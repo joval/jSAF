@@ -1,0 +1,5 @@
+build/
+components/facade/jSAF.jar
+components/provider/jSAF-LocalProvider.jar
+components/provider/rsrc/lib/slf4j-jdk14-1.6.2.jar
+components/provider/test.properties

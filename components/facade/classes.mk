@@ -1,4 +1,6 @@
 CLASSES=\
+	jsaf.JSAFSystem	\
+	jsaf.Message	\
 	jsaf.intf.io.IFile	\
 	jsaf.intf.io.IFileEx	\
 	jsaf.intf.io.IFileMetadata	\

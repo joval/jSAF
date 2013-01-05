@@ -3,12 +3,15 @@
 
 package jsaf;
 
+import java.util.HashMap;
+
 import ch.qos.cal10n.BaseName;
 import ch.qos.cal10n.IMessageConveyor;
 import ch.qos.cal10n.Locale;
 import ch.qos.cal10n.LocaleData;
 import ch.qos.cal10n.MessageConveyor;
 import ch.qos.cal10n.MessageConveyorException;
+import ch.qos.cal10n.MessageParameterObj;
 
 import org.slf4j.cal10n.LocLogger;
 import org.slf4j.cal10n.LocLoggerFactory;
@@ -241,25 +244,34 @@ public enum Message {
     WARNING_PERISHABLEIO_INTERRUPT,
     WARNING_WINDOWS_VIEW;
 
-    private static IMessageConveyor mc;
+    private static IMessageConveyor baseConveyor;
+    private static MultiConveyor conveyor;
     private static LocLoggerFactory loggerFactory;
     private static LocLogger sysLogger;
 
     static {
-	mc = new MessageConveyor(java.util.Locale.getDefault());
+	baseConveyor = new MessageConveyor(java.util.Locale.getDefault());
 	try {
 	    //
 	    // Get a message to test whether localized messages are available for the default Locale
 	    //
-	    getMessage(ERROR_EXCEPTION);
+	    baseConveyor.getMessage(ERROR_EXCEPTION);
 	} catch (MessageConveyorException e) {
 	    //
 	    // The test failed, so set the message Locale to English
 	    //
-	    mc = new MessageConveyor(java.util.Locale.ENGLISH);
+	    baseConveyor = new MessageConveyor(java.util.Locale.ENGLISH);
 	}
-	loggerFactory = new LocLoggerFactory(mc);
+	conveyor = new MultiConveyor();
+	loggerFactory = new LocLoggerFactory(conveyor);
 	sysLogger = loggerFactory.getLocLogger(Message.class);
+    }
+
+    /**
+     * Extend Message to be able to provide messages for the specified Enum class, using the specified IMessageConveyor.
+     */
+    public static void extend(Class<? extends Enum<?>> clazz, IMessageConveyor mc) {
+	conveyor.conveyors.put(clazz, mc);
     }
 
     /**
@@ -270,16 +282,36 @@ public enum Message {
     }
 
     /**
-     * Get the IMessageConveyor that provides localized messages for jSAF.
-     */
-    public static IMessageConveyor getConveyor() {
-	return mc;
-    }
-
-    /**
      * Retrieve a localized String, given the key and substitution arguments.
      */
-    public static String getMessage(Message key, Object... args) {
-	return mc.getMessage(key, args);
+    public static String getMessage(Enum<?> key, Object... args) {
+	return conveyor.getMessage(key, args);
     }
+
+    // Internal
+
+    /**
+     * An IMessageConveyor that consolidates multiple IMessageConveyors.
+     */
+    static class MultiConveyor implements IMessageConveyor {
+	HashMap<Class, IMessageConveyor> conveyors;
+
+	MultiConveyor() {
+	    conveyors = new HashMap<Class, IMessageConveyor>();
+	    conveyors.put(Message.class, baseConveyor);
+	}
+
+	public <E extends Enum<?>>String getMessage(E key, Object... args) throws MessageConveyorException {
+	    IMessageConveyor mc = conveyors.get(key.getDeclaringClass());
+	    if (mc == null) {
+		throw new MessageConveyorException(baseConveyor.getMessage(ERROR_MESSAGE_CONVEYOR, key.getClass().getName()));
+	    } else {
+		return mc.getMessage(key, args);
+	    }
+	}
+
+	public String getMessage(MessageParameterObj mpo) throws MessageConveyorException {
+	    return getMessage(mpo.getKey(), mpo.getArgs());
+	}
+     }
 }

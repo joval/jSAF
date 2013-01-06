@@ -18,9 +18,7 @@ CLASSES=\
 	jsaf.intf.unix.system.IUnixSession	\
 	jsaf.intf.util.IConfigurable	\
 	jsaf.intf.util.ILoggable	\
-	jsaf.intf.util.IObserver	\
 	jsaf.intf.util.IPerishable	\
-	jsaf.intf.util.IProducer	\
 	jsaf.intf.util.IProperty	\
 	jsaf.intf.util.ISearchable	\
 	jsaf.intf.windows.identity.IACE	\
@@ -50,7 +48,16 @@ CLASSES=\
 	jsaf.intf.windows.wmi.ISWbemProperty	\
 	jsaf.intf.windows.wmi.ISWbemPropertySet	\
 	jsaf.intf.windows.wmi.IWmiProvider	\
+	jsaf.provider.Configurator	\
 	jsaf.provider.SessionException	\
+	jsaf.provider.SessionFactory	\
+	jsaf.provider.windows.Timestamp	\
 	jsaf.provider.windows.powershell.PowershellException	\
 	jsaf.provider.windows.registry.RegistryException	\
-	jsaf.provider.windows.wmi.WmiException
+	jsaf.provider.windows.wmi.WmiException	\
+	jsaf.util.Base64	\
+	jsaf.util.Checksum	\
+	jsaf.util.IniFile	\
+	jsaf.util.PropertyUtil	\
+	jsaf.util.SafeCLI	\
+	jsaf.util.StringTools

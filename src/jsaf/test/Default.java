@@ -19,7 +19,7 @@ import java.util.logging.LogRecord;
 import jsaf.JSAFSystem;
 import jsaf.Message;
 import jsaf.intf.system.ISession;
-import jsaf.provider.Local;
+import jsaf.provider.SessionFactory;
 
 public class Default {
     public static void main (String[] argv) {
@@ -41,7 +41,7 @@ public class Default {
 		Logger.getLogger(Message.getLogger().getName()).addHandler(consoleHandler);
 	    }
 
-	    ISession session = Local.createSession(JSAFSystem.getDataDirectory());
+	    ISession session = (ISession)SessionFactory.newInstance(JSAFSystem.getDataDirectory()).createSession();
 	    if (session.connect()) {
 		if ("true".equals(props.getProperty("test.ad"))) {
 		    new AD(session).test(props.getProperty("ad.user"));

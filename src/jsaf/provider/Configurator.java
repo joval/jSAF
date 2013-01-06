@@ -22,7 +22,7 @@ import jsaf.util.IniFile;
  * @version %I% %G%
  */
 public class Configurator {
-    private static final String CONFIG_RESOURCE	= "defaults.ini";
+    private static final String CONFIG_RESOURCE	= "session.ini";
     private static IniFile config;
 
     static {
@@ -50,8 +50,21 @@ public class Configurator {
 	config.load(f);
     }
 
+    // Internal
+
     /**
-     * Configure an IConfigurable target in accordance with the jOVAL system configuration.
+     * Get a class property.
+     */
+    static String getProperty(Class clazz, String key) {
+	try {
+	    return config.getProperty(clazz.getName(), key);
+	} catch (NoSuchElementException e) {
+	    return null;
+	}
+    }
+
+    /**
+     * Configure an IConfigurable target in accordance with the jSAF system configuration.
      */
     static void configure(IConfigurable target) {
 	List<Class> visited = new ArrayList<Class>();

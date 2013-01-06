@@ -29,7 +29,7 @@ clean:
 
 resources:
 	rm -f $(BUILD)/*.ini
-	cp $(RSRC)/defaults.ini $(BUILD)
+	cp $(RSRC)/session.ini $(BUILD)
 	rm -f $(BUILD)/jsaf/provider/windows/io/*.psm1
 	cp $(SRC)/jsaf/provider/windows/io/*.psm1 $(BUILD)/jsaf/provider/windows/io/
 	rm -f $(BUILD)/jsaf/provider/windows/registry/*.psm1

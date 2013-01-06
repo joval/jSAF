@@ -9,9 +9,7 @@ CLASSES=\
 	jsaf.io.StreamTool	\
 	jsaf.provider.AbstractBaseSession	\
 	jsaf.provider.AbstractSession	\
-	jsaf.provider.Configurator	\
-	jsaf.provider.Local	\
-	jsaf.provider.SessionException	\
+	jsaf.provider.SessionFactoryImpl	\
 	jsaf.provider.unix.io.driver.AbstractDriver	\
 	jsaf.provider.unix.io.driver.AIXDriver	\
 	jsaf.provider.unix.io.driver.LinuxDriver	\
@@ -53,7 +51,6 @@ CLASSES=\
 	jsaf.provider.windows.registry.Value	\
 	jsaf.provider.windows.system.Environment	\
 	jsaf.provider.windows.system.WindowsSession	\
-	jsaf.provider.windows.Timestamp	\
 	jsaf.provider.windows.wmi.scripting.SWbemObject	\
 	jsaf.provider.windows.wmi.scripting.SWbemObjectSet	\
 	jsaf.provider.windows.wmi.scripting.SWbemProperty	\
@@ -68,13 +65,4 @@ CLASSES=\
 	jsaf.test.Reg	\
 	jsaf.test.WMI	\
 	jsaf.util.AbstractEnvironment	\
-	jsaf.util.Base64	\
-	jsaf.util.Checksum	\
 	jsaf.util.Environment	\
-	jsaf.util.IniFile	\
-	jsaf.util.LogFormatter	\
-	jsaf.util.Producer	\
-	jsaf.util.PropertyUtil	\
-	jsaf.util.SafeCLI	\
-	jsaf.util.StringTools	\
-	jsaf.util.Version

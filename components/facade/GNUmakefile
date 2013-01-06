@@ -22,6 +22,7 @@ $(FACADE_LIB): classes resources
 $(DOCS): $(GEN)
 	$(JAVA_HOME)/bin/javadoc -J-Xmx512m -d $(DOCS) -classpath $(CLASSPATH) -subpackages jsaf.intf \
 	$(SRC)/jsaf/provider/SessionException.java \
+	$(SRC)/jsaf/provider/windows/Timestamp	\
 	$(SRC)/jsaf/provider/windows/powershell/PowershellException.java \
 	$(SRC)/jsaf/provider/windows/registry/RegistryException.java \
 	$(SRC)/jsaf/provider/windows/wmi/WmiException.java

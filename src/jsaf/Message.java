@@ -292,7 +292,7 @@ public enum Message {
 	return conveyor.getMessage(key, args);
     }
 
-    public static Set<Map.Entry<Class<? extends Enum>, IMessageConveyor>> getConveyors() {
+    public static Set<Map.Entry<Class<? extends Enum<?>>, IMessageConveyor>> getConveyors() {
 	return conveyor.conveyors.entrySet();
     }
 
@@ -302,10 +302,10 @@ public enum Message {
      * An IMessageConveyor that consolidates multiple IMessageConveyors.
      */
     static class MultiConveyor implements IMessageConveyor {
-	HashMap<Class<? extends Enum>, IMessageConveyor> conveyors;
+	HashMap<Class<? extends Enum<?>>, IMessageConveyor> conveyors;
 
 	MultiConveyor() {
-	    conveyors = new HashMap<Class<? extends Enum>, IMessageConveyor>();
+	    conveyors = new HashMap<Class<? extends Enum<?>>, IMessageConveyor>();
 	    conveyors.put(Message.class, baseConveyor);
 	}
 

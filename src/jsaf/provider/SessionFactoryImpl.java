@@ -23,20 +23,20 @@ public class SessionFactoryImpl extends SessionFactory {
 	this.workspace = workspace;
     }
 
-    // Implement abstract methods of SesisonFactory
+    // Implement abstract methods of SessionFactory
 
     public IBaseSession createSession() {
 	return createSession(ISession.LOCALHOST);
     }
 
-    public IBaseSession createSession(String target) throws IllegalArgumentException {
+    public IBaseSession createSession(String target) {
 	if (!ISession.LOCALHOST.equals(target)) {
 	    throw new IllegalArgumentException(target);
 	}
 	File wsdir = null;
 	if (workspace != null) {
 	    wsdir = new File(workspace, target);
-	    if (!wsdir.isDirectory()) {
+	    if (!wsdir.exists()) {
 		wsdir.mkdirs();
 	    }
 	}

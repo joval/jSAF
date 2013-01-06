@@ -4,6 +4,7 @@
 package jsaf.provider;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 
 import jsaf.Message;
@@ -78,11 +79,11 @@ public abstract class SessionFactory {
     /**
      * Creates a session for the default target.
      */
-    public abstract IBaseSession createSession();
+    public abstract IBaseSession createSession() throws IOException;
 
     /**
      * Creates a session for the specified target. Interpretation of the target string is performed by the
      * underlying session factory implementation.
      */
-    public abstract IBaseSession createSession(String target) throws IllegalArgumentException;
+    public abstract IBaseSession createSession(String target) throws IOException;
 }

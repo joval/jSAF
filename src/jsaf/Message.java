@@ -310,7 +310,7 @@ public enum Message {
 	}
 
 	public <E extends Enum<?>>String getMessage(E key, Object... args) throws MessageConveyorException {
-	    IMessageConveyor mc = conveyors.get(key);
+	    IMessageConveyor mc = conveyors.get(key.getDeclaringClass());
 	    if (mc == null) {
 		throw new MessageConveyorException(baseConveyor.getMessage(ERROR_MESSAGE_CONVEYOR, key.getClass().getName()));
 	    } else {

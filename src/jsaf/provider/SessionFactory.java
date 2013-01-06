@@ -16,7 +16,10 @@ import jsaf.intf.system.IBaseSession;
  * @version %I% %G%
  */
 public abstract class SessionFactory {
-    static final String IMPL_CLASS_KEY = "implementation.classname";
+    /**
+     * The class name of the default factory implementation.
+     */
+    public static final String DEFAULT_FACTORY = "jsaf.provider.SessionFactoryImpl";
 
     /**
      * Obtain a new instance of a SessionFactory, with no workspace directory. 
@@ -31,9 +34,8 @@ public abstract class SessionFactory {
      * reduces memory overhead.
      */
     public static SessionFactory newInstance(File workspace) throws FactoryConfigurationError {
-	String factoryClassName = Configurator.getProperty(SessionFactory.class, IMPL_CLASS_KEY);
 	ClassLoader classLoader = SessionFactory.class.getClassLoader();
-	return newInstance(factoryClassName, classLoader, workspace);
+	return newInstance(DEFAULT_FACTORY, classLoader, workspace);
     }
 
     /**

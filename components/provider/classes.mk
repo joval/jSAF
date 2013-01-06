@@ -3,12 +3,11 @@ CLASSES=\
 	jsaf.io.fs.AbstractFilesystem	\
 	jsaf.io.fs.DefaultMetadata	\
 	jsaf.io.fs.IAccessor	\
-	jsaf.io.LittleEndian	\
 	jsaf.io.PerishableReader	\
 	jsaf.io.StreamLogger	\
-	jsaf.io.StreamTool	\
 	jsaf.provider.AbstractBaseSession	\
 	jsaf.provider.AbstractSession	\
+	jsaf.provider.Configurator	\
 	jsaf.provider.SessionFactoryImpl	\
 	jsaf.provider.unix.io.driver.AbstractDriver	\
 	jsaf.provider.unix.io.driver.AIXDriver	\
@@ -63,6 +62,4 @@ CLASSES=\
 	jsaf.test.FS	\
 	jsaf.test.Powershell	\
 	jsaf.test.Reg	\
-	jsaf.test.WMI	\
-	jsaf.util.AbstractEnvironment	\
-	jsaf.util.Environment	\
+	jsaf.test.WMI

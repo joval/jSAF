@@ -53,17 +53,6 @@ public class Configurator {
     // Internal
 
     /**
-     * Get a class property.
-     */
-    static String getProperty(Class clazz, String key) {
-	try {
-	    return config.getProperty(clazz.getName(), key);
-	} catch (NoSuchElementException e) {
-	    return null;
-	}
-    }
-
-    /**
      * Configure an IConfigurable target in accordance with the jSAF system configuration.
      */
     static void configure(IConfigurable target) {

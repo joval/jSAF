@@ -4,6 +4,8 @@
 package jsaf;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import ch.qos.cal10n.BaseName;
 import ch.qos.cal10n.IMessageConveyor;
@@ -290,21 +292,25 @@ public enum Message {
 	return conveyor.getMessage(key, args);
     }
 
+    public static Set<Map.Entry<Class<? extends Enum>, IMessageConveyor>> getConveyors() {
+	return conveyor.conveyors.entrySet();
+    }
+
     // Internal
 
     /**
      * An IMessageConveyor that consolidates multiple IMessageConveyors.
      */
     static class MultiConveyor implements IMessageConveyor {
-	HashMap<Class, IMessageConveyor> conveyors;
+	HashMap<Class<? extends Enum>, IMessageConveyor> conveyors;
 
 	MultiConveyor() {
-	    conveyors = new HashMap<Class, IMessageConveyor>();
+	    conveyors = new HashMap<Class<? extends Enum>, IMessageConveyor>();
 	    conveyors.put(Message.class, baseConveyor);
 	}
 
 	public <E extends Enum<?>>String getMessage(E key, Object... args) throws MessageConveyorException {
-	    IMessageConveyor mc = conveyors.get(key.getDeclaringClass());
+	    IMessageConveyor mc = conveyors.get(key);
 	    if (mc == null) {
 		throw new MessageConveyorException(baseConveyor.getMessage(ERROR_MESSAGE_CONVEYOR, key.getClass().getName()));
 	    } else {

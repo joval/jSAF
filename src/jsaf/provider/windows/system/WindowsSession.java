@@ -79,10 +79,10 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 		if (val.getType() == IValue.Type.REG_SZ) {
 		    return ((IStringValue)val).getData();
 		} else {
-		    logger.warn(Message.ERROR_SYSINFO_HOSTNAME);
+		    logger.warn(Message.ERROR_WINDOWS_MACHINENAME);
 		}
 	    } catch (Exception e) {
-		logger.warn(Message.ERROR_SYSINFO_HOSTNAME);
+		logger.warn(Message.ERROR_WINDOWS_MACHINENAME);
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
 	}

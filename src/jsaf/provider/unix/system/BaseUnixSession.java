@@ -3,8 +3,10 @@
 
 package jsaf.provider.unix.system;
 
+import jsaf.Message;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.provider.AbstractSession;
+import jsaf.util.SafeCLI;
 
 /**
  * A simple session implementation for Unix machines.
@@ -35,15 +37,29 @@ public abstract class BaseUnixSession extends AbstractSession implements IUnixSe
 	}
     }
 
-    // Implement IUnixSession
-
-    public Flavor getFlavor() {
-	return flavor;
-    }
-
     // Implement IBaseSession
 
     public Type getType() {
 	return Type.UNIX;
+    }
+
+    // Implement ISession
+
+    public String getMachineName() {
+	if (isConnected()) {
+	    try {
+		return SafeCLI.exec("hostname", this, Timeout.S);
+	    } catch (Exception e) {
+		logger.warn(Message.ERROR_MACHINENAME, e.getMessage());
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
+	}
+	return getHostname();
+    }
+
+    // Implement IUnixSession
+
+    public Flavor getFlavor() {
+	return flavor;
     }
 }

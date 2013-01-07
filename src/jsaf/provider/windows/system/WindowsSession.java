@@ -61,94 +61,6 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 	this.wsdir = wsdir;
     }
 
-    // Implement IWindowsSession extensions
-
-    public IRunspacePool getRunspacePool() {
-	return runspaces;
-    }
-
-    public IDirectory getDirectory() {
-	return directory;
-    }
-
-    public String getMachineName() {
-	if (isConnected()) {
-	    try {
-		IKey key = reg.getKey(IRegistry.Hive.HKLM, IRegistry.COMPUTERNAME_KEY);
-		IValue val = key.getValue(IRegistry.COMPUTERNAME_VAL);
-		if (val.getType() == IValue.Type.REG_SZ) {
-		    return ((IStringValue)val).getData();
-		} else {
-		    logger.warn(Message.ERROR_WINDOWS_MACHINENAME);
-		}
-	    } catch (Exception e) {
-		logger.warn(Message.ERROR_WINDOWS_MACHINENAME);
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    }
-	}
-	return getHostname();
-    }
-
-    public View getNativeView() {
-	return is64bit ? View._64BIT : View._32BIT;
-    }
-
-    public boolean supports(View view) {
-	switch(view) {
-	  case _32BIT:
-	    return true;
-	  case _64BIT:
-	  default:
-	    return is64bit;
-	}
-    }
-
-    public IRegistry getRegistry(View view) {
-	switch(view) {
-	  case _32BIT:
-	    if (reg32 == null) {
-		if (getNativeView() == View._32BIT) {
-		    reg32 = reg;
-		} else {
-		    try {
-			reg32 = new Registry(this, View._32BIT);
-		    } catch (Exception e) {
-			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		    }
-		}
-	    }
-	    return reg32;
-
-	  default:
-	    return reg;
-	}
-    }
-
-    public IWindowsFilesystem getFilesystem(View view) {
-	switch(view) {
-	  case _32BIT:
-	    if (fs32 == null) {
-		if (getNativeView() == View._32BIT) {
-		    fs32 = (IWindowsFilesystem)fs;
-		} else {
-		    try {
-			fs32 = new WindowsFilesystem(this, View._32BIT);
-		    } catch (Exception e) {
-			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		    }
-		}
-	    }
-	    return fs32;
-
-	  default:
-	    return (IWindowsFilesystem)fs;
-	}
-    }
-
-    public IWmiProvider getWmiProvider() {
-	return wmi;
-    }
-
     // Implement ILoggable
 
     @Override
@@ -239,5 +151,95 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 
     public Type getType() {
 	return Type.WINDOWS;
+    }
+
+    // Implement ISession
+
+    public String getMachineName() {
+	if (isConnected()) {
+	    try {
+		IKey key = reg.getKey(IRegistry.Hive.HKLM, IRegistry.COMPUTERNAME_KEY);
+		IValue val = key.getValue(IRegistry.COMPUTERNAME_VAL);
+		if (val.getType() == IValue.Type.REG_SZ) {
+		    return ((IStringValue)val).getData();
+		} else {
+		    logger.warn(Message.ERROR_MACHINENAME);
+		}
+	    } catch (Exception e) {
+		logger.warn(Message.ERROR_MACHINENAME);
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
+	}
+	return getHostname();
+    }
+
+    // Implement IWindowsSession
+
+    public IRunspacePool getRunspacePool() {
+	return runspaces;
+    }
+
+    public IDirectory getDirectory() {
+	return directory;
+    }
+
+    public View getNativeView() {
+	return is64bit ? View._64BIT : View._32BIT;
+    }
+
+    public boolean supports(View view) {
+	switch(view) {
+	  case _32BIT:
+	    return true;
+	  case _64BIT:
+	  default:
+	    return is64bit;
+	}
+    }
+
+    public IRegistry getRegistry(View view) {
+	switch(view) {
+	  case _32BIT:
+	    if (reg32 == null) {
+		if (getNativeView() == View._32BIT) {
+		    reg32 = reg;
+		} else {
+		    try {
+			reg32 = new Registry(this, View._32BIT);
+		    } catch (Exception e) {
+			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		    }
+		}
+	    }
+	    return reg32;
+
+	  default:
+	    return reg;
+	}
+    }
+
+    public IWindowsFilesystem getFilesystem(View view) {
+	switch(view) {
+	  case _32BIT:
+	    if (fs32 == null) {
+		if (getNativeView() == View._32BIT) {
+		    fs32 = (IWindowsFilesystem)fs;
+		} else {
+		    try {
+			fs32 = new WindowsFilesystem(this, View._32BIT);
+		    } catch (Exception e) {
+			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		    }
+		}
+	    }
+	    return fs32;
+
+	  default:
+	    return (IWindowsFilesystem)fs;
+	}
+    }
+
+    public IWmiProvider getWmiProvider() {
+	return wmi;
     }
 }

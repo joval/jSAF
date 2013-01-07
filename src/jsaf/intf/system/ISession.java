@@ -22,6 +22,11 @@ public interface ISession extends IBaseSession {
      */
     public String getTempDir() throws IOException;
 
+    /**
+     * Get the machine's name. NOTE: This name might not be meaningful to DNS.
+     */
+    String getMachineName();
+
     public IFilesystem getFilesystem();
 
     public IEnvironment getEnvironment();

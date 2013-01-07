@@ -46,7 +46,8 @@ public class JSAFSystem {
 	if (dir.isDirectory()) {
 	    dataDir = dir;
 	} else {
-	    throw new IllegalArgumentException(Message.getMessage(Message.ERROR_IO_NOT_DIR, dir.toString()));
+	    String reason = Message.getMessage(Message.ERROR_IO_NOT_DIR);
+	    throw new IllegalArgumentException(Message.getMessage(Message.ERROR_IO, dir.toString(), reason));
 	}
     }
 

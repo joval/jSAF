@@ -1,6 +1,9 @@
 CLASSES=\
 	jsaf.JSAFSystem	\
 	jsaf.Message	\
+	jsaf.identity.SimpleCredentialStore	\
+	jsaf.intf.identity.ICredential	\
+	jsaf.intf.identity.ICredentialStore	\
 	jsaf.intf.io.IFile	\
 	jsaf.intf.io.IFileEx	\
 	jsaf.intf.io.IFileMetadata	\
@@ -8,6 +11,7 @@ CLASSES=\
 	jsaf.intf.io.IRandomAccess	\
 	jsaf.intf.io.IReader	\
 	jsaf.intf.io.IReaderGobbler	\
+	jsaf.intf.ssh.identity.ISshCredential	\
 	jsaf.intf.system.IBaseSession	\
 	jsaf.intf.system.IEnvironment	\
 	jsaf.intf.system.IProcess	\
@@ -26,6 +30,7 @@ CLASSES=\
 	jsaf.intf.windows.identity.IGroup	\
 	jsaf.intf.windows.identity.IPrincipal	\
 	jsaf.intf.windows.identity.IUser	\
+	jsaf.intf.windows.identity.IWindowsCredential	\
 	jsaf.intf.windows.io.IWindowsFileInfo	\
 	jsaf.intf.windows.io.IWindowsFilesystem	\
 	jsaf.intf.windows.powershell.IRunspace	\

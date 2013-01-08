@@ -129,9 +129,9 @@ public interface IBaseSession extends ILoggable {
      */
     enum Type {
 	/**
-	 * An SSH-type session.  This can potentially become a UNIX or CISCO_IOS after discovery (if the IBaseSession also
-	 * implements ILocked, discovery occurs when the getType method is invoked after the session is unlocked with an
-	 * ICredential).
+	 * An SSH-type session.  This can potentially become a UNIX, CISCO_IOS, or JUNIPER_JUNOS type after discovery (if
+	 * the IBaseSession also implements ILocked, discovery occurs when the getType method is invoked after the session
+	 * is unlocked with an ICredential).
 	 *
 	 * @see org.joval.intf.identity.ICredential
 	 */

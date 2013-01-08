@@ -20,7 +20,7 @@ $(FACADE_LIB): classes resources
 	$(JAR) cvf $@ -C $(BUILD)/ .
 
 $(DOCS): $(GEN)
-	$(JAVA_HOME)/bin/javadoc -J-Xmx512m -d $(DOCS) -classpath $(CLASSPATH) -subpackages jsaf.intf \
+	$(JAVA_HOME)/bin/javadoc -J-Xmx512m -d $(DOCS) -classpath $(CLASSPATH) -subpackages jsaf.identity:jsaf.intf \
 	$(SRC)/jsaf/provider/SessionException.java \
 	$(SRC)/jsaf/provider/windows/Timestamp	\
 	$(SRC)/jsaf/provider/windows/powershell/PowershellException.java \

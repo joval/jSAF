@@ -6,6 +6,7 @@ package jsaf.provider;
 import java.io.File;
 
 import jsaf.intf.system.IBaseSession;
+import jsaf.intf.system.IRemote;
 import jsaf.intf.system.ISession;
 import jsaf.provider.unix.system.UnixSession;
 import jsaf.provider.windows.system.WindowsSession;
@@ -24,6 +25,13 @@ public class SessionFactoryImpl extends SessionFactory {
     }
 
     // Implement abstract methods of SessionFactory
+
+    /**
+     * This is a SessionFactory implementation for a local provider, which does not support remote sessions.
+     */
+    public IRemote getRemote() {
+	throw new UnsupportedOperationException("getRemote");
+    }
 
     public IBaseSession createSession() {
 	return createSession(ISession.LOCALHOST);

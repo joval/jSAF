@@ -15,6 +15,7 @@ CLASSES=\
 	jsaf.intf.system.IBaseSession	\
 	jsaf.intf.system.IEnvironment	\
 	jsaf.intf.system.IProcess	\
+	jsaf.intf.system.IRemote	\
 	jsaf.intf.system.ISession	\
 	jsaf.intf.unix.io.IUnixFileInfo	\
 	jsaf.intf.unix.io.IUnixFilesystem	\

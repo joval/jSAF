@@ -51,3 +51,4 @@ FACADE_LIB=$(FACADE)/jSAF.jar
 FACADE_DEPS=$(subst $(SPACE),$(CLN),$(filter %.jar %.zip, $(wildcard $(FACADE)/$(LIBDIR)/*)))
 PROVIDER=$(COMPONENTS)/provider
 PROVIDER_LIB=$(PROVIDER)/jSAF-LocalProvider.jar
+PROVIDER_DEPS=$(subst $(SPACE),$(CLN),$(filter %.jar %.zip, $(wildcard $(PROVIDER)/$(LIBDIR)/*)))

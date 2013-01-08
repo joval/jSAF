@@ -7,8 +7,12 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 
+import org.slf4j.cal10n.LocLogger;
+
 import jsaf.Message;
 import jsaf.intf.system.IBaseSession;
+import jsaf.intf.system.IRemote;
+import jsaf.intf.util.ILoggable;
 
 /**
  * Factory class for creating ISessions.
@@ -16,7 +20,7 @@ import jsaf.intf.system.IBaseSession;
  * @author David A. Solin
  * @version %I% %G%
  */
-public abstract class SessionFactory {
+public abstract class SessionFactory implements ILoggable {
     /**
      * The class name of the default factory implementation.
      */
@@ -74,7 +78,28 @@ public abstract class SessionFactory {
 	}
     }
 
+    protected LocLogger logger;
+
+    protected SessionFactory() {
+	logger = Message.getLogger();
+    }
+
+    // Implement ILoggable
+
+    public void setLogger(LocLogger logger) {
+	this.logger = logger;
+    }
+
+    public LocLogger getLogger() {
+	return logger;
+    }
+
     // Abstract
+
+    /**
+     * Get the factory's remote session management features.
+     */
+    public abstract IRemote getRemote();
 
     /**
      * Creates a session for the default target.

@@ -3,6 +3,7 @@
 
 package jsaf.intf.system;
 
+import java.io.IOException;
 import java.io.File;
 
 import jsaf.intf.identity.ICredentialStore;
@@ -42,6 +43,5 @@ public interface IRemote {
     /**
      * Set the SSH host database file to use for host validation.
      */
-    void setKnownHosts(File f);
+    void setKnownHosts(File f) throws IOException;
 }
-

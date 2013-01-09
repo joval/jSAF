@@ -19,12 +19,13 @@ $(FACADE_LIB): classes resources
 	$(JAR) cvf $@ -C $(BUILD)/ .
 
 $(DOCS): $(GEN)
-	$(JAVA_HOME)/bin/javadoc -J-Xmx512m -d $(DOCS) -classpath $(CLASSPATH) -subpackages jsaf.identity:jsaf.intf \
-	$(SRC)/jsaf/provider/SessionException.java \
-	$(SRC)/jsaf/provider/SessionFactory.java \
-	$(SRC)/jsaf/provider/windows/Timestamp.java	\
-	$(SRC)/jsaf/provider/windows/powershell/PowershellException.java \
-	$(SRC)/jsaf/provider/windows/registry/RegistryException.java \
+	$(JAVA_HOME)/bin/javadoc -J-Xmx512m -d $(DOCS) -classpath $(CLASSPATH)	\
+	-subpackages jsaf.identity:jsaf.intf:jasf.io:jsaf.util			\
+	$(SRC)/jsaf/provider/SessionException.java				\
+	$(SRC)/jsaf/provider/SessionFactory.java				\
+	$(SRC)/jsaf/provider/windows/Timestamp.java				\
+	$(SRC)/jsaf/provider/windows/powershell/PowershellException.java	\
+	$(SRC)/jsaf/provider/windows/registry/RegistryException.java		\
 	$(SRC)/jsaf/provider/windows/wmi/WmiException.java
 
 clean:

@@ -23,6 +23,7 @@ import jsaf.JSAFSystem;
 import jsaf.Message;
 import jsaf.intf.io.IReader;
 import jsaf.intf.util.IPerishable;
+import jsaf.util.StringTools;
 
 /**
  * A PerishableReader is a class that implements both IReader and IPerishable, signifying input that has a potential to
@@ -33,8 +34,6 @@ import jsaf.intf.util.IPerishable;
  * @version %I% %G%
  */
 public class PerishableReader extends InputStream implements IReader, IPerishable {
-    private final static String LF = System.getProperty("line.separator");
-
     /**
      * Create a new instance using the given InputStream and initial timeout.  The clock begins ticking immediately, so
      * it is important to start reading before the timeout has expired.
@@ -339,7 +338,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 		//
 		StringBuffer sb = new StringBuffer();
 		for (int i=0; i < trace.length; i++) {
-		    sb.append(LF);
+		    sb.append(StringTools.LOCAL_CR);
 		    if (i > 0) {
 			sb.append("    at ");
 		    }

@@ -121,7 +121,7 @@ public class MacOSXDriver extends AbstractDriver {
 		depth = ((Integer)condition.getValue()).intValue();
 		break;
 	      case ISearchable.FIELD_FROM:
-		from = (String)condition.getValue();
+		from = ((String)condition.getValue()).replace(" ", "\\ ");
 		break;
 	    }
 	}

@@ -32,6 +32,8 @@ public class StringTools {
     public static final Charset UTF16	= Charset.forName("UTF-16");
     public static final Charset UTF16LE	= Charset.forName("UTF-16LE");
 
+    public static final String LOCAL_CR = System.getProperty("line.separator");
+
     /**
      * Sort the array from A->Z (ascending ordering).
      */

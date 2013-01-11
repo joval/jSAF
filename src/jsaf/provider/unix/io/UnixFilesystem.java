@@ -161,13 +161,31 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 	    List<String> lines = ed.getLines();
 	    UnixFileInfo ufi = null;
 	    if (lines.size() > 0) {
-		ufi = (UnixFileInfo)getDriver().nextFileInfo(lines.iterator());
-		if (ufi == null) {
-		    if (exitCode == 0) {
-			throw new Exception(Message.getMessage(Message.ERROR_UNIXFILEINFO, path, data));
-		    } else {
-			throw new IOException(Message.getMessage(Message.ERROR_FS_LSTAT, path, exitCode, data));
+		switch(exitCode) {
+		  case -1: // couldn't determine the exit code
+		  case 0:
+		    ufi = (UnixFileInfo)getDriver().nextFileInfo(lines.iterator());
+		    if (ufi == null) {
+			if (exitCode == 0) {
+			    throw new Exception(Message.getMessage(Message.ERROR_UNIXFILEINFO, path, data));
+			} else {
+			    throw new IOException(Message.getMessage(Message.ERROR_FS_LSTAT, path, exitCode, data));
+			}
 		    }
+		    break;
+
+		  //
+		  // If we're here, that means that we've got a known-bad exit code for ls.
+		  //
+		  default:
+		    StringBuffer sb = new StringBuffer();
+		    for (int i=0; i < lines.size(); i++) {
+			if (i > 0) {
+			    sb.append(StringTools.LOCAL_CR);
+			}
+			sb.append(lines.get(i));
+		    }
+		    throw new IOException(sb.toString());
 		}
 	    } else {
 		logger.warn(Message.ERROR_UNIXFILEINFO, path, "''");
@@ -212,7 +230,12 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 	@Override
 	public boolean isDirectory() throws IOException {
 	    if (isLink()) {
-		return getFile(getCanonicalPath()).isDirectory();
+		String canonicalPath = getCanonicalPath();
+		if (!path.equals(canonicalPath)) {
+		    return getFile(canonicalPath).isDirectory();
+		} else {
+		    return false; // a link to oneself is just a link
+		}
 	    } else {
 		return super.isDirectory();
 	    }

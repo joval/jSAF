@@ -51,10 +51,10 @@ abstract class AbstractDriver implements IUnixFilesystemDriver {
     // Internal
 
     /**
-     * Get the number of tokens in path, according to awk.
+     * Get the number of times the character '/' appears in the path.
      */
-    int getAwkDepth(String path) {
-	int depth = 1;
+    int getDepth(String path) {
+	int depth = 0;
 	int ptr = 0;
 	while((ptr = path.indexOf("/", ptr)) != -1) {
 	    ptr++;

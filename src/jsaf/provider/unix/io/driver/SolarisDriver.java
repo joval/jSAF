@@ -110,7 +110,7 @@ public class SolarisDriver extends AbstractDriver {
 		depth = ((Integer)condition.getValue()).intValue();
 		break;
 	      case ISearchable.FIELD_FROM:
-		from = (String)condition.getValue();
+		from = ((String)condition.getValue()).replace(" ", "\\ ");
 		break;
 	    }
 	}
@@ -128,8 +128,13 @@ public class SolarisDriver extends AbstractDriver {
 	    if (dirname == null) {
 		if (dirOnly && depth != ISearchable.DEPTH_UNLIMITED) {
 		    cmd.append(" -type d");
-		    int currDepth = getAwkDepth(from);
-		    cmd.append(" | awk -F/ 'NF <= ").append(Integer.toString(currDepth + depth)).append("'");
+		    cmd.append(" -print");
+		    if (depth == 1 && "/".equals(from)) {
+			cmd.append(" ! -name /");
+		    }
+		    cmd.append(" -exec sh -c 'echo $1 | awk -F/ '\\''{if (NF > ");
+		    cmd.append(Integer.toString(getDepth(from) + depth));
+		    cmd.append(") {exit 0} else {exit 1}}'\\''' {} {} \\; -prune");
 		} else if (!dirOnly) {
 		    cmd.append(" -type f");
 		    if (literalBasename != null) {
@@ -137,9 +142,15 @@ public class SolarisDriver extends AbstractDriver {
 		    } else if (antiBasename != null) {
 			cmd.append(" ! -name '").append(antiBasename).append("'");
 		    }
+		    cmd.append(" -print");
 		    if (depth != ISearchable.DEPTH_UNLIMITED) {
-			int currDepth = getAwkDepth(from);
-			cmd.append(" | awk -F/ 'NF <= ").append(Integer.toString(currDepth + depth)).append("'");
+			cmd.append(" -o -type d");
+			if (depth == 1 && "/".equals(from)) {
+			    cmd.append(" ! -name /");
+			}
+			cmd.append(" -exec sh -c 'echo $1 | awk -F/ '\\''{if (NF > ");
+			cmd.append(Integer.toString(getDepth(from) + depth));
+			cmd.append(") {exit 0} else {exit 1}}'\\''' {} {} \\; -prune");
 		    }
 		    if (basename != null) {
 			cmd.append(" | /usr/xpg4/bin/awk -F/ '$NF ~ /").append(basename.pattern()).append("/'");

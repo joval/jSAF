@@ -213,7 +213,7 @@ public class Directory implements IDirectory {
 	Collection<IPrincipal> principals = new ArrayList<IPrincipal>();
 	if (resolveGroups) {
 	    Map<String, IPrincipal> map = new HashMap<String, IPrincipal>();
-	    queryAllMemebrs(principal, map);
+	    queryAllMembers(principal, map);
 	    principals = map.values();
 	} else {
 	    principals.add(principal);
@@ -243,19 +243,18 @@ public class Directory implements IDirectory {
     /**
      * Won't get stuck in a loop because it adds the groups themselves to the Map as it goes.
      */
-    private void queryAllMemebrs(IPrincipal principal, Map<String, IPrincipal> principals) throws WmiException {
+    private void queryAllMembers(IPrincipal principal, Map<String, IPrincipal> principals) throws WmiException {
 	if (!principals.containsKey(principal.getSid())) {
 	    principals.put(principal.getSid(), principal);
 	    switch(principal.getType()) {
 	      case GROUP:
-		principals.put(principal.getSid(), principal);
 		IGroup g = (IGroup)principal;
 		//
 		// Add users
 		//
 		for (String netbiosName : g.getMemberUserNetbiosNames()) {
 		    try {
-			queryAllMemebrs(queryUser(netbiosName), principals);
+			queryAllMembers(queryUser(netbiosName), principals);
 		    } catch (IllegalArgumentException e) {
 			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		    } catch (NoSuchElementException e) {
@@ -267,7 +266,7 @@ public class Directory implements IDirectory {
 		//
 		for (String netbiosName : g.getMemberGroupNetbiosNames()) {
 		    try {
-			queryAllMemebrs(queryGroup(netbiosName), principals);
+			queryAllMembers(queryGroup(netbiosName), principals);
 		    } catch (IllegalArgumentException e) {
 			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		    } catch (NoSuchElementException e) {

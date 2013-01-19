@@ -22,7 +22,7 @@ import jsaf.provider.windows.wmi.WmiException;
  */
 public interface IDirectory extends ILoggable {
     /**
-     * Get the Name portion of a Domain\\Name String.  If there is no domain portion, returns the original String.
+     * Get the Name portion of a DOMAIN\NAME String.  If there is no domain portion, returns the original String.
      */
     public String getName(String s);
 
@@ -32,8 +32,8 @@ public interface IDirectory extends ILoggable {
     public IUser queryUserBySid(String sid) throws NoSuchElementException, WmiException;
 
     /**
-     * Query for an individual user.  The input parameter should be of the form DOMAIN\\name.  For built-in users, the
-     * DOMAIN\\ part can be dropped, in which case the name parameter is just the user name.
+     * Query for an individual user.  The input parameter should be of the form DOMAIN\NAME.  For built-in users, the
+     * DOMAIN\ part can be dropped, in which case the name parameter is just the user name.
      *
      * @throws IllegalArgumentException if the domain is not recognized
      * @throws NoSuchElementException if the group does not exist
@@ -51,8 +51,8 @@ public interface IDirectory extends ILoggable {
     public IGroup queryGroupBySid(String sid) throws NoSuchElementException, WmiException;
 
     /**
-     * Query for an individual group.  The input parameter should be of the form DOMAIN\\name.  For built-in groups, the
-     * DOMAIN\\ part can be dropped, in which case the name parameter is just the group name.
+     * Query for an individual group.  The input parameter should be of the form DOMAIN\NAME.  For built-in groups, the
+     * DOMAIN\ part can be dropped, in which case the name parameter is just the group name.
      *
      * @throws IllegalArgumentException if the domain is not recognized
      * @throws NoSuchElementException if the group does not exist
@@ -108,7 +108,10 @@ public interface IDirectory extends ILoggable {
     public String getQualifiedNetbiosName(String netbiosName);
 
     /**
-     * Recurse members of the principal (if it's a group) and add children if resolveGroups == true.
+     * Get the members of the principal, if it's a group.
+     *
+     * @param includeGroups set to true to include group principals in the result, false if you only want users
+     * @param resolveGroups gets members recursively if true
      */
     public Collection<IPrincipal> getAllPrincipals(IPrincipal principal, boolean includeGroups, boolean resolveGroups)
 	throws WmiException;

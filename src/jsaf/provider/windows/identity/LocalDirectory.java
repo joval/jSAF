@@ -66,10 +66,6 @@ class LocalDirectory implements ILoggable {
 	usersBySid = new Hashtable<String, IUser>();
 	groupsByNetbiosName = new Hashtable<String, IGroup>();
 	groupsBySid = new Hashtable<String, IGroup>();
-/*
-	usersByNetbiosName.put(TRUSTED_INSTALLER.getNetbiosName(), TRUSTED_INSTALLER);
-	usersBySid.put(TRUSTED_INSTALLER.getSid(), TRUSTED_INSTALLER);
-*/
     }
 
     void setWmiProvider(IWmiProvider wmi) {

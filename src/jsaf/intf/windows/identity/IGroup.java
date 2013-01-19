@@ -13,12 +13,14 @@ import java.util.Collection;
  */
 public interface IGroup extends IPrincipal {
     /**
-     * Non-recursive.
+     * Get the Netbios names (DOMAIN\NAME) of users who are members of this group. Non-recursive (i.e., does not return
+     * names of users who are members of groups that are members of this group).
      */
     public Collection<String> getMemberUserNetbiosNames();
 
     /**
-     * Non-recursive.
+     * Get the Netbios names (DOMAIN\NAME) of groups which are members of this group. Non-recursive (i.e., does not return
+     * names of groups which are members of groups which are members of this group).
      */
     public Collection<String> getMemberGroupNetbiosNames();
 }

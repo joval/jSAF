@@ -8,6 +8,8 @@ import java.util.Hashtable;
 /**
  * Interface to Windows license data.
  *
+ * @see <a href="http://www.geoffchappell.com/viewer.htm?doc=studies/windows/km/ntoskrnl/api/ex/slmem/productpolicy.htm">Storage of License Values</a>
+ *
  * @author David A. Solin
  * @version %I% %G%
  */

@@ -12,7 +12,14 @@ import java.util.Collection;
  * @version %I% %G%
  */
 public interface IUser extends IPrincipal {
+    /**
+     * Returns the Netbios names (DOMAIN\NAME) of all groups of which the user is a member.  Non-recursive (i.e., only
+     * groups containing this user, not groups containing groups containing this user, etc.).
+     */
     public Collection<String> getGroupNetbiosNames();
 
+    /**
+     * Is the user account enabled or disabled?
+     */
     public boolean isEnabled();
 }

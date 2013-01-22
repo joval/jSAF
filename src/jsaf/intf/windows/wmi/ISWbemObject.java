@@ -8,7 +8,7 @@ import jsaf.provider.windows.wmi.WmiException;
 /**
  * An ISWbemObject is a collection of ISWbemProperties.
  * 
- * @see "http://msdn.microsoft.com/en-us/library/aa393741(VS.85).aspx"
+ * @see <a href="http://msdn.microsoft.com/en-us/library/aa393741(VS.85).aspx">SWbemObject object</a>
  */
 public interface ISWbemObject {
     /**

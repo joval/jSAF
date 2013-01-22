@@ -8,7 +8,7 @@ import jsaf.provider.windows.wmi.WmiException;
 /**
  * An ISWbemEventSource is a source of ISWbemObjects.
  * 
- * @see "http://msdn.microsoft.com/en-us/library/aa393741(VS.85).aspx"
+ * @see <a href="http://msdn.microsoft.com/en-us/library/aa393710%28v=vs.85%29.aspx">SWbemEventSource object</a>
  */
 public interface ISWbemEventSource {
     /**

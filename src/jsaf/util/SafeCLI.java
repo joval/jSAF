@@ -170,7 +170,7 @@ public class SafeCLI {
 		throws Exception {
 
 	SafeCLI cli = new SafeCLI(cmd, env, dir, session, readTimeout);
-	cli.exec(session.echo());
+	cli.exec();
 	return cli.getResult();
     }
 
@@ -326,8 +326,8 @@ public class SafeCLI {
 	}
     }
 
-    private void exec(boolean skipFirstLine) throws Exception {
-	exec(new InnerGobbler(skipFirstLine), null);
+    private void exec() throws Exception {
+	exec(new InnerGobbler(), null);
     }
 
     /**
@@ -335,20 +335,9 @@ public class SafeCLI {
      * class.
      */
     class InnerGobbler implements IReaderGobbler {
-	//
-	// For sessions that ignore the terminal mode bytes and echo anyway, discard the first line
-	// of output, as it's always the echo of the issued command.
-	//
-	private boolean skipFirstLine;
-
-	InnerGobbler(boolean skipFirstLine) {
-	    this.skipFirstLine = skipFirstLine;
-	}
+	InnerGobbler() {}
 
 	public void gobble(IReader reader) throws IOException {
-	    if (skipFirstLine) {
-		reader.readLine();
-	    }
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    byte[] buff = new byte[512];
 	    int len = 0;

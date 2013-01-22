@@ -117,7 +117,10 @@ public interface IFilesystem extends ILoggable {
 	String getPath();
 
 	/**
-	 * Get the type of the mount.
+	 * Get the type of the mount. This is a platform-dependent String.
+	 *
+	 * @see jsaf.intf.windows.io.IWindowsFilesystem.FsType.value()
+	 * @see <a href="http://www.kernel.org/doc/man-pages/online/pages/man2/mount.2.html">mount man page</a>
 	 */
 	String getType();
     }

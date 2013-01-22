@@ -6,7 +6,7 @@ package jsaf.intf.windows.identity;
 /**
  * Representation of a Windows Access Control Entity (ACE).
  *
- * @see http://msdn.microsoft.com/en-us/library/windows/desktop/aa374896%28v=vs.85%29.aspx
+ * @see <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/aa374896%28v=vs.85%29.aspx">Access Mask Format (Windows)</a>
  *
  * @author David A. Solin
  * @version %I% %G%
@@ -48,7 +48,7 @@ public interface IACE {
     int SYNCHRONIZE	= 0x100000;
 
     /**
-     * @see http://msdn.microsoft.com/en-us/library/windows/desktop/aa374892%28v=vs.85%29.aspx
+     * @see <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/aa374892%28v=vs.85%29.aspx">ACCESS_MASK (Windows)</a>
      */
     int STANDARD_RIGHTS_REQUIRED= 0x000F0000;
     int STANDARD_RIGHTS_READ	= READ_CONTROL;
@@ -66,13 +66,20 @@ public interface IACE {
     int ACCESS_SYSTEM_SECURITY	= 0x1000000;
 
     /**
-     * @see http://msdn.microsoft.com/en-us/library/windows/desktop/aa364399%28v=vs.85%29.aspx
+     * @see <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/aa364399%28v=vs.85%29.aspx">File Security and Access Rights (Windows)</a>
      */
     int FILE_GENERIC_READ = FILE_READ_ATTRIBUTES | FILE_READ_DATA | FILE_READ_EA | STANDARD_RIGHTS_READ | SYNCHRONIZE;
     int FILE_GENERIC_WRITE = FILE_APPEND_DATA | FILE_WRITE_ATTRIBUTES | FILE_WRITE_DATA | FILE_WRITE_EA | STANDARD_RIGHTS_WRITE | SYNCHRONIZE;
     int FILE_GENERIC_EXECUTE = FILE_EXECUTE | FILE_READ_ATTRIBUTES | STANDARD_RIGHTS_EXECUTE | SYNCHRONIZE;
     int FILE_GENERIC_ALL = FILE_GENERIC_READ | FILE_GENERIC_WRITE | FILE_GENERIC_EXECUTE;
 
+    /**
+     * Get the entry access flags.
+     */
     int getAccessMask();
+
+    /**
+     * Get the Security IDentifier string associated with this entry.
+     */
     String getSid();
 }

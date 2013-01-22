@@ -20,11 +20,6 @@ public interface IProcess {
     public String getCommand();
 
     /**
-     * Set the interactive property for the process.
-     */
-    public void setInteractive(boolean interactive);
-
-    /**
      * Start the process.
      */
     public void start() throws Exception;
@@ -48,7 +43,7 @@ public interface IProcess {
      * Wait for the process to complete.
      *
      * @param millis The maximum number of milliseconds to wait.  Set to 0 to wait until the process finishes (potentially
-     *               forever.
+     *               forever).
      */
     public void waitFor(long millis) throws InterruptedException;
 

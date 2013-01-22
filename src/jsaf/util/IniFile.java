@@ -24,8 +24,8 @@ import jsaf.intf.util.IProperty;
 /**
  * A class for interpreting an ini-style config file.  Each header is treated as a section full of properties.  Comment
  * lines begin with a ';'.  Delimiters can be either ':' or '=', and can appear in the name of a Key if escaped in the file
- * using a \\ character.  Key and value names are trimmed of leading and trailing white-space.  Multi-line values can be
- * created by ending the line with the \\ character, in which case whitespace is not trimmed.
+ * using a \ character.  Key and value names are trimmed of leading and trailing white-space.  Multi-line values can be
+ * created by ending the line with the \ character, in which case whitespace is not trimmed.
  *
  * @author David A. Solin
  * @version %I% %G%

@@ -60,10 +60,16 @@ public class PropertyUtil implements IProperty {
 	return prop.getProperty(key);
     }
 
+    /**
+     * Get a String iterator for the property keys.
+     */
     public Iterator<String> iterator() {
 	return prop.iterator();
     }
 
+    /**
+     * Convert to java.util.Properties.
+     */
     public Properties toProperties() {
 	return prop.toProperties();
     }

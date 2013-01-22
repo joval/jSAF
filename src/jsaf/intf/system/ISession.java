@@ -30,26 +30,36 @@ public interface ISession extends ILoggable {
 
 	/**
 	 * Indicates a session with a Unix host.
+	 *
+	 * @see jsaf.intf.unix.system.IUnixSession
 	 */
 	UNIX("unix"),
 
 	/**
 	 * Indicates a session with a device running Cisco IOS.
+	 *
+	 * @see jsaf.intf.cisco.system.IIosSession
 	 */
 	CISCO_IOS("ios"),
 
 	/**
 	 * Indicates a session with a device running Juniper JunOS.
+	 *
+	 * @see jsaf.intf.juniper.system.IJunosSession
 	 */
 	JUNIPER_JUNOS("junos"),
 
 	/**
 	 * Indicates a session with a device running Apple iOS.
+	 *
+	 * @see jsaf.intf.apple.system.IiOSSession
 	 */
 	APPLE_IOS("apple_iOS"),
 
 	/**
 	 * Indicates a session with a Windows host.
+	 *
+	 * @see jsaf.intf.windows.system.IWindowsSession
 	 */
 	WINDOWS("windows"),
 
@@ -170,11 +180,6 @@ public interface ISession extends ILoggable {
      * Get the number of milliseconds since midnight 1/1/70 UTC, on the system.
      */
     long getTime() throws Exception;
-
-    /**
-     * Does the session terminal echo the command?
-     */
-    boolean echo();
 
     /**
      * Create a process on the machine, with the specified environment variables.

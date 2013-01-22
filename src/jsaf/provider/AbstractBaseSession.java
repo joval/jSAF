@@ -112,10 +112,6 @@ public abstract class AbstractBaseSession implements IConfigurable, ISession {
 	logger.info(Message.STATUS_SESSION_DISPOSE, getHostname());
     }
 
-    public boolean echo() {
-	return false;
-    }
-
     public String getHostname() {
 	return LOCALHOST;
     }

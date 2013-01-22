@@ -14,11 +14,6 @@ import jsaf.intf.ssh.system.IShell;
  */
 public interface IIosSession extends INetconf {
     /**
-     * Property indicating the number of milliseconds to wait for a command to begin to return data.
-     */
-    public static final String PROP_READ_TIMEOUT = "ios.read.timeout";
-
-    /**
      * Retrieve "show tech-support" data from the device.
      */
     ITechSupport getTechSupport();

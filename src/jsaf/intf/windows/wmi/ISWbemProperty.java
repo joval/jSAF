@@ -10,7 +10,7 @@ import jsaf.provider.windows.wmi.WmiException;
 /**
  * An SWbemProperty interface.
  * 
- * @see "http://msdn.microsoft.com/en-us/library/aa393804(VS.85).aspx"
+ * @see <a href="http://msdn.microsoft.com/en-us/library/aa393804(VS.85).aspx">SWbemProperty object</a>
  */
 public interface ISWbemProperty {
     /**

@@ -6,7 +6,7 @@ package jsaf.intf.util;
 import java.util.Properties;
 
 /**
- * An interface representing something that can have properties.
+ * An interface representing something that can have properties. Iterates on the property keys.
  *
  * @author David A. Solin
  * @version %I% %G%

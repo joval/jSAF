@@ -32,7 +32,7 @@ import jsaf.Message;
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFileMetadata;
 import jsaf.intf.io.IFilesystem;
-import jsaf.intf.system.IBaseSession;
+import jsaf.intf.system.ISession;
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.util.ISearchable;
 import jsaf.intf.windows.io.IWindowsFileInfo;
@@ -176,7 +176,7 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 		// locally and read it.
 		//
 		remoteTemp = execToFile(cmd);
-		if (session.getWorkspace() == null || IBaseSession.LOCALHOST.equals(session.getHostname())) {
+		if (session.getWorkspace() == null || ISession.LOCALHOST.equals(session.getHostname())) {
 		    in = new GZIPInputStream(remoteTemp.getInputStream());
 		} else {
 		    localTemp = File.createTempFile("search", null, session.getWorkspace());

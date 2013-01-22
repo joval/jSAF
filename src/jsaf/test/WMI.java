@@ -6,7 +6,7 @@ package jsaf.test;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 
-import jsaf.intf.system.IBaseSession;
+import jsaf.intf.system.ISession;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.intf.windows.wmi.IWmiProvider;
 import jsaf.intf.windows.wmi.ISWbemObject;
@@ -18,10 +18,8 @@ import jsaf.provider.windows.wmi.WmiException;
 public class WMI {
     IWindowsSession session;
 
-    public WMI(IBaseSession session) {
-	if (session instanceof IWindowsSession) {
-	    this.session = (IWindowsSession)session;
-	}
+    public WMI(ISession session) {
+	this.session = (IWindowsSession)session;
     }
 
     public synchronized void test(String ns, String wql) {

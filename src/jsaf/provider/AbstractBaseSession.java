@@ -4,14 +4,17 @@
 package jsaf.provider;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Properties;
 
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
+import jsaf.intf.io.IFilesystem;
+import jsaf.intf.system.IEnvironment;
 import jsaf.intf.system.IProcess;
-import jsaf.intf.system.IBaseSession;
+import jsaf.intf.system.ISession;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.intf.util.IProperty;
 import jsaf.intf.util.IConfigurable;
@@ -26,7 +29,7 @@ import jsaf.util.PropertyUtil;
  * @author David A. Solin
  * @version %I% %G%
  */
-public abstract class AbstractBaseSession implements IConfigurable, IBaseSession {
+public abstract class AbstractBaseSession implements IConfigurable, ISession {
     protected File wsdir = null;
     protected LocLogger logger;
     protected boolean debug;
@@ -70,7 +73,7 @@ public abstract class AbstractBaseSession implements IConfigurable, IBaseSession
 	return internalProps;
     }
 
-    // Implement IBaseSession
+    // Implement ISession (sparsely)
 
     public long getTimeout(Timeout to) {
 	switch(to) {
@@ -117,17 +120,23 @@ public abstract class AbstractBaseSession implements IConfigurable, IBaseSession
 	return LOCALHOST;
     }
 
-    // All the abstract methods, for reference
+    // All the unsupported-by-default methods
 
-    public abstract boolean connect();
+    public String getMachineName() {
+	throw new UnsupportedOperationException();
+    }
 
-    public abstract void disconnect();
+    public IEnvironment getEnvironment() {
+	throw new UnsupportedOperationException();
+    }
 
-    public abstract long getTime() throws Exception;
+    public String getTempDir() throws IOException {
+	throw new UnsupportedOperationException();
+    }
 
-    public abstract Type getType();
-
-    public abstract IProcess createProcess(String command, String[] env) throws Exception;
+    public IFilesystem getFilesystem() {
+	throw new UnsupportedOperationException();
+    }
 
     // Private
 

@@ -37,14 +37,13 @@ public abstract class BaseUnixSession extends AbstractSession implements IUnixSe
 	}
     }
 
-    // Implement IBaseSession
+    // Implement ISession
 
     public Type getType() {
 	return Type.UNIX;
     }
 
-    // Implement ISession
-
+    @Override
     public String getMachineName() {
 	if (isConnected()) {
 	    try {

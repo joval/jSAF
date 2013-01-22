@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.logging.*;
 
-import jsaf.intf.system.IBaseSession;
+import jsaf.intf.system.ISession;
 import jsaf.intf.windows.registry.IRegistry;
 import jsaf.intf.windows.registry.IKey;
 import jsaf.intf.windows.registry.IValue;
@@ -29,10 +29,8 @@ import jsaf.io.LittleEndian;
 public class Reg {
     IWindowsSession session;
 
-    public Reg(IBaseSession session) {
-	if (session instanceof IWindowsSession) {
-	    this.session = (IWindowsSession)session;
-	}
+    public Reg(ISession session) {
+	this.session = (IWindowsSession)session;
     }
 
     public void testLicense() {

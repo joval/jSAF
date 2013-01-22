@@ -5,7 +5,7 @@ package jsaf.test;
 
 import java.util.NoSuchElementException;
 
-import jsaf.intf.system.IBaseSession;
+import jsaf.intf.system.ISession;
 import jsaf.intf.windows.identity.IDirectory;
 import jsaf.intf.windows.identity.IGroup;
 import jsaf.intf.windows.identity.IUser;
@@ -16,10 +16,8 @@ import jsaf.provider.windows.wmi.WmiException;
 public class AD {
     IWindowsSession session;
 
-    public AD(IBaseSession session) {
-	if (session instanceof IWindowsSession) {
-	    this.session = (IWindowsSession)session;
-	}
+    public AD(ISession session) {
+	this.session = (IWindowsSession)session;
     }
 
     public void test(String name) {

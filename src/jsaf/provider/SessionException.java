@@ -4,7 +4,7 @@
 package jsaf.provider;
 
 /**
- * An exception indicating there is a problem with an IBaseSession.
+ * An exception indicating there is a problem with an ISession.
  *
  * @author David A. Solin
  * @version %I% %G%

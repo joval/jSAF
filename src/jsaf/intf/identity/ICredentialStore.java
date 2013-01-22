@@ -5,7 +5,7 @@ package jsaf.intf.identity;
 
 import java.security.AccessControlException;
 
-import jsaf.intf.system.IBaseSession;
+import jsaf.intf.system.ISession;
 
 /**
  * An interface for a credential storage mechanism.
@@ -15,11 +15,11 @@ import jsaf.intf.system.IBaseSession;
  */
 public interface ICredentialStore {
     /**
-     * Return the appropriate credential for the specified IBaseSession.
+     * Return the appropriate credential for the specified ISession.
      *
      * @return null if no credential is found
      *
      * @throws AccessControlException if access to the requested credential is not allowed.
      */
-    ICredential getCredential(IBaseSession session) throws AccessControlException;
+    ICredential getCredential(ISession session) throws AccessControlException;
 }

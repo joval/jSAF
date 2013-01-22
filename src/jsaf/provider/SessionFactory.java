@@ -10,7 +10,7 @@ import java.lang.reflect.Constructor;
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
-import jsaf.intf.system.IBaseSession;
+import jsaf.intf.system.ISession;
 import jsaf.intf.system.IRemote;
 import jsaf.intf.util.ILoggable;
 
@@ -104,11 +104,11 @@ public abstract class SessionFactory implements ILoggable {
     /**
      * Creates a session for the default target.
      */
-    public abstract IBaseSession createSession() throws IOException;
+    public abstract ISession createSession() throws IOException;
 
     /**
      * Creates a session for the specified target. Interpretation of the target string is performed by the
      * underlying session factory implementation.
      */
-    public abstract IBaseSession createSession(String target) throws IOException;
+    public abstract ISession createSession(String target) throws IOException;
 }

@@ -71,9 +71,9 @@ public class Runspace implements IRunspace {
 	modules = new HashSet<String>();
 	if (view == IWindowsSession.View._32BIT) {
 	    String cmd = new StringBuffer("%SystemRoot%\\SysWOW64\\cmd.exe /c ").append(INIT_COMMAND).toString();
-	    p = session.createProcess(cmd, null);
+	    p = session.createProcess(cmd, null, null);
 	} else {
-	    p = session.createProcess(INIT_COMMAND, null);
+	    p = session.createProcess(INIT_COMMAND, null, null);
 	}
 	p.start();
 	stdout = p.getInputStream();

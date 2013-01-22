@@ -12,7 +12,7 @@ import jsaf.Message;
 import jsaf.intf.identity.ICredential;
 import jsaf.intf.identity.ICredentialStore;
 import jsaf.intf.ssh.identity.ISshCredential;
-import jsaf.intf.system.IBaseSession;
+import jsaf.intf.system.ISession;
 import jsaf.intf.util.IProperty;
 import jsaf.intf.windows.identity.IWindowsCredential;
 import jsaf.util.PropertyUtil;
@@ -72,8 +72,8 @@ public class SimpleCredentialStore implements ICredentialStore {
 
     // Implement ICredentialStore
 
-    public ICredential getCredential(IBaseSession base) throws AccessControlException {
-	IProperty prop = table.get(base.getHostname());
+    public ICredential getCredential(ISession session) throws AccessControlException {
+	IProperty prop = table.get(session.getHostname());
 	if (prop == null) {
 	    return null;
 	}
@@ -85,8 +85,8 @@ public class SimpleCredentialStore implements ICredentialStore {
 	String privateKey	= prop.getProperty(PROP_PRIVATE_KEY);
 
 	ICredential cred = null;
-	if (base.getHostname().equalsIgnoreCase(prop.getProperty(PROP_HOSTNAME))) {
-	    switch (base.getType()) {
+	if (session.getHostname().equalsIgnoreCase(prop.getProperty(PROP_HOSTNAME))) {
+	    switch (session.getType()) {
 	      case WINDOWS:
 		if (domain == null) {
 		    domain = prop.getProperty(PROP_HOSTNAME).toUpperCase();

@@ -5,7 +5,6 @@ package jsaf.provider;
 
 import java.io.File;
 
-import jsaf.intf.system.IBaseSession;
 import jsaf.intf.system.IRemote;
 import jsaf.intf.system.ISession;
 import jsaf.provider.unix.system.UnixSession;
@@ -33,11 +32,11 @@ public class SessionFactoryImpl extends SessionFactory {
 	throw new UnsupportedOperationException("getRemote");
     }
 
-    public IBaseSession createSession() {
+    public ISession createSession() {
 	return createSession(ISession.LOCALHOST);
     }
 
-    public IBaseSession createSession(String target) {
+    public ISession createSession(String target) {
 	if (!ISession.LOCALHOST.equals(target)) {
 	    throw new IllegalArgumentException(target);
 	}

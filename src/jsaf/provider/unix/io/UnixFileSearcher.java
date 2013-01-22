@@ -31,9 +31,9 @@ import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFilesystem;
 import jsaf.intf.io.IReader;
 import jsaf.intf.io.IReaderGobbler;
-import jsaf.intf.system.IBaseSession;
 import jsaf.intf.system.IEnvironment;
 import jsaf.intf.system.IProcess;
+import jsaf.intf.system.ISession;
 import jsaf.intf.unix.io.IUnixFileInfo;
 import jsaf.intf.unix.io.IUnixFilesystem;
 import jsaf.intf.unix.io.IUnixFilesystemDriver;
@@ -115,7 +115,7 @@ public class UnixFileSearcher implements ISearchable<IFile>, ILoggable {
 		//
 		IReader reader = null;
 		remoteTemp = execToFile(cmd);
-		if (session.getWorkspace() == null || IBaseSession.LOCALHOST.equals(session.getHostname())) {
+		if (session.getWorkspace() == null || ISession.LOCALHOST.equals(session.getHostname())) {
 		    reader = new BufferedReader(new GZIPInputStream(remoteTemp.getInputStream()));
 		} else {
 		    localTemp = File.createTempFile("search", null, session.getWorkspace());
@@ -143,7 +143,7 @@ public class UnixFileSearcher implements ISearchable<IFile>, ILoggable {
 		    try {
 			remoteTemp.delete();
 			if (remoteTemp.exists()) {
-			    SafeCLI.exec("rm -f " + remoteTemp.getPath(), session, IUnixSession.Timeout.S);
+			    SafeCLI.exec("rm -f " + remoteTemp.getPath(), session, ISession.Timeout.S);
 			}
 		    } catch (Exception e) {
 			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
@@ -187,7 +187,7 @@ public class UnixFileSearcher implements ISearchable<IFile>, ILoggable {
 
 	FileMonitor mon = new FileMonitor(tempPath);
 	JSAFSystem.getTimer().schedule(mon, 15000, 15000);
-	SafeCLI.exec(cmd, null, session, session.getTimeout(IUnixSession.Timeout.XL), new ErrorReader(), new ErrorReader());
+	SafeCLI.exec(cmd, null, null, session, session.getTimeout(ISession.Timeout.XL), new ErrorReader(), new ErrorReader());
 	mon.cancel();
 	JSAFSystem.getTimer().purge();
 	return fs.getFile(tempPath, IFile.Flags.READWRITE);

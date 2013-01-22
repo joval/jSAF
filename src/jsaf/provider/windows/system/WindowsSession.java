@@ -77,7 +77,7 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 	}
     }
 
-    // Implement IBaseSession
+    // Implement ISession
 
     @Override
     public void dispose() {
@@ -130,7 +130,6 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 		return false;
 	    }
 	}
-	cwd = new File(env.expand("%SystemRoot%"));
 	if (wmi.register()) {
 	    connected = true;
 	    if (directory == null) {
@@ -153,8 +152,7 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 	return Type.WINDOWS;
     }
 
-    // Implement ISession
-
+    @Override
     public String getMachineName() {
 	if (isConnected()) {
 	    try {

@@ -9,7 +9,7 @@ import java.io.File;
 import jsaf.intf.identity.ICredentialStore;
 
 /**
- * Remote management interface for an IBaseSession factory.
+ * Remote management interface for an ISession factory.
  *
  * @author David A. Solin
  * @version %I% %G%
@@ -30,7 +30,7 @@ public interface IRemote {
      * remote.addRoute("D", "C");
      * remote.addRoute("C", "B"); 
      * remote.addRoute("B", "A"); 
-     * IBaseSession session = factory.createSession("D");
+     * ISession session = factory.createSession("D");
      * &lt;/pre&gt;
      */
     void addRoute(String destination, String gateway);

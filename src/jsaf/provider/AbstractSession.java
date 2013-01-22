@@ -22,7 +22,6 @@ import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFilesystem;
 import jsaf.intf.system.IEnvironment;
 import jsaf.intf.system.IProcess;
-import jsaf.intf.system.ISession;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.io.StreamLogger;
 import jsaf.io.fs.AbstractFilesystem;
@@ -33,8 +32,7 @@ import jsaf.io.fs.AbstractFilesystem;
  * @author David A. Solin
  * @version %I% %G%
  */
-public abstract class AbstractSession extends AbstractBaseSession implements ISession {
-    protected File cwd;
+public abstract class AbstractSession extends AbstractBaseSession {
     protected IEnvironment env;
     protected IFilesystem fs;
 
@@ -58,25 +56,22 @@ public abstract class AbstractSession extends AbstractBaseSession implements ISe
 	}
     }
 
-    // Implement ISession
+    // Implement ISession (sparsely)
 
-    public void setWorkingDir(String path) {
-	cwd = new File(path);
-    }
-
+    @Override
     public String getTempDir() throws IOException {
 	return System.getProperty("java.io.tmpdir");
     }
 
+    @Override
     public IEnvironment getEnvironment() {
 	return env;
     }
 
+    @Override
     public IFilesystem getFilesystem() {
 	return fs;
     }
-
-    // Implement IBaseSession
 
     @Override
     public void dispose() {
@@ -103,17 +98,9 @@ public abstract class AbstractSession extends AbstractBaseSession implements ISe
      * Here, we provide an implementation for local ISessions.
      */
     @Override
-    public IProcess createProcess(String command, String[] env) throws Exception {
-	return new JavaProcess(command, env);
+    public IProcess createProcess(String command, String[] env, String dir) throws Exception {
+	return new JavaProcess(command, env, dir);
     }
-
-    // All the abstract methods, for reference
-
-    public abstract boolean connect();
-
-    public abstract void disconnect();
-
-    public abstract Type getType();
 
     // Internal
 
@@ -132,10 +119,12 @@ public abstract class AbstractSession extends AbstractBaseSession implements ISe
 	protected int pid;
 	protected String command;
 	protected String[] env;
+	protected String dir;
 
-	protected JavaProcess(String command, String[] env) {
+	protected JavaProcess(String command, String[] env, String dir) {
 	    this.command = command;
 	    this.env = env;
+	    this.dir = dir;
 	    this.pid = AbstractSession.this.pid++;
 	}
 
@@ -165,20 +154,25 @@ public abstract class AbstractSession extends AbstractBaseSession implements ISe
 		args.add("/c");
 		args.add(command);
 	    }
-	    try {
-		ProcessBuilder pb = new ProcessBuilder(args);
-		if (env != null) {
-		    for (String s : env) {
-			int ptr = s.indexOf("=");
-			if (ptr > 0) {
-			    pb.environment().put(s.substring(0, ptr), s.substring(ptr+1));
-			}
+	    ProcessBuilder pb = new ProcessBuilder(args);
+	    if (env != null) {
+		for (String s : env) {
+		    int ptr = s.indexOf("=");
+		    if (ptr > 0) {
+			pb.environment().put(s.substring(0, ptr), s.substring(ptr+1));
 		    }
 		}
-		p = pb.directory(cwd).start();
-	    } catch (IOException e) {
-		throw new Exception(e);
 	    }
+	    if (dir != null) {
+		File f = new File(dir);
+		if (f.isDirectory()) {
+		    pb.directory(new File(dir));
+		} else {
+		    String reason = Message.getMessage(Message.ERROR_IO_NOT_DIR);
+		    throw new IOException(Message.getMessage(Message.ERROR_IO, dir, reason));
+		}
+	    }
+	    p = pb.start();
 	}
 
 	public InputStream getInputStream() throws IOException {

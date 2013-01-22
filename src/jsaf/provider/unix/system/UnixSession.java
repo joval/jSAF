@@ -22,7 +22,7 @@ public class UnixSession extends BaseUnixSession {
 	this.wsdir = wsdir;
     }
 
-    // Implement IBaseSession
+    // Implement ISession
 
     public boolean connect() {
 	if (env == null) {
@@ -31,7 +31,6 @@ public class UnixSession extends BaseUnixSession {
 	if (fs == null) {
 	    fs = new UnixFilesystem(this);
 	}
-	cwd = new File(".");
 	flavor = Flavor.flavorOf(this);
 	connected = true;
 	return true;

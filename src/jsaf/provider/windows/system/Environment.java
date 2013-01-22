@@ -14,9 +14,9 @@ import java.util.regex.Matcher;
 
 import org.slf4j.cal10n.LocLogger;
 
-import jsaf.intf.system.IBaseSession;
 import jsaf.intf.system.IEnvironment;
 import jsaf.intf.system.IProcess;
+import jsaf.intf.system.ISession;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.util.AbstractEnvironment;
 import jsaf.util.SafeCLI;
@@ -28,10 +28,10 @@ import jsaf.util.SafeCLI;
  * @version %I% %G%
  */
 public class Environment extends AbstractEnvironment {
-    public Environment(IBaseSession session) throws Exception {
+    public Environment(ISession session) throws Exception {
 	super();
 	String lastKey = null;
-	for (String line : SafeCLI.multiLine("set", session, IBaseSession.Timeout.M)) {
+	for (String line : SafeCLI.multiLine("set", session, ISession.Timeout.M)) {
 	    int ptr = line.indexOf("=");
 	    if (ptr > 0) {
 		String key = line.substring(0,ptr);

@@ -5,20 +5,20 @@ package jsaf.test;
 
 import java.io.InputStream;
 
-import jsaf.intf.system.IBaseSession;
 import jsaf.intf.system.IProcess;
+import jsaf.intf.system.ISession;
 
 public class Exec {
-    IBaseSession session;
+    ISession session;
 
-    public Exec(IBaseSession session) {
+    public Exec(ISession session) {
 	this.session = session;
     }
 
     public void test(String command) {
 	try {
 	    String[] env = {"DAS=jOVAL"};
-	    IProcess p = session.createProcess(command, env);
+	    IProcess p = session.createProcess(command, env, null);
 	    p.start();
 
 	    InputStream in = p.getInputStream();

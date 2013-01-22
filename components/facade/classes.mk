@@ -2,6 +2,9 @@ CLASSES=\
 	jsaf.JSAFSystem	\
 	jsaf.Message	\
 	jsaf.identity.SimpleCredentialStore	\
+	jsaf.intf.apple.system.IiOSSession	\
+	jsaf.intf.cisco.system.IIosSession	\
+	jsaf.intf.cisco.system.ITechSupport	\
 	jsaf.intf.identity.ICredential	\
 	jsaf.intf.identity.ICredentialStore	\
 	jsaf.intf.io.IFile	\
@@ -11,8 +14,11 @@ CLASSES=\
 	jsaf.intf.io.IRandomAccess	\
 	jsaf.intf.io.IReader	\
 	jsaf.intf.io.IReaderGobbler	\
+	jsaf.intf.juniper.system.IJunosSession	\
+	jsaf.intf.juniper.system.ISupportInformation	\
+	jsaf.intf.netconf.INetconf	\
 	jsaf.intf.ssh.identity.ISshCredential	\
-	jsaf.intf.system.IBaseSession	\
+	jsaf.intf.ssh.system.IShell	\
 	jsaf.intf.system.IEnvironment	\
 	jsaf.intf.system.IProcess	\
 	jsaf.intf.system.IRemote	\

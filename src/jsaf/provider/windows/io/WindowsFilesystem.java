@@ -174,7 +174,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 
     protected WindowsFileInfo getWindowsFileInfo(String path) throws IOException {
 	try {
-	    String data = runspace.invoke("Get-Item -literalPath \"" + path + "\" | Print-FileInfo");
+	    String data = runspace.invoke("Get-Item -literalPath '" + path + "' | Print-FileInfo");
 	    return (WindowsFileInfo)nextFileInfo(StringTools.toList(data.split("\r\n")).iterator());
 	} catch (IOException e) {
 	    throw e;

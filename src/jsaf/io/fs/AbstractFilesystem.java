@@ -289,8 +289,12 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	return getFile(path, flags).getRandomAccess(mode);
     }
 
-    public final InputStream getInputStream(String path) throws IllegalArgumentException, IOException {
+    public final InputStream getInputStream(String path) throws IOException {
 	return getFile(path).getInputStream();
+    }
+
+    public final OutputStream getOutputStream(String path, boolean append) throws IOException {
+	return getFile(path, IFile.Flags.READWRITE).getOutputStream(append);
     }
 
     // Inner Classes

@@ -22,6 +22,7 @@ public class Checksum {
     public enum Algorithm {
 	MD5("MD5"),
 	SHA1("SHA-1"),
+	SHA128("SHA-128"),
 	SHA224("SHA-224"),
 	SHA256("SHA-256"),
 	SHA384("SHA-384"),

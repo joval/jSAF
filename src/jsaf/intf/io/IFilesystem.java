@@ -99,7 +99,12 @@ public interface IFilesystem extends ILoggable {
     /**
      * Read a file.
      */
-    InputStream getInputStream(String path) throws IllegalArgumentException, IOException;
+    InputStream getInputStream(String path) throws IOException;
+
+    /**
+     * Write to a file.
+     */
+    OutputStream getOutputStream(String path, boolean append) throws IOException;
 
     /**
      * List the mounts on this filesystem, whose types do not match the specified typeFilter. Typically, for example,

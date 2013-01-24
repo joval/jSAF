@@ -139,20 +139,20 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	}
 	StringBuffer command = null;
 	if (dirOnly) {
-	    command = new StringBuffer("Find-Directories -Path \"").append(from).append("\"");
+	    command = new StringBuffer("Find-Directories -Path '").append(from).append("'");
 	    if (dirPattern != null) {
-		command.append(" -Pattern \"").append(dirPattern.pattern()).append("\"");
+		command.append(" -Pattern '").append(dirPattern.pattern()).append("'");
 	    }
 	} else {
-	    command = new StringBuffer("Find-Files -Path \"").append(from).append("\"");
+	    command = new StringBuffer("Find-Files -Path '").append(from).append("'");
 	    if (pathPattern != null) {
-		command.append(" -Pattern \"").append(pathPattern.pattern()).append("\"");
+		command.append(" -Pattern '").append(pathPattern.pattern()).append("'");
 	    }
 	    if (basename != null) {
-		command.append(" -LiteralFilename \"").append(basename).append("\"");
+		command.append(" -LiteralFilename '").append(basename).append("'");
 	    }
 	    if (basenamePattern != null) {
-		command.append(" -Filename \"").append(basenamePattern.pattern()).append("\"");
+		command.append(" -Filename '").append(basenamePattern.pattern()).append("'");
 	    }
 	}
 	command.append(" -Depth ").append(Integer.toString(maxDepth));

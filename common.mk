@@ -44,7 +44,7 @@ DOCS=docs/api
 SRC=$(TOP)/src
 COMPONENTS=$(TOP)/components
 LIBDIR=$(RSRC)/lib
-LIB=$(subst $(SPACE),$(CLN),$(filter %.jar %.zip, $(wildcard $(LIBDIR)/*)))
+LIBS=$(subst $(SPACE),$(CLN),$(filter %.jar %.zip, $(wildcard $(LIBDIR)/*)))
 
 FACADE=$(COMPONENTS)/facade
 FACADE_LIB=$(FACADE)/jSAF.jar

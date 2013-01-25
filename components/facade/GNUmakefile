@@ -5,7 +5,7 @@ TOP=../..
 
 include $(TOP)/common.mk
 
-CLASSPATH="$(CLASSLIB)$(CLN)$(LIB)$(CLN)$(PROVIDER_DEPS)$(CLN)$(SRC)"
+CLASSPATH="$(CLASSLIB)$(CLN)$(LIBS)$(CLN)$(PROVIDER_DEPS)$(CLN)$(SRC)"
 
 include classes.mk
 

@@ -5,6 +5,7 @@ package jsaf.provider;
 
 import java.io.File;
 
+import jsaf.intf.io.IFilesystem;
 import jsaf.intf.system.IRemote;
 import jsaf.intf.system.ISession;
 import jsaf.provider.unix.system.UnixSession;
@@ -47,10 +48,15 @@ public class SessionFactoryImpl extends SessionFactory {
 		wsdir.mkdirs();
 	    }
 	}
+	ISession session = null;
 	if (System.getProperty("os.name").startsWith("Windows")) {
-	    return new WindowsSession(wsdir);
+	    session = new WindowsSession(wsdir);
 	} else {
-	    return new UnixSession(wsdir);
+	    session = new UnixSession(wsdir);
 	}
+	if (workspace == null) {
+	    session.getProperties().setProperty(IFilesystem.PROP_CACHE_JDBM, null);
+	}
+	return session;
     }
 }

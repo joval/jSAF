@@ -24,9 +24,12 @@ import jsaf.intf.windows.wmi.ISWbemPropertySet;
 import jsaf.provider.windows.wmi.WmiException;
 
 /**
- * The LocalDirectory class provides a mechanism to query the local User/Group directory for a Windows machine.  It is
- * case-insensitive, and it intelligently caches results so that subsequent requests for the same object can be returned
+ * The LocalDirectory class provides a mechanism to query the local User/Group directory for a Windows machine using WMI.
+ * It is case-insensitive, and it intelligently caches results so that subsequent requests for the same object can be returned
  * from memory.
+ *
+ * An alternative method to implement this functionality would be to use the NetUserEnum function. See this example:
+ * http://stackoverflow.com/questions/12424418/getting-user-info-from-networkapi-user-info-3-user-info-4-structures
  *
  * @author David A. Solin
  * @version %I% %G%

@@ -10,8 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 
-import jsaf.util.StringTools;
-
 /**
  * Provides a facade for an InputStream while logging its contents to a file.
  *
@@ -37,7 +35,7 @@ public class StreamLogger extends InputStream {
 	if (comment != null) {
 	    StringBuffer sb = new StringBuffer("# ");
 	    sb.append(comment);
-	    sb.append(StringTools.LOCAL_CR);
+	    sb.append(System.getProperty("line.separator"));
 	    out.write(sb.toString().getBytes());
 	}
     }

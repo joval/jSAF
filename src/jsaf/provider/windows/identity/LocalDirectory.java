@@ -38,13 +38,13 @@ class LocalDirectory implements ILoggable {
     static final String USER_WQL		= "SELECT SID, Name, Domain, Disabled FROM Win32_UserAccount";
     static final String SYSUSER_WQL		= "SELECT SID, Name, Domain FROM Win32_SystemAccount";
     static final String GROUP_WQL		= "SELECT SID, Name, Domain FROM Win32_Group";
+    static final String LOCAL_CONDITION		= "LocalAccount=TRUE";
     static final String DOMAIN_CONDITION	= "Domain='$domain'";
     static final String NAME_CONDITION		= "Name='$name'";
     static final String SID_CONDITION		= "SID='$sid'";
 
-    static final String USER_GROUP_WQL		= "ASSOCIATORS OF {$conditions} WHERE resultClass=Win32_Group";
+    static final String USER_GROUP_WQL		= "SELECT * FROM Win32_GroupUser WHERE PartComponent=\"$conditions\"";
     static final String USER_DOMAIN_CONDITION	= "Win32_UserAccount.Domain='$domain'";
-    static final String USER_NAME_CONDITION	= "Name='$username'";
 
     static final String GROUP_USER_WQL		= "SELECT * FROM Win32_GroupUser WHERE GroupComponent=\"$conditions\"";
     static final String GROUP_DOMAIN_CONDITION	= "Win32_Group.Domain='$domain'";
@@ -116,7 +116,11 @@ class LocalDirectory implements ILoggable {
 	    StringBuffer conditions = new StringBuffer(" WHERE ");
 	    conditions.append(NAME_CONDITION.replaceAll("(?i)\\$name", Matcher.quoteReplacement(name)));
 	    conditions.append(" AND ");
-	    conditions.append(DOMAIN_CONDITION.replaceAll("(?i)\\$domain", Matcher.quoteReplacement(domain)));
+	    if (domain.equalsIgnoreCase(hostname)) {
+		conditions.append(LOCAL_CONDITION);
+	    } else {
+		conditions.append(DOMAIN_CONDITION.replaceAll("(?i)\\$domain", Matcher.quoteReplacement(domain)));
+	    }
 	    ISWbemObjectSet os = wmi.execQuery(IWmiProvider.CIMv2, USER_WQL + conditions.toString());
 	    if (os.getSize() == 0) {
 		os = wmi.execQuery(IWmiProvider.CIMv2, SYSUSER_WQL + conditions.toString());
@@ -135,7 +139,7 @@ class LocalDirectory implements ILoggable {
     Collection<IUser> queryAllUsers() throws WmiException {
 	if (!preloadedUsers) {
 	    StringBuffer conditions = new StringBuffer(" WHERE ");
-	    conditions.append(DOMAIN_CONDITION.replaceAll("(?i)\\$domain", Matcher.quoteReplacement(hostname)));
+	    conditions.append(LOCAL_CONDITION);
 	    for (ISWbemObject row : wmi.execQuery(IWmiProvider.CIMv2, USER_WQL + conditions.toString())) {
 		preloadUser(row.getProperties());
 	    }
@@ -194,7 +198,11 @@ class LocalDirectory implements ILoggable {
 	    wql.append(" WHERE ");
 	    wql.append(NAME_CONDITION.replaceAll("(?i)\\$name", Matcher.quoteReplacement(name)));
 	    wql.append(" AND ");
-	    wql.append(DOMAIN_CONDITION.replaceAll("(?i)\\$domain", Matcher.quoteReplacement(domain)));
+	    if (domain.equalsIgnoreCase(hostname)) {
+		wql.append(LOCAL_CONDITION);
+	    } else {
+		wql.append(DOMAIN_CONDITION.replaceAll("(?i)\\$domain", Matcher.quoteReplacement(domain)));
+	    }
 
 	    ISWbemObjectSet os = wmi.execQuery(IWmiProvider.CIMv2, wql.toString());
 	    if (os.getSize() == 0) {
@@ -217,7 +225,7 @@ class LocalDirectory implements ILoggable {
 	if (!preloadedGroups) {
 	    StringBuffer wql = new StringBuffer(GROUP_WQL);
 	    wql.append(" WHERE ");
-	    wql.append(DOMAIN_CONDITION.replaceAll("(?i)\\$domain", Matcher.quoteReplacement(hostname)));
+	    wql.append(LOCAL_CONDITION);
 	    for (ISWbemObject rows : wmi.execQuery(IWmiProvider.CIMv2, wql.toString())) {
 		ISWbemPropertySet columns = rows.getProperties();
 		String domain = columns.getItem("Domain").getValueAsString();
@@ -345,14 +353,19 @@ class LocalDirectory implements ILoggable {
 	StringBuffer conditions = new StringBuffer();
 	conditions.append(USER_DOMAIN_CONDITION.replaceAll("(?i)\\$domain", Matcher.quoteReplacement(domain)));
 	conditions.append(",");
-	conditions.append(USER_NAME_CONDITION.replaceAll("(?i)\\$username", Matcher.quoteReplacement(name)));
+	conditions.append(NAME_CONDITION.replaceAll("(?i)\\$name", Matcher.quoteReplacement(name)));
 	String wql = USER_GROUP_WQL.replaceAll("(?i)\\$conditions", Matcher.quoteReplacement(conditions.toString()));
 
 	Collection<String> groupNetbiosNames = new Vector<String>();
 	for (ISWbemObject row : wmi.execQuery(IWmiProvider.CIMv2, wql)) {
 	    ISWbemPropertySet columns = row.getProperties();
-	    String groupDomain = columns.getItem("Domain").getValueAsString();
-	    String groupName = columns.getItem("Name").getValueAsString();
+	    String groupComponent = columns.getItem("GroupComponent").getValueAsString();
+	    int begin = groupComponent.indexOf("Domain=\"") + 8;
+	    int end = groupComponent.indexOf("\"", begin);
+	    String groupDomain = groupComponent.substring(begin, end);
+	    begin = groupComponent.indexOf("Name=\"") + 6;
+	    end = groupComponent.indexOf("\"", begin+1);
+	    String groupName = groupComponent.substring(begin, end);
 	    groupNetbiosNames.add(groupDomain + "\\" + groupName);
 	}
 	return new User(domain, name, sid, groupNetbiosNames, enabled);

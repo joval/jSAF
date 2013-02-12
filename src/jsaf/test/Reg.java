@@ -7,8 +7,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.*;
 
@@ -36,7 +36,7 @@ public class Reg {
     public void testLicense() {
 	try {
 	    IRegistry r = session.getRegistry(IWindowsSession.View._64BIT);
-	    Hashtable<String, IEntry> ht = r.getLicenseData().getEntries();
+	    Map<String, IEntry> ht = r.getLicenseData().getEntries();
 	    for (IEntry entry : ht.values()) {
 		System.out.println(entry.toString());
 	    }

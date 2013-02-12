@@ -48,7 +48,7 @@ public class LicenseData implements ILicenseData {
 		if (len == buff.length) {
 		    int offset = 0x14;
 		    for (int bytesRead=0; bytesRead < valueLen; ) {
-			IEntry entry = readEntry(buff, offset);
+			Entry entry = (Entry)readEntry(buff, offset);
 			entries.put(entry.getName(), entry);
 			bytesRead = bytesRead + entry.length();
 			offset = offset + entry.length();
@@ -86,28 +86,37 @@ public class LicenseData implements ILicenseData {
 	switch(dataType) {
 	  case IEntry.TYPE_DWORD:
 	    if (dataLen == 4) {
-		return new DwordEntry(len, dataType, name, data);
+		return new DwordEntry(len, name, data);
 	    } else {
 		throw new RuntimeException("Illegal length for DWORD data: " + dataLen);
 	    }
 
 	  case IEntry.TYPE_SZ:
-	    return new StringEntry(len, dataType, name, data);
+	    return new StringEntry(len, name, data);
 
 	  case IEntry.TYPE_BINARY:
 	  default:
-	    return new BinaryEntry(len, dataType, name, data);
+	    return new BinaryEntry(len, name, data);
 	}
     }
 
     abstract class Entry implements IEntry {
+	private int len;
+
 	int dataType;
 	String name;
 
-	Entry(int dataType, String name) {
+	Entry(int len, int dataType, String name) {
+	    this.len = len;
 	    this.dataType = dataType;
 	    this.name = name;
 	}
+
+	int length() {
+	    return len;
+	}
+
+	// Implement IEntry
 
 	public int getType() {
 	    return dataType;
@@ -121,8 +130,8 @@ public class LicenseData implements ILicenseData {
     class BinaryEntry extends Entry implements IBinaryEntry {
 	private byte[] data;
 
-	BinaryEntry(int dataType, String name, byte[] data) {
-	    super(dataType, name);
+	BinaryEntry(int len, String name, byte[] data) {
+	    super(len, TYPE_BINARY, name);
 	    this.data = data;
 	}
 
@@ -143,8 +152,8 @@ public class LicenseData implements ILicenseData {
     class DwordEntry extends Entry implements IDwordEntry {
 	private int data;
 
-	DwordEntry(int dataType, String name, byte[] data) {
-	    super(dataType, name);
+	DwordEntry(int len, String name, byte[] data) {
+	    super(len, TYPE_DWORD, name);
 	    this.data = LittleEndian.getUInt(data, 0);
 	}
 
@@ -160,8 +169,8 @@ public class LicenseData implements ILicenseData {
     class StringEntry extends Entry implements IStringEntry {
 	private String data;
 
-	StringEntry(int dataType, String name, byte[] data) {
-	    super(dataType, name);
+	StringEntry(int len, String name, byte[] data) {
+	    super(len, TYPE_SZ, name);
 	    this.data = LittleEndian.getSzUTF16LEString(data, 0, data.length);
 	}
 

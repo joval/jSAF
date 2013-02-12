@@ -17,8 +17,14 @@ import java.security.Provider;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public class Checksum {
+    /**
+     * An enumeration of supported checksum algorithms.
+     *
+     * @since 1.0
+     */
     public enum Algorithm {
 	MD5("MD5"),
 	SHA1("SHA-1"),
@@ -39,6 +45,9 @@ public class Checksum {
 	}
     }
 
+    /**
+     * @since 1.0
+     */
     public static String getChecksum(File f, Algorithm algorithm) throws IOException {
 	InputStream in = null;
 	try {
@@ -54,6 +63,9 @@ public class Checksum {
 	}
     }
 
+    /**
+     * @since 1.0
+     */
     public static String getChecksum(String data, Algorithm algorithm) {
 	try {
 	    return getChecksum(new ByteArrayInputStream(data.getBytes()), algorithm);
@@ -62,6 +74,9 @@ public class Checksum {
 	}
     }
 
+    /**
+     * @since 1.0
+     */
     public static String getChecksum(InputStream in, Algorithm algorithm) throws IOException {
         byte[] buff = createChecksum(in, algorithm);
         String str = "";
@@ -71,6 +86,9 @@ public class Checksum {
         return str;
     }
 
+    /**
+     * @since 1.0
+     */
     public static String getChecksum(byte[] buff, Algorithm algorithm) {
         byte[] cs = createChecksum(buff, algorithm);
         String str = "";
@@ -80,12 +98,18 @@ public class Checksum {
         return str;
     }
 
+    /**
+     * @since 1.0
+     */
     public static byte[] createChecksum(byte[] buff, Algorithm algorithm) {
 	MessageDigest digest = getDigest(algorithm);
        	digest.update(buff, 0, buff.length);
         return digest.digest();
     }
 
+    /**
+     * @since 1.0
+     */
     public static byte[] createChecksum(InputStream in, Algorithm algorithm) throws IOException {
 	MessageDigest digest = getDigest(algorithm);
         byte[] buff = new byte[512];

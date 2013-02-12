@@ -10,12 +10,20 @@ import jsaf.intf.identity.ICredential;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IWindowsCredential extends ICredential {
+    /**
+     * Return the user domain.
+     *
+     * @since 1.0
+     */
     String getDomain();
 
     /**
      * Return a username of the form domain\name.
+     *
+     * @since 1.0
      */
     String getDomainUser();
 }

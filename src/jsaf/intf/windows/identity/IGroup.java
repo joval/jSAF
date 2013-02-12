@@ -10,17 +10,22 @@ import java.util.Collection;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IGroup extends IPrincipal {
     /**
      * Get the Netbios names (DOMAIN\NAME) of users who are members of this group. Non-recursive (i.e., does not return
      * names of users who are members of groups that are members of this group).
+     *
+     * @since 1.0
      */
-    public Collection<String> getMemberUserNetbiosNames();
+    Collection<String> getMemberUserNetbiosNames();
 
     /**
      * Get the Netbios names (DOMAIN\NAME) of groups which are members of this group. Non-recursive (i.e., does not return
      * names of groups which are members of groups which are members of this group).
+     *
+     * @since 1.0
      */
-    public Collection<String> getMemberGroupNetbiosNames();
+    Collection<String> getMemberGroupNetbiosNames();
 }

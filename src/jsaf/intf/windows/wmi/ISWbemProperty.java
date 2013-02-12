@@ -11,47 +11,67 @@ import jsaf.provider.windows.wmi.WmiException;
  * An SWbemProperty interface.
  * 
  * @see <a href="http://msdn.microsoft.com/en-us/library/aa393804(VS.85).aspx">SWbemProperty object</a>
+ *
+ * @author David A. Solin
+ * @version %I% %G%
+ * @since 1.0
  */
 public interface ISWbemProperty {
     /**
      * Get the name of the property.
+     *
+     * @since 1.0
      */
-    public String getName() throws WmiException;
+    String getName() throws WmiException;
 
     /**
      * Get the value of the property, wrapped by an object provided by the underlying implementation of the WMI provider.
+     *
+     * @since 1.0
      */
-    public Object getValue() throws WmiException;
+    Object getValue() throws WmiException;
 
     /**
      * Get the value of the property as an Integer.
+     *
+     * @since 1.0
      */
-    public Integer getValueAsInteger() throws WmiException;
+    Integer getValueAsInteger() throws WmiException;
     
     /**
      * Get the value of the property as a Long.
+     *
+     * @since 1.0
      */
-    public Long getValueAsLong() throws WmiException;
+    Long getValueAsLong() throws WmiException;
 
     /**
      * Get the value of the proeprty as a Windows Timestamp, which is the number of 100-nanosecond 'clicks' since 1601AD.
      *
      * @see org.joval.os.windows.Timestamp
+     *
+     * @since 1.0
      */
-    public BigInteger getValueAsTimestamp() throws WmiException;
+    BigInteger getValueAsTimestamp() throws WmiException;
 
     /**
      * Get the value of the property as a Boolean.
+     *
+     * @since 1.0
      */
-    public Boolean getValueAsBoolean() throws WmiException;
+    Boolean getValueAsBoolean() throws WmiException;
 
     /**
      * Get the value of the property as a String.
+     *
+     * @since 1.0
      */
-    public String getValueAsString() throws WmiException;
+    String getValueAsString() throws WmiException;
 
     /**
      * Get the value of the property as a an array of Strings.
+     *
+     * @since 1.0
      */
-    public String[] getValueAsArray() throws WmiException;
+    String[] getValueAsArray() throws WmiException;
 }

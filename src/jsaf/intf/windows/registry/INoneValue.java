@@ -8,6 +8,7 @@ package jsaf.intf.windows.registry;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface INoneValue extends IValue {
 }

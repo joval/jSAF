@@ -12,9 +12,27 @@ import jsaf.intf.identity.ICredential;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface ISshCredential extends ICredential {
+    /**
+     * Get the credential for a user with "elevated" privileges (i.e., the root account).
+     *
+     * @since 1.0
+     */
     ICredential getRootCredential();
+
+    /**
+     * Get the passphrase required to decrypt the private key file.
+     *
+     * @since 1.0
+     */
     String getPassphrase();
+
+    /**
+     * Get the file containing the user's SSH private key.
+     *
+     * @since 1.0
+     */
     File getPrivateKey();
 }

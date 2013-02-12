@@ -18,11 +18,14 @@ import jsaf.util.StringTools;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public class LittleEndian {
     /**
      * Get a string representation of a byte array, where each byte is converted into a [0-F] hex character pair.
      * This is just a utility method that has nothing in particular to do with byte ordering.
+     *
+     * @since 1.0
      */
     public static final String toHexString(byte[] b) {
 	StringBuffer sb = new StringBuffer();
@@ -34,41 +37,66 @@ public class LittleEndian {
 
     /**
      * Get a string representation of a byte, as a [0-F] hex character pair.
+     *
+     * @since 1.0
      */
     public static final String toHexString(byte b) {
 	return Integer.toString((b&0xff) + 0x100, 16).substring(1);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final String toHexString(short s) {
 	return Integer.toHexString(s & 0xFFFF);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final String toHexString(int i) {
 	return Integer.toHexString(i);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final String toHexString(long l) {
 	return Long.toHexString(l & 0xFFFFFFFFFFFFFFFFL);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final short getShort(byte[] buff) {
 	return getShort(buff, 0);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final short getShort(byte[] buff, int offset) {
 	return (short)((buff[offset] << 0) | (buff[offset + 1] << 8));
     }
 
+    /**
+     * @since 1.0
+     */
     public static final short getUShort(byte[] buff) {
 	return getUShort(buff, 0);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final short getUShort(byte[] buff, int offset) {
 	return (short)((buff[offset] & 0xFF) | ((buff[offset + 1] & 0xFF) << 8));
     }
 
     /**
      * Read a signed 2-byte short.
+     *
+     * @since 1.0
      */
     public static final short readShort(InputStream in) throws IOException {
 	byte[] buff = new byte[2];
@@ -78,6 +106,8 @@ public class LittleEndian {
 
     /**
      * Read an unsigned 2-byte short.
+     *
+     * @since 1.0
      */
     public static final short readUShort(InputStream in) throws IOException {
 	byte[] buff = new byte[2];
@@ -85,24 +115,39 @@ public class LittleEndian {
 	return getUShort(buff, 0);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final short readUShort(IRandomAccess ra) throws IOException {
 	byte[] buff = new byte[2];
 	ra.readFully(buff);
 	return getUShort(buff, 0);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final int getInt(byte[] buff) {
 	return getInt(buff, 0);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final int getInt(byte[] buff, int offset) {
 	return buff[offset] | (buff[offset + 1] << 8) | (buff[offset + 2] << 16) | (buff[offset + 3] << 24);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final int getUInt(byte[] buff) {
 	return getUInt(buff, 0);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final int getUInt(byte[] buff, int offset) {
 	return  (buff[offset] & 0xFF)             |
 		((buff[offset + 1] & 0xFF) << 8)  |
@@ -112,6 +157,8 @@ public class LittleEndian {
 
     /**
      * Read a signed 4-byte int (AKA DWORD).
+     *
+     * @since 1.0
      */
     public static final int readInt(InputStream in) throws IOException {
 	byte[] buff = new byte[4];
@@ -121,6 +168,8 @@ public class LittleEndian {
 
     /**
      * Read an unsigned 4-byte int (AKA DWORD).
+     *
+     * @since 1.0
      */
     public static final int readUInt(InputStream in) throws IOException {
 	byte[] buff = new byte[4];
@@ -128,12 +177,18 @@ public class LittleEndian {
 	return getUInt(buff, 0);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final int readUInt(IRandomAccess ra) throws IOException {
 	byte[] buff = new byte[4];
 	ra.readFully(buff);
 	return getUInt(buff, 0);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final void writeUInt(int i, OutputStream out) throws IOException {
 	byte[] buff = new byte[4];
 	buff[0] = (byte)(0xFF & i);
@@ -143,24 +198,38 @@ public class LittleEndian {
 	out.write(buff);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final long getLong(byte[] buff) {
 	return getLong(buff, 0);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final long getLong(byte[] buff, int offset) {
 	return (long)getInt(buff, offset) + (((long)getInt(buff, offset + 4)) << 32);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final long getULong(byte[] buff) {
 	return getULong(buff, 0);
     }
 
+    /**
+     * @since 1.0
+     */
     public static final long getULong(byte[] buff, int offset) {
 	return (long)getUInt(buff, offset) + (((long)getUInt(buff, offset + 4)) << 32);
     }
 
     /**
      * Read a signed 8-byte Long.
+     *
+     * @since 1.0
      */
     public static final long readLong(InputStream in) throws IOException {
 	byte[] buff = new byte[8];
@@ -170,6 +239,8 @@ public class LittleEndian {
 
     /**
      * Read an unsigned 8-byte Long.
+     *
+     * @since 1.0
      */
     public static final long readULong(IRandomAccess ra) throws IOException {
 	byte[] buff = new byte[8];
@@ -179,6 +250,8 @@ public class LittleEndian {
 
     /**
      * Read an unsigned 8-byte Long.
+     *
+     * @since 1.0
      */
     public static final long readULong(InputStream in) throws IOException {
 	byte[] buff = new byte[8];
@@ -190,6 +263,8 @@ public class LittleEndian {
      * Fetch a null-terminated UTF16LE String from an array.  If the length is unknown, pass in a -1 and
      * this method will find the length.  If offset+len exceeds the size of the buffer, this method will also
      * compute the correct length automatically.
+     *
+     * @since 1.0
      */
     public static final String getSzUTF16LEString(byte[] buff, int offset, int len) {
 	try {
@@ -225,6 +300,8 @@ public class LittleEndian {
 
     /**
      * Read a null-terminated string.
+     *
+     * @since 1.0
      */
     public static final String readSzUTF16LEString(IRandomAccess ra) throws IOException {
 	byte[] buff = new byte[512];
@@ -262,6 +339,8 @@ public class LittleEndian {
      *
      * @arg fileOffset is the offset from the start of the file to the start of the buffer itself.
      * @arg offset is the offset within the buffer from which to start padding.
+     *
+     * @since 1.0
      */
     public static final byte[] get32BitAlignPadding(byte[] buff, int offset, int fileOffset) {
 	int pos = fileOffset + offset;
@@ -283,6 +362,8 @@ public class LittleEndian {
 
     /**
      * Create a buffer and read into it in order to align the file pointer to a 32-bit alignment.
+     *
+     * @since 1.0
      */
     public static final byte[] read32BitAlignPadding(IRandomAccess ra) throws IOException {
 	int pos = (int)ra.getFilePointer();

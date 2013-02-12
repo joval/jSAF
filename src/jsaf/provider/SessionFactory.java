@@ -19,15 +19,20 @@ import jsaf.intf.util.ILoggable;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public abstract class SessionFactory implements ILoggable {
     /**
      * The class name of the default factory implementation.
+     *
+     * @since 1.0
      */
     public static final String DEFAULT_FACTORY = "jsaf.provider.SessionFactoryImpl";
 
     /**
      * Obtain a new instance of a SessionFactory, with no workspace directory. 
+     *
+     * @since 1.0
      */
     public static SessionFactory newInstance() throws FactoryConfigurationError {
 	return newInstance(null);
@@ -37,6 +42,8 @@ public abstract class SessionFactory implements ILoggable {
      * Obtain a new instance of a SessionFactory, that will use the specified workspace directory. The workspace
      * directory is where sessions are permitted to save state information, which improves session performance and
      * reduces memory overhead.
+     *
+     * @since 1.0
      */
     public static SessionFactory newInstance(File workspace) throws FactoryConfigurationError {
 	ClassLoader classLoader = SessionFactory.class.getClassLoader();
@@ -47,6 +54,8 @@ public abstract class SessionFactory implements ILoggable {
      * Obtain a new instance of a SessionFactory from class name. This function is useful when there are multiple
      * providers in the classpath, by giving control to the application to specify which provider should be
      * loaded.
+     *
+     * @since 1.0
      */
     public static SessionFactory newInstance(String factoryClassName, ClassLoader classLoader, File workspace)
 		throws FactoryConfigurationError {
@@ -98,17 +107,23 @@ public abstract class SessionFactory implements ILoggable {
 
     /**
      * Get the factory's remote session management features.
+     *
+     * @since 1.0
      */
     public abstract IRemote getRemote();
 
     /**
      * Creates a session for the default target.
+     *
+     * @since 1.0
      */
     public abstract ISession createSession() throws IOException;
 
     /**
      * Creates a session for the specified target. Interpretation of the target string is performed by the
      * underlying session factory implementation.
+     *
+     * @since 1.0
      */
     public abstract ISession createSession(String target) throws IOException;
 }

@@ -12,10 +12,13 @@ import jsaf.intf.system.ISession;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface INetconf extends ISession {
     /**
      * Get an XML Document containing an unfiltered get-config reply.
+     *
+     * @since 1.0
      */
     Document getConfig() throws Exception;
 }

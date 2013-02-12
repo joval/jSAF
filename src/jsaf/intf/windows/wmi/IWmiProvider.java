@@ -13,23 +13,33 @@ import jsaf.provider.windows.wmi.WmiException;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IWmiProvider extends ILoggable {
-    public static final String CIMv2 = "root\\cimv2";
+    /**
+     * The namespace for the CIMv2 model.
+     *
+     * @since 1.0
+     */
+    static final String CIMv2 = "root\\cimv2";
 
     /**
      * Execute a WQL query on the given namespace.
      *
      * @throws NoSuchElementException if the specified namespace is not registered
      * @throws WmiException if there was an error performing the query
+     *
+     * @since 1.0
      */
-    public ISWbemObjectSet execQuery(String ns, String wql) throws NoSuchElementException, WmiException;
+    ISWbemObjectSet execQuery(String ns, String wql) throws NoSuchElementException, WmiException;
 
     /**
      * Execute a notification query.
      *
      * @throws NoSuchElementException if the specified namespace is not registered
      * @throws WmiException if there was an error performing the query
+     *
+     * @since 1.0
      */
-    public ISWbemEventSource execNotificationQuery(String ns, String wql) throws NoSuchElementException, WmiException;
+    ISWbemEventSource execNotificationQuery(String ns, String wql) throws NoSuchElementException, WmiException;
 }

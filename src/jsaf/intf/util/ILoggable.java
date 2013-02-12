@@ -10,15 +10,20 @@ import org.slf4j.cal10n.LocLogger;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface ILoggable {
     /**
      * Get the active logger for this object.
+     *
+     * @since 1.0
      */
     LocLogger getLogger();
 
     /**
      * Set the active logger for this object.
+     *
+     * @since 1.0
      */
     void setLogger(LocLogger logger);
 }

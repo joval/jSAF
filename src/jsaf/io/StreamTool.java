@@ -22,10 +22,13 @@ import jsaf.util.StringTools;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public class StreamTool {
     /**
      * Useful in debugging...
+     *
+     * @since 1.0
      */
     public static final void hexDump(byte[] buff, PrintStream out) {
 	int numRows = buff.length / 16;
@@ -51,6 +54,8 @@ public class StreamTool {
 
     /**
      * Read from the stream until the buffer is full.
+     *
+     * @since 1.0
      */
     public static final void readFully(InputStream in, byte[] buff) throws IOException {
 	for (int i=0; i < buff.length; i++) {
@@ -67,7 +72,9 @@ public class StreamTool {
      * Copy from in to out asynchronously (i.e., in a new Thread). Closes the InputStream when done, but not
      * the OutputStream.
      *
-     * @returns the new Thread
+     * @return the new Thread
+     *
+     * @since 1.0
      */
     public static Thread copyAsync(InputStream in, OutputStream out) {
 	Thread thread = new Thread(new Copier(in, out));
@@ -77,6 +84,8 @@ public class StreamTool {
 
     /**
      * Copy completely from in to out.  Closes the InputStream when done, but not the OutputStream.
+     *
+     * @since 1.0
      */
     public static void copy(InputStream in, OutputStream out) {
 	copy(in, out, false);
@@ -84,6 +93,8 @@ public class StreamTool {
 
     /**
      * Copy completely from in to out.  Closes the InputStream when done.  Closes the OutputStream according to closeOut.
+     *
+     * @since 1.0
      */
     public static void copy(InputStream in, OutputStream out, boolean closeOut) {
 	try {
@@ -100,6 +111,8 @@ public class StreamTool {
 
     /**
      * Read the BOM (Byte-Order marker) from a stream.
+     *
+     * @since 1.0
      */
     public static Charset detectEncoding(InputStream in) throws IOException {
 	switch(in.read()) {

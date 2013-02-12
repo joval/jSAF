@@ -9,20 +9,30 @@ import jsaf.provider.windows.wmi.WmiException;
 
 /**
  * An ISWbemPropertySet is a collection of ISWbemProperties.
+ *
+ * @author David A. Solin
+ * @version %I% %G%
+ * @since 1.0
  */
 public interface ISWbemPropertySet extends Iterable <ISWbemProperty> {
     /**
      * Iterate over the properties in the set.
+     *
+     * @since 1.0
      */
-    public Iterator<ISWbemProperty> iterator();
+    Iterator<ISWbemProperty> iterator();
 
     /**
      * Get the number of properties in the set.
+     *
+     * @since 1.0
      */
-    public int getSize();
+    int getSize();
 
     /**
      * Get a property by its name.
+     *
+     * @since 1.0
      */
-    public ISWbemProperty getItem(String itemName) throws WmiException;
+    ISWbemProperty getItem(String itemName) throws WmiException;
 }

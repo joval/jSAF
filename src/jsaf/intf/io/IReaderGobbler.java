@@ -10,10 +10,13 @@ import java.io.IOException;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IReaderGobbler {
     /**
      * Handle data from the reader. No effort should be made to catch any IOException.
+     *
+     * @since 1.0
      */
     void gobble(IReader reader) throws IOException;
 } 

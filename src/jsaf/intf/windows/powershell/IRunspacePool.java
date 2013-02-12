@@ -13,15 +13,20 @@ import jsaf.intf.windows.system.IWindowsSession;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IRunspacePool {
     /**
      * Returns all the currently open runspaces.
+     *
+     * @since 1.0
      */
     Collection<IRunspace> enumerate();
 
     /**
      * Returns the maximum number of runspaces that can live in the pool.
+     *
+     * @since 1.0
      */
     int capacity();
 
@@ -29,6 +34,8 @@ public interface IRunspacePool {
      * Get a specific runspace, given its ID.
      *
      * @throws NoSuchElementException if no runspace with the given ID was found in the pool.
+     *
+     * @since 1.0
      */
     IRunspace get(String id) throws NoSuchElementException;
 
@@ -36,6 +43,8 @@ public interface IRunspacePool {
      * Create (and return) a new Runspace in the pool (default architecture).
      *
      * @throws IndexOutOfBoundsException if the pool is already at capacity.
+     *
+     * @since 1.0
      */
     IRunspace spawn() throws Exception;
 
@@ -43,6 +52,8 @@ public interface IRunspacePool {
      * Create (and return) a new Runspace in the pool for the specified architecture.
      *
      * @throws IndexOutOfBoundsException if the pool is already at capacity.
+     *
+     * @since 1.0
      */
     IRunspace spawn(IWindowsSession.View view) throws Exception;
 }

@@ -17,46 +17,78 @@ import jsaf.intf.util.ISearchable;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IFilesystem extends ILoggable {
     /**
      * Property specifying a list of filesystem types that should not be preloaded by an IFilesystem implementation.
      * Delimiter is the ':' character.
+     *
+     * @since 1.0
      */
     String PROP_MOUNT_FSTYPE_FILTER = "fs.localMount.filter";
 
     /**
      * Property governing whether the filesystem cache layer should be JDBM-backed (true) or memory-backed (false).
+     *
+     * @since 1.0
      */
     String PROP_CACHE_JDBM = "fs.cache.useJDBM";
 
     /**
      * Condition field for a type (i.e., file/directory/link).
+     *
+     * @since 1.0
      */
     int FIELD_FILETYPE = 50;
 
     /**
      * Condition field for a file path pattern.
+     *
+     * @since 1.0
      */
     int FIELD_PATH = 51;
 
     /**
      * Condition field for a file dirname (directory path) pattern. For files of type FILETYPE_DIR, the dirname is
      * the same as the path.
+     *
+     * @since 1.0
      */
     int FIELD_DIRNAME = 52;
 
     /**
      * Condition field for a file basename (filename) pattern. Files of type FILETYPE_DIR have no basename.
+     *
+     * @since 1.0
      */
     int FIELD_BASENAME = 53;
 
+    /**
+     * A condition value indicating a regular file, for conditions of type FIELD_FILETYPE.
+     *
+     * @since 1.0
+     */
     String FILETYPE_FILE = "f";
+
+    /**
+     * A condition value indicating a directory, for conditions of type FIELD_FILETYPE.
+     *
+     * @since 1.0
+     */
     String FILETYPE_DIR = "d";
+
+    /**
+     * A condition value indicating a ling, for conditions of type FIELD_FILETYPE.
+     *
+     * @since 1.0
+     */
     String FILETYPE_LINK = "l";
 
     /**
      * A search condition for only matching directories.
+     *
+     * @since 1.0
      */
     ISearchable.ICondition DIRECTORIES = new ISearchable.ICondition() {
 	public int getType() { return ISearchable.TYPE_EQUALITY; }
@@ -66,16 +98,22 @@ public interface IFilesystem extends ILoggable {
 
     /**
      * Get the path delimiter character used by this filesystem.
+     *
+     * @since 1.0
      */
     String getDelimiter();
 
     /**
      * Access an ISearchable for the filesystem.
+     *
+     * @since 1.0
      */
     ISearchable<IFile> getSearcher() throws IOException;
 
     /**
      * Retrieve an IFile with default (IFile.READONLY) access.
+     *
+     * @since 1.0
      */
     IFile getFile(String path) throws IOException;
 
@@ -83,41 +121,57 @@ public interface IFilesystem extends ILoggable {
      * Retrieve an IFile with the specified flags.
      *
      * @arg flags IFile.READONLY, IFile.READWRITE, IFile.READVOLATILE, IFile.NOCACHE
+     *
+     * @since 1.0
      */
     IFile getFile(String path, IFile.Flags flags) throws IOException;
 
     /**
      * Get random access to an IFile.
+     *
+     * @since 1.0
      */
     IRandomAccess getRandomAccess(IFile file, String mode) throws IllegalArgumentException, IOException;
 
     /**
      * Get random access to a file given its path (such as would be passed into the getFile method).
+     *
+     * @since 1.0
      */
     IRandomAccess getRandomAccess(String path, String mode) throws IllegalArgumentException, IOException;
 
     /**
      * Read a file.
+     *
+     * @since 1.0
      */
     InputStream getInputStream(String path) throws IOException;
 
     /**
      * Write to a file.
+     *
+     * @since 1.0
      */
     OutputStream getOutputStream(String path, boolean append) throws IOException;
 
     /**
      * List the mounts on this filesystem, whose types do not match the specified typeFilter. Typically, for example,
      * a type filter might be used to exclude network mounts. Use null for no filtering.
+     *
+     * @since 1.0
      */
     Collection<IMount> getMounts(Pattern typeFilter) throws IOException;
 
     /**
      * An interface describing a filesystem mount point.
+     *
+     * @since 1.0
      */
     public interface IMount {
 	/**
 	 * Get the path of the mount.
+	 *
+	 * @since 1.0
 	 */
 	String getPath();
 
@@ -126,6 +180,8 @@ public interface IFilesystem extends ILoggable {
 	 *
 	 * @see jsaf.intf.windows.io.IWindowsFilesystem.FsType.value()
 	 * @see <a href="http://www.kernel.org/doc/man-pages/online/pages/man2/mount.2.html">mount man page</a>
+	 *
+	 * @since 1.0
 	 */
 	String getType();
     }

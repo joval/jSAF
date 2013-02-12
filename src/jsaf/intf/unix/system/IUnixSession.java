@@ -12,23 +12,62 @@ import jsaf.util.SafeCLI;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IUnixSession extends ISession {
     /**
      * Property indicating the number of milliseconds to wait for a read before quiting.
+     *
+     * @since 1.0
      */
     String PROP_SUDO_READ_TIMEOUT = "read.timeout.sudo";
 
+    /**
+     * Get the "Flavor" of the Unix session.
+     *
+     * @since 1.0
+     */
     Flavor getFlavor();
 
     /**
      * Enumeration of Unix flavors.
+     *
+     * @since 1.0
      */
     enum Flavor {
+	/**
+	 * Unknown (unsupported) Unix flavor.
+	 *
+	 * @since 1.0
+	 */
 	UNKNOWN("unknown"),
+
+	/**
+	 * Flavor for AIX.
+	 *
+	 * @since 1.0
+	 */
 	AIX("AIX"),
+
+	/**
+	 * Flavor for Linux.
+	 *
+	 * @since 1.0
+	 */
 	LINUX("Linux"),
+
+	/**
+	 * Flavor for Mac OS X.
+	 *
+	 * @since 1.0
+	 */
 	MACOSX("Darwin"),
+
+	/**
+	 * Flavor for Sun (Oracle) Solaris.
+	 *
+	 * @since 1.0
+	 */
 	SOLARIS("SunOS");
     
 	private String value = null;
@@ -37,10 +76,20 @@ public interface IUnixSession extends ISession {
 	    this.value = value;
 	}
 
+	/**
+	 * Get the String value for the Flavor.
+	 *
+	 * @since 1.0
+	 */
 	public String value() {
 	    return value;
 	}
 
+	/**
+	 * Get the Flavor corresponding to the String value.
+	 *
+	 * @since 1.0
+	 */
 	public static Flavor flavorOf(String value) {
 	    for (Flavor flavor : values()) {
 		if (flavor.value().equals(value)) {
@@ -49,7 +98,12 @@ public interface IUnixSession extends ISession {
 	    }
 	    return UNKNOWN;
 	}
-    
+
+	/**
+	 * Computes the Flavor of the specified session.
+	 *
+	 * @since 1.0
+	 */
 	public static Flavor flavorOf(IUnixSession session) {
 	    Flavor flavor = UNKNOWN;
 	    try {

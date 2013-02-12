@@ -10,10 +10,13 @@ import java.math.BigInteger;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IQwordValue extends IValue {
     /**
      * Get the data.
+     *
+     * @since 1.0
      */
     public BigInteger getData();
 }

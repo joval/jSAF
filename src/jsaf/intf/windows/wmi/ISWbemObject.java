@@ -9,10 +9,16 @@ import jsaf.provider.windows.wmi.WmiException;
  * An ISWbemObject is a collection of ISWbemProperties.
  * 
  * @see <a href="http://msdn.microsoft.com/en-us/library/aa393741(VS.85).aspx">SWbemObject object</a>
+ *
+ * @author David A. Solin
+ * @version %I% %G%
+ * @since 1.0
  */
 public interface ISWbemObject {
     /**
      * Get the object's property set.
+     *
+     * @since 1.0
      */
-    public ISWbemPropertySet getProperties() throws WmiException;
+    ISWbemPropertySet getProperties() throws WmiException;
 }

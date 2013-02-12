@@ -8,6 +8,7 @@ package jsaf.provider;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public class SessionException extends Exception {
     public SessionException(String message) {

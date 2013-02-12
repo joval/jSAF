@@ -12,10 +12,13 @@ import jsaf.intf.system.ISession;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IiOSSession extends ISession {
     /**
      * Retrieves plist data for the device.
+     *
+     * @since 1.0
      */
     InputStream getConfigurationProfile();
 }

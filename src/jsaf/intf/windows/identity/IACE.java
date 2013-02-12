@@ -4,12 +4,15 @@
 package jsaf.intf.windows.identity;
 
 /**
- * Representation of a Windows Access Control Entity (ACE).
+ * Representation of a Windows Access Control Entity (ACE), including various Windows constants.
  *
  * @see <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/aa374896%28v=vs.85%29.aspx">Access Mask Format (Windows)</a>
+ * @see <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/aa374892%28v=vs.85%29.aspx">ACCESS_MASK (Windows)</a>
+ * @see <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/aa364399%28v=vs.85%29.aspx">File Security and Access Rights (Windows)</a>
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IACE {
     int KEY_QUERY_VALUE		= 0x0001;
@@ -41,15 +44,12 @@ public interface IACE {
     int GENERIC_WRITE		= 0x40000000;
     int GENERIC_READ		= 0x80000000;
 
-    int DELETE 		= 0x10000;
-    int READ_CONTROL	= 0x20000;
-    int WRITE_DAC	= 0x40000;
-    int WRITE_OWNER	= 0x80000;
-    int SYNCHRONIZE	= 0x100000;
+    int DELETE 			= 0x10000;
+    int READ_CONTROL		= 0x20000;
+    int WRITE_DAC		= 0x40000;
+    int WRITE_OWNER		= 0x80000;
+    int SYNCHRONIZE		= 0x100000;
 
-    /**
-     * @see <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/aa374892%28v=vs.85%29.aspx">ACCESS_MASK (Windows)</a>
-     */
     int STANDARD_RIGHTS_REQUIRED= 0x000F0000;
     int STANDARD_RIGHTS_READ	= READ_CONTROL;
     int STANDARD_RIGHTS_WRITE	= READ_CONTROL;
@@ -65,9 +65,6 @@ public interface IACE {
 
     int ACCESS_SYSTEM_SECURITY	= 0x1000000;
 
-    /**
-     * @see <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/aa364399%28v=vs.85%29.aspx">File Security and Access Rights (Windows)</a>
-     */
     int FILE_GENERIC_READ = FILE_READ_ATTRIBUTES | FILE_READ_DATA | FILE_READ_EA | STANDARD_RIGHTS_READ | SYNCHRONIZE;
     int FILE_GENERIC_WRITE = FILE_APPEND_DATA | FILE_WRITE_ATTRIBUTES | FILE_WRITE_DATA | FILE_WRITE_EA | STANDARD_RIGHTS_WRITE | SYNCHRONIZE;
     int FILE_GENERIC_EXECUTE = FILE_EXECUTE | FILE_READ_ATTRIBUTES | STANDARD_RIGHTS_EXECUTE | SYNCHRONIZE;
@@ -75,11 +72,15 @@ public interface IACE {
 
     /**
      * Get the entry access flags.
+     *
+     * @since 1.0
      */
     int getAccessMask();
 
     /**
      * Get the Security IDentifier string associated with this entry.
+     *
+     * @since 1.0
      */
     String getSid();
 }

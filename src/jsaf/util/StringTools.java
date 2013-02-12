@@ -20,22 +20,62 @@ import jsaf.Message;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public class StringTools {
     /**
+     * Array containing all the regex special characters.
+     *
+     * @since 1.0
+     */
+    public static final char[] REGEX_CHARS = {'\\', '^', '.', '$', '|', '(', ')', '[', ']', '{', '}', '*', '+', '?'};
+
+    /**
      * An ascending Comparator for Strings.
+     *
+     * @since 1.0
      */
     public static final Comparator<String> COMPARATOR = new StringComparator(true);
 
-    public static final Charset ASCII	= Charset.forName("US-ASCII");
-    public static final Charset UTF8	= Charset.forName("UTF-8");
-    public static final Charset UTF16	= Charset.forName("UTF-16");
-    public static final Charset UTF16LE	= Charset.forName("UTF-16LE");
+    /**
+     * ASCII charset.
+     *
+     * @since 1.0
+     */
+    public static final Charset ASCII = Charset.forName("US-ASCII");
 
+    /**
+     * UTF8 charset.
+     *
+     * @since 1.0
+     */
+    public static final Charset UTF8 = Charset.forName("UTF-8");
+
+    /**
+     * UTF16 charset.
+     *
+     * @since 1.0
+     */
+    public static final Charset UTF16 = Charset.forName("UTF-16");
+
+    /**
+     * UTF16 Little Endian charset.
+     *
+     * @since 1.0
+     */
+    public static final Charset UTF16LE = Charset.forName("UTF-16LE");
+
+    /**
+     * The line separator on the local machine.
+     *
+     * @since 1.0
+     */
     public static final String LOCAL_CR = System.getProperty("line.separator");
 
     /**
      * Sort the array from A->Z (ascending ordering).
+     *
+     * @since 1.0
      */
     public static final String[] sort(String[] array) {
 	return sort(array, true);
@@ -45,6 +85,8 @@ public class StringTools {
      * Arrays can be sorted ascending or descending.
      *
      * @param asc true for ascending (A->Z), false for descending (Z->A).
+     *
+     * @since 1.0
      */
     public static final String[] sort(String[] array, boolean asc) {
 	Arrays.sort(array, new StringComparator(asc));
@@ -54,6 +96,8 @@ public class StringTools {
     /**
      * A StringTokenizer operates on single-character tokens.  This acts on a delimiter that is a multi-character
      * String.
+     *
+     * @since 1.0
      */
     public static Iterator<String> tokenize(String target, String delimiter) {
 	return new StringTokenIterator(target, delimiter);
@@ -62,11 +106,18 @@ public class StringTools {
     /**
      * Gives you an option to keep any zero-length tokens at the ends of the target, if it begins or ends with the delimiter.
      * This guarantees that you get one token for every time the delimiter appears in the target String.
+     *
+     * @since 1.0
      */
     public static Iterator<String> tokenize(String target, String delimiter, boolean trim) {
 	return new StringTokenIterator(target, delimiter, trim);
     }
 
+    /**
+     * Convert an Iterator of Strings to a List.
+     *
+     * @since 1.0
+     */
     public static List<String> toList(Iterator<String> iter) {
 	List<String> list = new Vector<String>();
 	while (iter.hasNext()) {
@@ -75,6 +126,11 @@ public class StringTools {
 	return list;
     }
 
+    /**
+     * Convert an array of Strings to a List.
+     *
+     * @since 1.0
+     */
     public static List<String> toList(String[] sa) {
 	List<String> list = new Vector<String>(sa.length);
 	for (int i=0; i < sa.length; i++) {
@@ -85,11 +141,18 @@ public class StringTools {
 
     /**
      * Check for ASCII values between [A-Z] or [a-z].
+     *
+     * @since 1.0
      */
     public static boolean isLetter(int c) {
 	return (c >= 65 && c <= 90) || (c >= 95 && c <= 122);
     }
 
+    /**
+     * Convert byte[] to char[], assuming the buffer is ASCII-encoded.
+     *
+     * @since 1.0
+     */
     public static char[] toASCIICharArray(byte[] buff) throws IllegalArgumentException {
 	char[] ca = new char[buff.length];
 	for (int i=0; i < buff.length; i++) {
@@ -118,6 +181,8 @@ public class StringTools {
     /**
      * Escape any regular expression elements in the string.  This is different from Pattern.quote, which simply puts the
      * string inside of \Q...\E.
+     *
+     * @since 1.0
      */
     public static String escapeRegex(String s) {
 	Stack<String> delims = new Stack<String>();
@@ -129,6 +194,8 @@ public class StringTools {
 
     /**
      * Returns true if the specified String contains any regular expression syntax.
+     *
+     * @since 1.0
      */
     public static boolean containsRegex(String s) {
 	for (String ch : REGEX_STRS) {
@@ -141,6 +208,8 @@ public class StringTools {
 
     /**
      * Returns true if the specified String contains any regular expression syntax that is not escaped.
+     *
+     * @since 1.0
      */
     public static boolean containsUnescapedRegex(String s) {
 	for (int i=1; i < REGEX_STRS.length; i++) { // skip ESCAPE
@@ -167,7 +236,9 @@ public class StringTools {
     }
 
     /**
-     * Perform a very basic substitution of POSIX character classes to Java character classes...
+     * Perform a substitution of POSIX character classes to Java character classes.
+     *
+     * @since 1.0
      */
     public static String regexPosix2Java(String perlExpression) {
 	String javaExpression = perlExpression;
@@ -215,7 +286,6 @@ public class StringTools {
     }
 
     private static final String ESCAPE = "\\";
-    public static final char[] REGEX_CHARS = {'\\', '^', '.', '$', '|', '(', ')', '[', ']', '{', '}', '*', '+', '?'};
     private static final String[] REGEX_STRS = {ESCAPE, "^", ".", "$", "|", "(", ")", "[", "]", "{", "}", "*", "+", "?"};
 
     private static String safeEscape(Stack<String> delims, String s) {

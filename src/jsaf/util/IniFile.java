@@ -29,6 +29,7 @@ import jsaf.intf.util.IProperty;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public class IniFile {
     private static final String SEMICOLON	= ";";
@@ -46,7 +47,7 @@ public class IniFile {
     }
 
     /**
-     * Create a new IniFile from a File.
+     * Create a new IniFile from a File using the default encoding.
      */
     public IniFile(File f) throws IOException {
 	this();
@@ -54,20 +55,27 @@ public class IniFile {
     }
 
     /**
-     * Create a new IniFile from an InputStream.
+     * Create a new IniFile from a stream using the default encoding..
      */
     public IniFile(InputStream in) throws IOException {
 	this();
 	load(in);
     }
 
+    /**
+     * Create a new IniFile from a stream using the specified encoding.
+     *
+     * @since 1.0
+     */
     public IniFile(InputStream in, Charset encoding) throws IOException {
 	this();
 	load(in, encoding);
     }
 
     /**
-     * A convenience method for loading files.
+     * A convenience method for loading files, using the default encoding.
+     *
+     * @since 1.0
      */
     public void load(File f) throws IOException {
 	load(new FileInputStream(f));
@@ -76,13 +84,17 @@ public class IniFile {
     /**
      * Add configuration data from a stream.  If the IniFile already contains configuration information,
      * the information from the stream is added.
+     *
+     * @since 1.0
      */
     public void load(InputStream in) throws IOException {
 	load(in, Charset.defaultCharset());
     }
 
     /**
-     * Use a specific encoding.
+     * Load using a specific encoding.
+     *
+     * @since 1.0
      */
     public void load(InputStream in, Charset encoding) throws IOException {
 	BufferedReader br = null;
@@ -148,6 +160,11 @@ public class IniFile {
 	}
     }
 
+    /**
+     * Write the INI file to a stream.
+     *
+     * @since 1.0
+     */
     public synchronized void save(OutputStream out) throws IOException {
 	PrintWriter writer = new PrintWriter(out);
 	writer.println("; Saved " + new java.util.Date().toString());
@@ -163,14 +180,29 @@ public class IniFile {
 	writer.close();
     }
 
+    /**
+     * Return a collection of all the sections.
+     *
+     * @since 1.0
+     */
     public Collection<String> listSections() {
 	return sections.keySet();
     }
 
+    /**
+     * Test for the existence of a section.
+     *
+     * @since 1.0
+     */
     public boolean containsSection(String name) {
 	return sections.containsKey(name);
     }
 
+    /**
+     * Get a section of the INI file.
+     *
+     * @since 1.0
+     */
     public IProperty getSection(String name) throws NoSuchElementException {
 	IProperty section = sections.get(name);
 	if (section == null) {
@@ -180,6 +212,11 @@ public class IniFile {
 	}
     }
 
+    /**
+     * Remove a section from the INI file.
+     *
+     * @since 1.0
+     */
     public void deleteSection(String name) throws NoSuchElementException {
 	if (sections.containsKey(name)) {
 	    sections.remove(name);
@@ -190,6 +227,8 @@ public class IniFile {
 
     /**
      * Get the section with the given name, or create it if it doesn't already exist.
+     *
+     * @since 1.0
      */
     public IProperty getCreateSection(String name) {
 	if (!sections.containsKey(name)) {
@@ -198,6 +237,11 @@ public class IniFile {
 	return sections.get(name);
     }
 
+    /**
+     * Shortcut for getSection(section).getProperty(key).
+     *
+     * @since 1.0
+     */
     public String getProperty(String section, String key) throws NoSuchElementException {
 	return getSection(section).getProperty(key);
     }

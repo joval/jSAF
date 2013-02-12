@@ -13,65 +13,90 @@ import jsaf.provider.windows.registry.RegistryException;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IKey {
     /**
      * Get a string representation of this key.  Corresponds to getHive() + \\ + getPath().
+     *
+     * @since 1.0
      */
-    public String toString();
+    String toString();
 
     /**
      * Get the hive for this key.
+     *
+     * @since 1.0
      */
-    public IRegistry.Hive getHive();
+    IRegistry.Hive getHive();
 
     /**
      * Get the full path for this key underneath its hive.
+     *
+     * @since 1.0
      */
-    public String getPath();
+    String getPath();
 
     /**
      * Get this key's name (the last element of its path).
+     *
+     * @since 1.0
      */
-    public String getName();
+    String getName();
 
     /**
      * Indicates whether this key has a subkey with the given name.
+     *
+     * @since 1.0
      */
-    public boolean hasSubkey(String name);
+    boolean hasSubkey(String name);
 
     /**
      * Returns an array of subkey names.
+     *
+     * @since 1.0
      */
-    public String[] listSubkeys() throws RegistryException;
+    String[] listSubkeys() throws RegistryException;
 
     /**
      * Returns an array of subkey names matching (filtered by) the given Pattern.
+     *
+     * @since 1.0
      */
-    public String[] listSubkeys(Pattern p) throws RegistryException;
+    String[] listSubkeys(Pattern p) throws RegistryException;
 
     /**
      * Return a child of this key.
+     *
+     * @since 1.0
      */
-    public IKey getSubkey(String name) throws NoSuchElementException, RegistryException;
+    IKey getSubkey(String name) throws NoSuchElementException, RegistryException;
 
     /**
      * Test if this key has a value with the given name.
+     *
+     * @since 1.0
      */
-    public boolean hasValue(String name);
+    boolean hasValue(String name);
 
     /**
      * Returns an array of the names of this key's values.
+     *
+     * @since 1.0
      */
-    public IValue[] listValues() throws RegistryException;
+    IValue[] listValues() throws RegistryException;
 
     /**
      * Returns an array of the names of this key's values matching (filtered by) the given Pattern.
+     *
+     * @since 1.0
      */
-    public IValue[] listValues(Pattern p) throws RegistryException;
+    IValue[] listValues(Pattern p) throws RegistryException;
 
     /**
      * Get a value of this key.
+     *
+     * @since 1.0
      */
-    public IValue getValue(String name) throws NoSuchElementException, RegistryException;
+    IValue getValue(String name) throws NoSuchElementException, RegistryException;
 }

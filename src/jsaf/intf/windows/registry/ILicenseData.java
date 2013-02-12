@@ -3,7 +3,7 @@
 
 package jsaf.intf.windows.registry;
 
-import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Interface to Windows license data.
@@ -12,33 +12,89 @@ import java.util.Hashtable;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface ILicenseData {
+    /**
+     * An interface describing a license entry.
+     *
+     * @since 1.0
+     */
     public interface IEntry {
+	/**
+	 * Type constant indicating a String entry.
+	 *
+	 * @since 1.0
+	 */
 	int TYPE_SZ	= 1;
+
+	/**
+	 * Type constant indicating a binary entry.
+	 *
+	 * @since 1.0
+	 */
 	int TYPE_BINARY	= 2;
+
+	/**
+	 * Type constant indicating a DWORD entry.
+	 *
+	 * @since 1.0
+	 */
 	int TYPE_DWORD	= 4;
 
-	int length();
-
+	/**
+	 * Return the TYPE_* constant corresponding to the entry type.
+	 *
+	 * @since 1.0
+	 */
 	int getType();
 
+	/**
+	 * Return the name of the entry.
+	 *
+	 * @since 1.0
+	 */
 	String getName();
 
+	/**
+	 * Get a String representation of the entry.
+	 *
+	 * @since 1.0
+	 */
 	String toString();
     }
 
-    public interface IBinaryEntry extends IEntry {
+    /**
+     * Interface describing a binary license entry.
+     *
+     * @since 1.0
+     */
+    interface IBinaryEntry extends IEntry {
 	byte[] getData();
     }
 
-    public interface IDwordEntry extends IEntry {
+    /**
+     * Interface describing a DWORD license entry.
+     *
+     * @since 1.0
+     */
+    interface IDwordEntry extends IEntry {
 	int getData();
     }
 
-    public interface IStringEntry extends IEntry {
+    /**
+     * Interface describing a String license entry.
+     *
+     * @since 1.0
+     */
+    interface IStringEntry extends IEntry {
 	String getData();
     }
 
-    Hashtable<String, IEntry> getEntries();
+    /**
+     * Get the license entries.
+     *
+     * @since 1.0
+     */
+    Map<String, IEntry> getEntries();
 }

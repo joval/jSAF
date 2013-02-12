@@ -10,15 +10,20 @@ import jsaf.intf.system.IEnvironment;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IExpandStringValue extends IValue {
     /**
      * Get the raw data (variable references are unexpanded).
+     *
+     * @since 1.0
      */
-    public String getData();
+    String getData();
 
     /**
      * Get the fully-expanded version of the data.
+     *
+     * @since 1.0
      */
-    public String getExpandedData(IEnvironment env);
+    String getExpandedData(IEnvironment env);
 }

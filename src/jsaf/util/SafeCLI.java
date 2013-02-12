@@ -30,6 +30,7 @@ import jsaf.provider.SessionException;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public class SafeCLI {
     /**
@@ -41,6 +42,8 @@ public class SafeCLI {
      * @returns the input String (if no exception is thrown)
      *
      * @throws IllegalArgumentException if a potentially-malicious pattern has been detected.
+     *
+     * @since 1.0
      */
     public static String checkArgument(String arg, ISession session) throws IllegalArgumentException {
 	switch(session.getType()) {
@@ -61,6 +64,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the first (non-empty) line of output.
+     *
+     * @since 1.0
      */
     public static final String exec(String cmd, ISession session, ISession.Timeout to) throws Exception {
 	return exec(cmd, null, session, session.getTimeout(to));
@@ -68,6 +73,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the first (non-empty) line of output, using the specified environment.
+     *
+     * @since 1.0
      */
     public static final String exec(String cmd, String[] env, ISession session, ISession.Timeout to) throws Exception {
 	return exec(cmd, env, null, session, session.getTimeout(to));
@@ -75,6 +82,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the first (non-empty) line of output, using the specified environment and start directory.
+     *
+     * @since 1.0
      */
     public static final String exec(String cmd, String[] env, String dir, ISession session, ISession.Timeout to)
 		throws Exception {
@@ -84,6 +93,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the first (non-empty) line of output.
+     *
+     * @since 1.0
      */
     public static final String exec(String cmd, ISession session, long readTimeout) throws Exception {
 	return exec(cmd, null, null, session, readTimeout);
@@ -91,6 +102,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the first (non-empty) line of output, using the specified environment.
+     *
+     * @since 1.0
      */
     public static final String exec(String cmd, String[] env, ISession session, long readTimeout) throws Exception {
 	return exec(cmd, env, null, session, readTimeout);
@@ -98,6 +111,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the first (non-empty) line of output, using the specified environment and start directory.
+     *
+     * @since 1.0
      */
     public static final String exec(String cmd, String[] env, String dir, ISession session, long readTimeout) throws Exception {
 	List<String> lines = multiLine(cmd, env, dir, session, readTimeout);
@@ -110,6 +125,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the resulting lines of output.
+     *
+     * @since 1.0
      */
     public static final List<String> multiLine(String cmd, ISession session, ISession.Timeout to) throws Exception {
 	return multiLine(cmd, null, null, session, session.getTimeout(to));
@@ -117,6 +134,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the resulting lines of output, using the specified environment.
+     *
+     * @since 1.0
      */
     public static final List<String> multiLine(String cmd, String[] env, ISession session, ISession.Timeout to)
 		throws Exception {
@@ -126,6 +145,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the resulting lines of output, using the specified environment and start directory.
+     *
+     * @since 1.0
      */
     public static final List<String> multiLine(String cmd, String[] env, String dir, ISession session, ISession.Timeout to)
 		throws Exception {
@@ -135,6 +156,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the resulting lines of output.
+     *
+     * @since 1.0
      */
     public static final List<String> multiLine(String cmd, ISession session, long readTimeout) throws Exception {
 	return multiLine(cmd, null, null, session, readTimeout);
@@ -142,6 +165,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the resulting lines of output, using the specified environment.
+     *
+     * @since 1.0
      */
     public static final List<String> multiLine(String cmd, String[] env, ISession session, long readTimeout) throws Exception {
 	return multiLine(cmd, env, null, session, readTimeout);
@@ -149,6 +174,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the resulting lines of output, using the specified environment.
+     *
+     * @since 1.0
      */
     public static final List<String> multiLine(String cmd, String[] env, String dir, ISession session, long readTimeout)
 		throws Exception {
@@ -158,6 +185,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the resulting ExecData, using the specified environment.
+     *
+     * @since 1.0
      */
     public static final ExecData execData(String cmd, String[] env, ISession session, long readTimeout) throws Exception {
 	return execData(cmd, env, null, session, readTimeout);
@@ -165,6 +194,8 @@ public class SafeCLI {
 
     /**
      * Run a command and get the resulting ExecData, using the specified environment and start directory.
+     *
+     * @since 1.0
      */
     public static final ExecData execData(String cmd, String[] env, String dir, ISession session, long readTimeout)
 		throws Exception {
@@ -183,6 +214,8 @@ public class SafeCLI {
      *
      * Hence, the gobbler should initialize itself completely when gobble is invoked, and not perform permanent output
      * processing until the reader has reached the end of the process output.
+     *
+     * @since 1.0
      */
     public static final void exec(String cmd, String[] env, String dir, ISession session, long readTimeout,
 				  IReaderGobbler out, IReaderGobbler err) throws Exception {
@@ -192,6 +225,8 @@ public class SafeCLI {
 
     /**
      * A container for information resulting from the execution of a process.
+     *
+     * @since 1.0
      */
     public class ExecData {
 	int exitCode;
@@ -202,16 +237,28 @@ public class SafeCLI {
 	    data = null;
 	}
 
+	/**
+	 * Get the final (i.e., if there were retries) exit code of the process.
+	 *
+	 * @since 1.0
+	 */
 	public int getExitCode() {
 	    return exitCode;
 	}
 
+	/**
+	 * Get the raw data collected from the process stdout.
+	 *
+	 * @since 1.0
+	 */
 	public byte[] getData() {
 	    return data;
 	}
 
 	/**
 	 * Guaranteed to have at least one entry.
+	 *
+	 * @since 1.0
 	 */
 	public List<String> getLines() throws IOException {
 	    Charset encoding = null;

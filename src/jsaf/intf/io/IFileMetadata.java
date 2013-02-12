@@ -13,55 +13,87 @@ import java.util.regex.Pattern;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IFileMetadata {
+    /**
+     * Enumeration of basic file types.
+     *
+     * @since 1.0
+     */
     enum Type {
 	FILE,
 	DIRECTORY,
 	LINK;
     }
 
+    /**
+     * Constant indicating the time value is unknown.
+     *
+     * @since 1.0
+     */
     long UNKNOWN_TIME = -1L;
 
+    /**
+     * Obtain the file type.
+     *
+     * @since 1.0
+     */
     Type getType() throws IOException;
 
     /**
      * If the IFile represents a link, returns a path to the link target.
+     *
+     * @since 1.0
      */
     String getLinkPath() throws IllegalStateException, IOException;
 
     /**
      * Get the time that the file was last accessed.
+     *
+     * @since 1.0
      */
     public long accessTime() throws IOException;
 
     /**
      * Get the time that the file was created.
+     *
+     * @since 1.0
      */
     public long createTime() throws IOException;
 
     /**
      * Get the time this file was last modified.
+     *
+     * @since 1.0
      */
     public long lastModified() throws IOException;
 
     /**
      * Get the size (in bytes) of this file.
+     *
+     * @since 1.0
      */
     public long length() throws IOException;
 
     /**
      * Returns the full path as it appears to the system on which the IFile resides (not necessarily canonical).
+     *
+     * @since 1.0
      */
     public String getPath();
 
     /**
      * Returns the canonical path representation of the IFile (i.e., linkless path).
+     *
+     * @since 1.0
      */
     public String getCanonicalPath() throws IOException;
 
     /**
      * Get a platform-specific extended attributes API, if any.
+     *
+     * @since 1.0
      */
     public IFileEx getExtended() throws IOException;
 }

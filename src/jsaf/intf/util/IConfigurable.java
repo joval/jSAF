@@ -8,7 +8,13 @@ package jsaf.intf.util;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IConfigurable {
+    /**
+     * Get the properties (which is what makes the object configurable).
+     *
+     * @since 1.0
+     */
     IProperty getProperties();
 }

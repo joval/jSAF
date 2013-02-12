@@ -8,15 +8,20 @@ package jsaf.intf.util;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IPerishable {
     /**
      * Check whether this object has expired.
+     *
+     * @since 1.0
      */
     boolean checkExpired();
 
     /**
      * Set the object's shelf life.  This (re-)starts the expiration timer.
+     *
+     * @since 1.0
      */
     void setTimeout(long timeout);
 }

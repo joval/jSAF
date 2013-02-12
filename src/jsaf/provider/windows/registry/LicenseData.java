@@ -4,7 +4,8 @@
 package jsaf.provider.windows.registry;
 
 import java.util.Arrays;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 import jsaf.intf.windows.registry.IBinaryValue;
 import jsaf.intf.windows.registry.IKey;
@@ -25,10 +26,10 @@ import jsaf.io.LittleEndian;
  * @version %I% %G%
  */
 public class LicenseData implements ILicenseData {
-    private Hashtable<String, IEntry> entries;
+    private Map<String, IEntry> entries;
 
     public LicenseData(IRegistry reg) throws Exception {
-	entries = new Hashtable<String, IEntry>();
+	entries = new HashMap<String, IEntry>();
 	IKey key = reg.getKey(IRegistry.Hive.HKLM, "SYSTEM\\CurrentControlSet\\Control\\ProductOptions");
 	IValue value = key.getValue("ProductPolicy");
 	switch(value.getType()) {
@@ -66,7 +67,7 @@ public class LicenseData implements ILicenseData {
 	}
     }
 
-    public Hashtable<String, IEntry> getEntries() {
+    public Map<String, IEntry> getEntries() {
 	return entries;
     }
 
@@ -100,17 +101,12 @@ public class LicenseData implements ILicenseData {
     }
 
     abstract class Entry implements IEntry {
-	int len, dataType;
+	int dataType;
 	String name;
 
-	Entry(int len, int dataType, String name) {
-	    this.len = len;
+	Entry(int dataType, String name) {
 	    this.dataType = dataType;
 	    this.name = name;
-	}
-
-	public int length() {
-	    return len;
 	}
 
 	public int getType() {
@@ -125,8 +121,8 @@ public class LicenseData implements ILicenseData {
     class BinaryEntry extends Entry implements IBinaryEntry {
 	private byte[] data;
 
-	BinaryEntry(int len, int dataType, String name, byte[] data) {
-	    super(len, dataType, name);
+	BinaryEntry(int dataType, String name, byte[] data) {
+	    super(dataType, name);
 	    this.data = data;
 	}
 
@@ -147,8 +143,8 @@ public class LicenseData implements ILicenseData {
     class DwordEntry extends Entry implements IDwordEntry {
 	private int data;
 
-	DwordEntry(int len, int dataType, String name, byte[] data) {
-	    super(len, dataType, name);
+	DwordEntry(int dataType, String name, byte[] data) {
+	    super(dataType, name);
 	    this.data = LittleEndian.getUInt(data, 0);
 	}
 
@@ -164,8 +160,8 @@ public class LicenseData implements ILicenseData {
     class StringEntry extends Entry implements IStringEntry {
 	private String data;
 
-	StringEntry(int len, int dataType, String name, byte[] data) {
-	    super(len, dataType, name);
+	StringEntry(int dataType, String name, byte[] data) {
+	    super(dataType, name);
 	    this.data = LittleEndian.getSzUTF16LEString(data, 0, data.length);
 	}
 

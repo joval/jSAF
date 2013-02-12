@@ -12,6 +12,7 @@ import jsaf.intf.system.ISession;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface ICredentialStore {
     /**
@@ -20,6 +21,8 @@ public interface ICredentialStore {
      * @return null if no credential is found
      *
      * @throws AccessControlException if access to the requested credential is not allowed.
+     *
+     * @since 1.0
      */
     ICredential getCredential(ISession session) throws AccessControlException;
 }

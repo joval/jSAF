@@ -17,6 +17,7 @@ import jsaf.intf.util.ISearchable;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IUnixFilesystemDriver extends ILoggable {
     /**
@@ -24,6 +25,8 @@ public interface IUnixFilesystemDriver extends ILoggable {
      *
      * @arg typeFilter A regex pattern indicating the /types/ of filesystems to /exclude/ from the result.  Use null for
      *                 an unfiltered list of mount points.
+     *
+     * @since 1.0
      */
     public Collection<IFilesystem.IMount> getMounts(Pattern typeFilter) throws Exception;
 
@@ -31,12 +34,16 @@ public interface IUnixFilesystemDriver extends ILoggable {
      * Returns a string containing the correct find command for the Unix flavor.
      *
      * The resulting command will follow links, but restrict results to the originating filesystem.
+     *
+     * @since 1.0
      */
     public String getFindCommand(List<ISearchable.ICondition> conditions);
 
     /**
      * Returns some variation of the ls or stat command.  The final argument (not included) should be the escaped path of
      * the file being stat'd.
+     *
+     * @since 1.0
      */
     public String getStatCommand();
 
@@ -44,6 +51,8 @@ public interface IUnixFilesystemDriver extends ILoggable {
      * Generate a UnixFileInfo based on the output from the Stat command.  The lines iterator may contain output
      * representing one or more stat commands, but this method is expected to retrieve only the very next FileInfo.
      * If there are no more lines, this method should return null.
+     *
+     * @since 1.0
      */
     public IUnixFileInfo nextFileInfo(Iterator<String> lines);
 }

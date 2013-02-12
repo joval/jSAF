@@ -10,10 +10,13 @@ import java.util.Iterator;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IEnvironment extends Iterable<String> {
     /**
      * Get an environment variable by name.
+     *
+     * @since 1.0
      */
     public String getenv(String var);
 
@@ -23,11 +26,15 @@ public interface IEnvironment extends Iterable<String> {
      *
      * For example, if there is an environment variable called FOO with a value of "bar", the string "My %FOO%" passed into
      * this method would return the string "My bar".
+     *
+     * @since 1.0
      */
     public String expand(String s);
 
     /**
      * Returns an Iterator over the names of the variables defined in this environment.
+     *
+     * @since 1.0
      */
     public Iterator<String> iterator();
 
@@ -35,6 +42,8 @@ public interface IEnvironment extends Iterable<String> {
      * Returns a String array suitable for passing into ISession.createProcess as the environment argument.
      *
      * @see jsaf.intf.system.ISession.createProcess
+     *
+     * @since 1.0
      */
     public String[] toArray();
 }

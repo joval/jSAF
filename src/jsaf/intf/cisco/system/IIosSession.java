@@ -11,15 +11,20 @@ import jsaf.intf.ssh.system.IShell;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IIosSession extends INetconf {
     /**
      * Retrieve "show tech-support" data from the device.
+     *
+     * @since 1.0
      */
     ITechSupport getTechSupport();
 
     /**
      * Obtain a shell connection to the device.
+     *
+     * @since 1.0
      */
     IShell getShell() throws Exception;
 }

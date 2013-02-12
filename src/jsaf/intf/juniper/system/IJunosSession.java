@@ -10,10 +10,13 @@ import jsaf.intf.netconf.INetconf;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IJunosSession extends INetconf {
     /**
      * Retrieve "request support information" data from the device.
+     *
+     * @since 1.0
      */
     ISupportInformation getSupportInformation();
 }

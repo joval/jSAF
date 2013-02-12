@@ -13,10 +13,13 @@ import jsaf.intf.identity.ICredentialStore;
  *
  * @author David A. Solin
  * @version %I% %G%
+ * @since 1.0
  */
 public interface IRemote {
     /**
      * Set the ICredentialStore for the SessionFactory.
+     *
+     * @since 1.0
      */
     void setCredentialStore(ICredentialStore cs);
 
@@ -32,16 +35,22 @@ public interface IRemote {
      * remote.addRoute("B", "A"); 
      * ISession session = factory.createSession("D");
      * &lt;/pre&gt;
+     *
+     * @since 1.0
      */
     void addRoute(String destination, String gateway);
 
     /**
      * Enable/disable SSH host validation. The default state is enabled (true).
+     *
+     * @since 1.0
      */
     void setHostValidation(boolean enable);
 
     /**
      * Set the SSH host database file to use for host validation.
+     *
+     * @since 1.0
      */
     void setKnownHosts(File f) throws IOException;
 }

@@ -3,7 +3,7 @@
 
 package jsaf.intf.windows.registry;
 
-import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Interface to Windows license data.
@@ -18,8 +18,6 @@ public interface ILicenseData {
 	int TYPE_SZ	= 1;
 	int TYPE_BINARY	= 2;
 	int TYPE_DWORD	= 4;
-
-	int length();
 
 	int getType();
 
@@ -40,5 +38,5 @@ public interface ILicenseData {
 	String getData();
     }
 
-    Hashtable<String, IEntry> getEntries();
+    Map<String, IEntry> getEntries();
 }

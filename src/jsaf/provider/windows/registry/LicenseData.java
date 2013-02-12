@@ -4,7 +4,8 @@
 package jsaf.provider.windows.registry;
 
 import java.util.Arrays;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 import jsaf.intf.windows.registry.IBinaryValue;
 import jsaf.intf.windows.registry.IKey;
@@ -25,10 +26,10 @@ import jsaf.io.LittleEndian;
  * @version %I% %G%
  */
 public class LicenseData implements ILicenseData {
-    private Hashtable<String, IEntry> entries;
+    private Map<String, IEntry> entries;
 
     public LicenseData(IRegistry reg) throws Exception {
-	entries = new Hashtable<String, IEntry>();
+	entries = new HashMap<String, IEntry>();
 	IKey key = reg.getKey(IRegistry.Hive.HKLM, "SYSTEM\\CurrentControlSet\\Control\\ProductOptions");
 	IValue value = key.getValue("ProductPolicy");
 	switch(value.getType()) {
@@ -47,7 +48,7 @@ public class LicenseData implements ILicenseData {
 		if (len == buff.length) {
 		    int offset = 0x14;
 		    for (int bytesRead=0; bytesRead < valueLen; ) {
-			IEntry entry = readEntry(buff, offset);
+			Entry entry = (Entry)readEntry(buff, offset);
 			entries.put(entry.getName(), entry);
 			bytesRead = bytesRead + entry.length();
 			offset = offset + entry.length();
@@ -66,7 +67,7 @@ public class LicenseData implements ILicenseData {
 	}
     }
 
-    public Hashtable<String, IEntry> getEntries() {
+    public Map<String, IEntry> getEntries() {
 	return entries;
     }
 
@@ -100,7 +101,9 @@ public class LicenseData implements ILicenseData {
     }
 
     abstract class Entry implements IEntry {
-	int len, dataType;
+	private int len;
+
+	int dataType;
 	String name;
 
 	Entry(int len, int dataType, String name) {
@@ -109,7 +112,7 @@ public class LicenseData implements ILicenseData {
 	    this.name = name;
 	}
 
-	public int length() {
+	int length() {
 	    return len;
 	}
 

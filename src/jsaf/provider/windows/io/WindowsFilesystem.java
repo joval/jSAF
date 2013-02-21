@@ -53,45 +53,47 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
     private static final String END = "}";
 
     private WindowsFileSearcher searcher;
-    private final IWindowsSession.View view;
+    private final IWindowsSession.View apparentView, accessorView;
     private Collection<IMount> mounts;
     private String system32, sysWOW64, sysNative;
-    private boolean redirect3264;
 
     protected IRunspace runspace;
 
-    public WindowsFilesystem(IWindowsSession session) throws Exception {
-	this(session, session.getNativeView());
-    }
+    public WindowsFilesystem(IWindowsSession session, IWindowsSession.View apparentView, IWindowsSession.View accessorView)
+		throws Exception {
 
-    public WindowsFilesystem(IWindowsSession session, IWindowsSession.View view) throws Exception {
-	super(session, DELIM_STR, IWindowsSession.View._32BIT == view ? "fs32" : "fs");
-	if (view == null) {
-	    view = session.getNativeView();
-	}
-	this.view = view;
+	super(session, DELIM_STR, IWindowsSession.View._32BIT == apparentView ? "fs32" : "fs");
+	this.apparentView = apparentView;
+	this.accessorView = accessorView;
 	for (IRunspace runspace : session.getRunspacePool().enumerate()) {
-	    if (runspace.getView() == view) {
+	    if (runspace.getView() == apparentView) {
 		this.runspace = runspace;
 	    }
 	}
 	if (runspace == null) {
-	    runspace = session.getRunspacePool().spawn(view);
+	    runspace = session.getRunspacePool().spawn(apparentView);
 	}
 	runspace.loadModule(WindowsFilesystem.class.getResourceAsStream("WindowsFilesystem.psm1"));
-	redirect3264 = view == IWindowsSession.View._32BIT && session.getNativeView() == IWindowsSession.View._64BIT;
 	String sysRoot	= session.getEnvironment().getenv("SystemRoot");
 	system32	= sysRoot + DELIM_STR + "System32"  + DELIM_STR;
 	sysNative	= sysRoot + DELIM_STR + "Sysnative" + DELIM_STR;
 	sysWOW64	= sysRoot + DELIM_STR + "SysWOW64"  + DELIM_STR;
     }
 
-    protected String getRealPath(String path) {
-	if (redirect3264) {
+    protected String getAccessorPath(String path) {
+	if (apparentView == accessorView) {
+	    return path;
+	} else if (apparentView == IWindowsSession.View._32BIT) {
 	    if (path.toUpperCase().startsWith(system32.toUpperCase())) {
 		return sysWOW64 + path.substring(system32.length());
 	    } else if (path.toUpperCase().startsWith(sysNative.toUpperCase())) {
 		return system32 + path.substring(system32.length());
+	    }
+	} else if (apparentView == IWindowsSession.View._64BIT) {
+	    if (path.toUpperCase().startsWith(system32.toUpperCase())) {
+		return sysNative + path.substring(system32.length());
+	    } else if (path.toUpperCase().startsWith(sysWOW64.toUpperCase())) {
+		return system32 + path.substring(sysWOW64.length());
 	    }
 	}
 	return path;
@@ -169,7 +171,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
     }
 
     protected IFile getPlatformFile(String path, IFile.Flags flags) throws IOException {
-	return new WindowsFile(path, new File(getRealPath(path)), flags);
+	return new WindowsFile(path, new File(getAccessorPath(path)), flags);
     }
 
     protected WindowsFileInfo getWindowsFileInfo(String path) throws IOException {
@@ -277,13 +279,13 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 
 	@Override
 	public String toString() {
-	    return getRealPath(path);
+	    return getAccessorPath(path);
 	}
 
 	@Override
 	protected IAccessor getAccessor() {
 	    if (accessor == null) {
-		accessor = new WindowsAccessor(path, new File(getRealPath(path)));
+		accessor = new WindowsAccessor(path, new File(getAccessorPath(path)));
 	    }
 	    return accessor;
 	}

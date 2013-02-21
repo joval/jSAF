@@ -45,6 +45,7 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
     private Directory directory = null;
     private RunspacePool runspaces = null;
     private List<String> baseCommand = Arrays.asList("cmd", "/c");
+    private View accessorView = null;
 
     //
     // Load the JACOB DLL
@@ -104,12 +105,16 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 	}
 	is64bit = ((Environment)env).is64bit();
 	if (is64bit) {
-	    if (!"64".equals(System.getProperty("sun.arch.data.model"))) {
+	    if ("64".equals(System.getProperty("sun.arch.data.model"))) {
+		accessorView = View._64BIT;
+	    } else {
+		accessorView = View._32BIT;
 		StringBuffer cmd = new StringBuffer(System.getenv("SystemRoot")).append("\\SysNative\\cmd.exe");
 		baseCommand = Arrays.asList(cmd.toString(), "/c");
 	    }
 	    logger.trace(Message.STATUS_WINDOWS_BITNESS, "64");
 	} else {
+	    accessorView = View._32BIT;
 	    logger.trace(Message.STATUS_WINDOWS_BITNESS, "32");
 	}
 
@@ -130,7 +135,7 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 	}
 	if (fs == null) {
 	    try {
-		fs = new WindowsFilesystem(this);
+		fs = new WindowsFilesystem(this, View._32BIT, accessorView);
 		if (!is64bit) fs32 = (IWindowsFilesystem)fs;
 	    } catch (Exception e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
@@ -231,7 +236,7 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 		    fs32 = (IWindowsFilesystem)fs;
 		} else {
 		    try {
-			fs32 = new WindowsFilesystem(this, View._32BIT);
+			fs32 = new WindowsFilesystem(this, View._32BIT, accessorView);
 		    } catch (Exception e) {
 			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		    }

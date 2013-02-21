@@ -135,8 +135,12 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 	}
 	if (fs == null) {
 	    try {
-		fs = new WindowsFilesystem(this, View._32BIT, accessorView);
-		if (!is64bit) fs32 = (IWindowsFilesystem)fs;
+		if (is64bit) {
+		    fs = new WindowsFilesystem(this, View._64BIT, accessorView);
+		} else {
+		    fs32 = new WindowsFilesystem(this, View._32BIT, accessorView);
+		    fs = fs32;
+		}
 	    } catch (Exception e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		return false;

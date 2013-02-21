@@ -42,49 +42,56 @@ function Find-Files {
     if ($CurrentItem -eq $null) {
       $CurrentItem = Get-Item -literalPath $Path
     }
-    try {
-      if ($Pattern -eq ".*") {
-	if ($PsCmdlet.ParameterSetName -eq "Pattern") {
-	  if ($Filename -eq ".*") {
-	    $CurrentItem
+
+    if (($PsCmdlet.ParameterSetName -eq "Literal") -and $Depth -eq -1) {
+      $ErrorActionPreference = "SilentlyContinue" 
+      Get-ChildItem $Path -recurse -force | Where-Object {$_.Name -eq $LiteralFilename}
+      $ErrorActionPreference = "Stop" 
+    } else {
+      try {
+	if ($Pattern -eq ".*") {
+	  if ($PsCmdlet.ParameterSetName -eq "Pattern") {
+	    if ($Filename -eq ".*") {
+	      $CurrentItem
+	    } else {
+	      if (!$CurrentItem.PSIsContainer -and ($CurrentItem.Name -imatch $Filename)) {
+		$CurrentItem
+	      }
+	    }
 	  } else {
-	    if (!$CurrentItem.PSIsContainer -and ($CurrentItem.Name -imatch $Filename)) {
+	    $Name = $CurrentItem.Name
+	    if (!$CurrentItem.PSIsContainer -and ($Name -eq $LiteralFilename)) {
 	      $CurrentItem
 	    }
 	  }
 	} else {
-	  $Name = $CurrentItem.Name
-	  if (!$CurrentItem.PSIsContainer -and ($Name -eq $LiteralFilename)) {
+	  if ($Path -imatch $Pattern) {
 	    $CurrentItem
 	  }
 	}
-      } else {
-	if ($Path -imatch $Pattern) {
-	  $CurrentItem
-	}
-      }
-      if ($CurrentItem.PSIsContainer) {
-	$NextDepth = $Depth - 1
-	if ($Depth -ne 0) {
-	  $ErrorActionPreference = "SilentlyContinue"
-	  foreach ($ChildItem in Get-ChildItem $CurrentItem) {
-	    if ($Pattern -eq ".*") {
-	      if ($PsCmdlet.ParameterSetName -eq "Pattern") {
-		if ($Filename -eq ".*") {
-		  Find-Files -Path $ChildItem.FullName -Depth $NextDepth
+	if ($CurrentItem.PSIsContainer) {
+	  $NextDepth = $Depth - 1
+	  if ($Depth -ne 0) {
+	    $ErrorActionPreference = "SilentlyContinue"
+	    foreach ($ChildItem in Get-ChildItem $CurrentItem) {
+	      if ($Pattern -eq ".*") {
+		if ($PsCmdlet.ParameterSetName -eq "Pattern") {
+		  if ($Filename -eq ".*") {
+		    Find-Files -Path $ChildItem.FullName -Depth $NextDepth
+		  } else {
+		    Find-Files -Path $ChildItem.FullName -Filename $Filename -Depth $NextDepth
+		  }
 		} else {
-		  Find-Files -Path $ChildItem.FullName -Filename $Filename -Depth $NextDepth
+		    Find-Files -Path $ChildItem.FullName -LiteralFilename $LiteralFilename -Depth $NextDepth
 		}
 	      } else {
-		  Find-Files -Path $ChildItem.FullName -LiteralFilename $LiteralFilename -Depth $NextDepth
+		Find-Files -Path $ChildItem.FullName -Pattern $Pattern -Depth $NextDepth
 	      }
-	    } else {
-	      Find-Files -Path $ChildItem.FullName -Pattern $Pattern -Depth $NextDepth
 	    }
 	  }
 	}
-      }
-    } catch {}
+      } catch {}
+    }
   }
 }
 

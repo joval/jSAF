@@ -5,9 +5,9 @@ package jsaf.provider.windows.system;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import org.slf4j.cal10n.LocLogger;
 
@@ -44,6 +44,7 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
     private IWindowsFilesystem fs32;
     private Directory directory = null;
     private RunspacePool runspaces = null;
+    private List<String> baseCommand = Arrays.asList("cmd", "/c");
 
     //
     // Load the JACOB DLL
@@ -59,6 +60,11 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
     public WindowsSession(File wsdir) {
 	super();
 	this.wsdir = wsdir;
+    }
+
+    @Override
+    protected List<String> getBaseCommand() {
+	return baseCommand;
     }
 
     // Implement ILoggable
@@ -99,7 +105,8 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 	is64bit = ((Environment)env).is64bit();
 	if (is64bit) {
 	    if (!"64".equals(System.getProperty("sun.arch.data.model"))) {
-		throw new RuntimeException(Message.getMessage(Message.ERROR_WINDOWS_BITNESS_INCOMPATIBLE));
+		StringBuffer cmd = new StringBuffer(System.getenv("SystemRoot")).append("\\SysNative\\cmd.exe");
+		baseCommand = Arrays.asList(cmd.toString(), "/c");
 	    }
 	    logger.trace(Message.STATUS_WINDOWS_BITNESS, "64");
 	} else {

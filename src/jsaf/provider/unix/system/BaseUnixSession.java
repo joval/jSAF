@@ -3,6 +3,9 @@
 
 package jsaf.provider.unix.system;
 
+import java.util.Arrays;
+import java.util.List;
+
 import jsaf.Message;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.provider.AbstractSession;
@@ -19,6 +22,11 @@ public abstract class BaseUnixSession extends AbstractSession implements IUnixSe
 
     protected BaseUnixSession() {
 	super();
+    }
+
+    @Override
+    protected List<String> getBaseCommand() {
+	return Arrays.asList("/bin/sh", "-c");
     }
 
     @Override

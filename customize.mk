@@ -17,4 +17,5 @@ JAVA_HOME=$(TOP)/../../tools/jdk1.6.0_26
 # JRE_HOME is the install path for the JRE that will be used to run the test target. On Windows it must match
 # the platform architecture (i.e., 64-bit JRE on 64-bit Windows).
 #
-JRE_HOME=$(TOP)/../../tools/jre170_03_x64
+#JRE_HOME=$(TOP)/../../tools/jre170_03_x64
+JRE_HOME=$(TOP)/../../tools/jre170_03_x86

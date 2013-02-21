@@ -43,6 +43,11 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	super();
     }
 
+    /**
+     * The base command prefix for running a process command-line on the local platform, e.g., "/bin/sh -c" or "cmd /c".
+     */
+    protected abstract List<String> getBaseCommand();
+
     // Implement ILoggable
 
     /**
@@ -145,15 +150,8 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	public void start() throws Exception {
 	    logger.debug(Message.STATUS_PROCESS_START, getCommand());
 	    List<String>args = new Vector<String>();
-	    if (System.getProperty("os.name").toLowerCase().indexOf("windows") == -1) {
-		args.add("/bin/sh");
-		args.add("-c");
-		args.add(command);
-	    } else {
-		args.add("cmd");
-		args.add("/c");
-		args.add(command);
-	    }
+	    args.addAll(getBaseCommand());
+	    args.add(command);
 	    ProcessBuilder pb = new ProcessBuilder(args);
 	    if (env != null) {
 		for (String s : env) {

@@ -30,6 +30,8 @@ clean:
 resources:
 	rm -f $(BUILD)/*.ini
 	cp $(RSRC)/session.ini $(BUILD)
+	rm -f $(BUILD)/jsaf/provider/windows/identity/*.psm1
+	cp $(SRC)/jsaf/provider/windows/identity/*.psm1 $(BUILD)/jsaf/provider/windows/identity/
 	rm -f $(BUILD)/jsaf/provider/windows/io/*.psm1
 	cp $(SRC)/jsaf/provider/windows/io/*.psm1 $(BUILD)/jsaf/provider/windows/io/
 	rm -f $(BUILD)/jsaf/provider/windows/registry/*.psm1

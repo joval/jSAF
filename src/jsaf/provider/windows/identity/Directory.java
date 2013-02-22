@@ -87,18 +87,18 @@ public class Directory implements IDirectory {
     private LocLogger logger;
     private ActiveDirectory ad;
     private LocalDirectory local;
+    private ServiceDirectory service;
 
-    public Directory(IWindowsSession session) {
+    public Directory(IWindowsSession session) throws Exception {
 	this.session = session;
 	logger = session.getLogger();
 	ad = new ActiveDirectory(this);
 	local = new LocalDirectory(session.getMachineName(), this);
-	setWmiProvider(session.getWmiProvider());
+	service = new ServiceDirectory(session);
     }
 
-    public void setWmiProvider(IWmiProvider wmi) {
-	ad.setWmiProvider(wmi);
-	local.setWmiProvider(wmi);
+    public IWmiProvider getWmiProvider() {
+	return session.getWmiProvider();
     }
 
     // Implement ILoggable
@@ -125,15 +125,21 @@ public class Directory implements IDirectory {
     }
 
     public IUser queryUserBySid(String sid) throws NoSuchElementException, WmiException {
-	try {
-	    return local.queryUserBySid(sid);
-	} catch (NoSuchElementException e) {
-	    return ad.queryUserBySid(sid);
+	if (service.isServiceSid(sid)) {
+	    return service.queryUserBySid(sid);
+	} else {
+	    try {
+		return local.queryUserBySid(sid);
+	    } catch (NoSuchElementException e) {
+		return ad.queryUserBySid(sid);
+	    }
 	}
     }
 
     public IUser queryUser(String netbiosName) throws IllegalArgumentException, NoSuchElementException, WmiException {
-	if (isLocal(netbiosName)) {
+	if (netbiosName.toUpperCase().startsWith("NT SERVICE\\")) {
+	    return service.queryUser(netbiosName);
+	} else if (isLocal(netbiosName)) {
 	    return local.queryUser(netbiosName);
 	} else {
 	    return ad.queryUser(netbiosName);
@@ -165,7 +171,9 @@ public class Directory implements IDirectory {
     }
 
     public IPrincipal queryPrincipal(String netbiosName) throws NoSuchElementException, IllegalArgumentException, WmiException {
-	if (isLocal(netbiosName)) {
+	if (netbiosName.toUpperCase().startsWith("NT SERVICE\\")) {
+	    return service.queryUser(netbiosName);
+	} else if (isLocal(netbiosName)) {
 	    return local.queryPrincipal(netbiosName);
 	} else {
 	    return ad.queryPrincipal(netbiosName);
@@ -173,10 +181,14 @@ public class Directory implements IDirectory {
     }
 
     public IPrincipal queryPrincipalBySid(String sid) throws NoSuchElementException, WmiException {
-	try {
-	    return local.queryPrincipalBySid(sid);
-	} catch (NoSuchElementException e) {
-	    return ad.queryPrincipalBySid(sid);
+	if (service.isServiceSid(sid)) {
+	    return service.queryUserBySid(sid);
+	} else {
+	    try {
+		return local.queryPrincipalBySid(sid);
+	    } catch (NoSuchElementException e) {
+		return ad.queryPrincipalBySid(sid);
+	    }
 	}
     }
 

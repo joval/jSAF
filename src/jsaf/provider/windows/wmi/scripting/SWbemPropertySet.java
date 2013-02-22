@@ -46,7 +46,7 @@ public class SWbemPropertySet implements ISWbemPropertySet {
 	Iterator<ISWbemProperty> iter = iterator();
 	while(iter.hasNext()) {
 	    ISWbemProperty prop = iter.next();
-	    if (itemName.equals(prop.getName())) {
+	    if (itemName.equalsIgnoreCase(prop.getName())) {
 		return prop;
 	    }
 	}

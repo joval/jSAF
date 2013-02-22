@@ -59,10 +59,7 @@ class ActiveDirectory implements ILoggable {
 	usersBySid = new Hashtable<String, User>();
 	groupsByNetbiosName = new Hashtable<String, Group>();
 	groupsBySid = new Hashtable<String, Group>();
-    }
-
-    void setWmiProvider(IWmiProvider wmi) {
-	this.wmi = wmi;
+	wmi = parent.getWmiProvider();
     }
 
     User queryUserBySid(String sid) throws NoSuchElementException, WmiException {

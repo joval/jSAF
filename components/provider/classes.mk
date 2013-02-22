@@ -27,6 +27,7 @@ CLASSES=\
 	jsaf.provider.windows.identity.Group	\
 	jsaf.provider.windows.identity.LocalDirectory	\
 	jsaf.provider.windows.identity.Principal	\
+	jsaf.provider.windows.identity.ServiceDirectory	\
 	jsaf.provider.windows.identity.User	\
 	jsaf.provider.windows.io.WindowsFileInfo	\
 	jsaf.provider.windows.io.WindowsFileSearcher	\

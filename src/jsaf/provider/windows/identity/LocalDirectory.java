@@ -69,10 +69,7 @@ class LocalDirectory implements ILoggable {
 	usersBySid = new Hashtable<String, IUser>();
 	groupsByNetbiosName = new Hashtable<String, IGroup>();
 	groupsBySid = new Hashtable<String, IGroup>();
-    }
-
-    void setWmiProvider(IWmiProvider wmi) {
-	this.wmi = wmi;
+	wmi = parent.getWmiProvider();
     }
 
     IUser queryUserBySid(String sid) throws NoSuchElementException, WmiException {
@@ -281,7 +278,7 @@ class LocalDirectory implements ILoggable {
      */
     boolean isMember(String netbiosName) {
 	String domain = getDomain(netbiosName);
-	return hostname.equalsIgnoreCase(domain) || "NT SERVICE".equalsIgnoreCase(domain);
+	return hostname.equalsIgnoreCase(domain);
     }
 
     boolean isMemberSid(String sid) {

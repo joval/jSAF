@@ -40,7 +40,7 @@ public class SWbemProperty implements ISWbemProperty {
     }
 
     public Object getValue() throws WmiException {
-        return value;
+	return value;
     }
 
     public Integer getValueAsInteger() throws WmiException {
@@ -52,20 +52,21 @@ public class SWbemProperty implements ISWbemProperty {
     }
 
     public BigInteger getValueAsTimestamp() throws WmiException {
-	value.changeType(Variant.VariantDate);
-	return new BigInteger(Double.toString(value.getDate()));
-/*
-	String s = getValueAsString();
-	if (s == null) {
+	if (value.isNull()) {
 	    return null;
 	} else {
-	    try {
-		return Timestamp.toWindowsTimestamp(s);
-	    } catch (Exception e) {
-		throw new WmiException(e);
+	    switch(value.getvt()) {
+	      case Variant.VariantDate:
+		return new BigInteger(Double.toString(value.getDate()));
+
+	      default:
+		try {
+		    return Timestamp.toWindowsTimestamp(getValueAsString());
+		} catch (Exception e) {
+		    throw new WmiException(e);
+		}
 	    }
 	}
-*/
     }
 
     public Boolean getValueAsBoolean() throws WmiException {

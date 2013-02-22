@@ -36,7 +36,7 @@ public class WMI {
 		while (propIter.hasNext()) {
 		    ISWbemProperty prop = propIter.next();
 		    String clazz = prop.getValue() == null ? "null" : prop.getValue().getClass().getName();
-		    System.out.println("  " + prop.getName() + "=" + prop.getValue() + ", Class: " + clazz);
+		    System.out.println("  " + prop.getName() + "=" + prop.getValueAsString() + ", Class: " + clazz);
 		}
 	    }
 	} catch (WmiException e) {

@@ -52,6 +52,9 @@ public class SWbemProperty implements ISWbemProperty {
     }
 
     public BigInteger getValueAsTimestamp() throws WmiException {
+	value.changeType(Variant.VariantDate);
+	return new BigInteger(Double.toString(value.getDate()));
+/*
 	String s = getValueAsString();
 	if (s == null) {
 	    return null;
@@ -62,9 +65,11 @@ public class SWbemProperty implements ISWbemProperty {
 		throw new WmiException(e);
 	    }
 	}
+*/
     }
 
     public Boolean getValueAsBoolean() throws WmiException {
+	value.changeType(Variant.VariantBoolean);
 	return value.getBoolean();
     }
 
@@ -92,26 +97,26 @@ public class SWbemProperty implements ISWbemProperty {
 
     // Private
 
-    private String getString(Variant var) {
+    private static String getString(Variant var) {
 	if (var.isNull()) {
 	    return null;
 	} else {
 	    int type = var.getvt();
 	    switch(type) {
 	      case Variant.VariantString:
-		return value.toString();
+		return var.getString();
 
 	      case Variant.VariantInt:
-		return Integer.toString(value.getInt());
+		return Integer.toString(var.getInt());
 
 	      case Variant.VariantObject:
-		return value.toString();
+		return var.toString();
 
 	      case Variant.VariantByte:
 		return LittleEndian.toHexString(var.getByte());
 
 	      case Variant.VariantDispatch:
-		return getString(Dispatch.get(value.toDispatch(), "value"));
+		return getString(Dispatch.get(var.toDispatch(), "value"));
 
 	      default:
 		if (Variant.VariantArray == (Variant.VariantArray & type)) {
@@ -121,21 +126,25 @@ public class SWbemProperty implements ISWbemProperty {
 		      case Variant.VariantByte:
 			return new String(sa.toByteArray());
 
+		      //
+		      // Represent the array as a string
+		      //
 		      default: {
 			Variant[] va = sa.toVariantArray();
-			StringBuffer sb = new StringBuffer();
-			for (int i=0; i < va.length; i++) {
-			    sb.append(getString(va[i]));
+			StringBuffer sb = new StringBuffer("{");
+			for (Variant v : sa.toVariantArray()) {
+			    if (sb.length() > 1) {
+				sb.append(",");
+			    }
+			    sb.append(getString(v));
 			}
-			return sb.toString();
+			return sb.append("}").toString();
 		      }
 		    }
 		} else {
-		    return value.toString();
+		    return var.toString();
 		}
 	    }
-
-
 	}
     }
 }

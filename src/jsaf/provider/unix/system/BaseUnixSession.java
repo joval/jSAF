@@ -24,7 +24,6 @@ public abstract class BaseUnixSession extends AbstractSession implements IUnixSe
 	super();
     }
 
-    @Override
     protected List<String> getBaseCommand() {
 	return Arrays.asList("/bin/sh", "-c");
     }

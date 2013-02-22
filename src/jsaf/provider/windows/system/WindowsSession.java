@@ -63,7 +63,6 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 	this.wsdir = wsdir;
     }
 
-    @Override
     protected List<String> getBaseCommand() {
 	return baseCommand;
     }

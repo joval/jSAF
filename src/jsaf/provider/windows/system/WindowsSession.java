@@ -146,15 +146,16 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 	    }
 	}
 	if (wmi.register()) {
+	    connected = true; // set this now so the IDirectory has access to the machine name
 	    if (directory == null) {
 		try {
 		    directory = new Directory(this);
 		} catch (Exception e) {
 		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		    connected = false;
 		    return false;
 		}
 	    }
-	    connected = true;
 	    return true;
 	} else {
 	    return false;

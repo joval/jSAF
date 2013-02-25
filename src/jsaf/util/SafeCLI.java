@@ -7,19 +7,30 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
+import java.util.NoSuchElementException;
+import java.util.TimerTask;
+import java.util.zip.GZIPInputStream;
 
+import jsaf.JSAFSystem;
 import jsaf.Message;
+import jsaf.intf.io.IFile;
+import jsaf.intf.io.IFilesystem;
 import jsaf.intf.io.IReader;
 import jsaf.intf.io.IReaderGobbler;
 import jsaf.intf.system.IProcess;
 import jsaf.intf.system.ISession;
+import jsaf.intf.unix.system.IUnixSession;
 import jsaf.io.PerishableReader;
 import jsaf.io.StreamTool;
 import jsaf.provider.SessionException;
@@ -48,15 +59,15 @@ public class SafeCLI {
     public static String checkArgument(String arg, ISession session) throws IllegalArgumentException {
 	switch(session.getType()) {
 	  case WINDOWS:
-            if (arg.indexOf("'") != -1 || arg.indexOf("\"") != -1) {
-        	throw new IllegalArgumentException(arg);
+	    if (arg.indexOf("'") != -1 || arg.indexOf("\"") != -1) {
+		throw new IllegalArgumentException(arg);
 	    }
 	    break;
 
 	  case UNIX:
-            if (arg.indexOf("'") != -1 || arg.indexOf("\"") != -1 || arg.indexOf("`") != -1) {
-        	throw new IllegalArgumentException(arg);
-            }
+	    if (arg.indexOf("'") != -1 || arg.indexOf("\"") != -1 || arg.indexOf("`") != -1) {
+		throw new IllegalArgumentException(arg);
+	    }
 	    break;
 	}
 	return arg;
@@ -184,6 +195,70 @@ public class SafeCLI {
     }
 
     /**
+     * Run a command and get the resulting lines of output, using the specified environment. This command assumes that
+     * there will be a large volume of output from the command, so it will pipe the output to a file, transfer the file
+     * locally (if the session is a remote session), and then return an iterator that reads lines from the local file.
+     * When the end of the iterator is reached, the local file is deleted.
+     *
+     * @since 1.0.1
+     */
+    public static final Iterator<String> manyLines(String cmd, String[] env, IUnixSession session) throws Exception {
+
+	//
+	// Modify the command to redirect output to a temp file (compressed)
+	//
+	String unique = null;
+	synchronized(session) {
+	    unique = Long.toString(System.currentTimeMillis());
+	    Thread.sleep(1);
+	}
+	String tempPath = session.getTempDir();
+	IFilesystem fs = session.getFilesystem();
+	if (!tempPath.endsWith(fs.getDelimiter())) {
+	    tempPath = tempPath + fs.getDelimiter();
+	}
+	tempPath = new StringBuffer(tempPath).append("cmd.").append(unique).append(".out").toString();
+	tempPath = session.getEnvironment().expand(tempPath);
+	cmd = new StringBuffer(cmd).append(" | gzip > ").append(tempPath).toString();
+
+	//
+	// Execute the command, and monitor the size of the output file
+	//
+	FileMonitor mon = new FileMonitor(fs, tempPath);
+	JSAFSystem.getTimer().schedule(mon, 15000, 15000);
+	try {
+	    exec(cmd, null, null, session, session.getTimeout(ISession.Timeout.XL), new DevNull(), new ErrorLogger(session));
+	} finally {
+	    mon.cancel();
+	    JSAFSystem.getTimer().purge();
+	}
+
+	//
+	// Create and return a reader/Iterator<String> based on a local cache file
+	//
+	if (ISession.LOCALHOST.equals(session.getHostname())) {
+	    return new ReaderIterator(new File(tempPath));
+	} else {
+	    IFile remoteTemp = fs.getFile(tempPath, IFile.Flags.READWRITE);
+	    File tempDir = session.getWorkspace() == null ? new File(System.getProperty("user.home")) : session.getWorkspace();
+	    File localTemp = File.createTempFile("cmd", null, tempDir);
+	    StreamTool.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
+	    try {
+		remoteTemp.delete();
+	    } catch (IOException e) {
+		try {
+		    if (remoteTemp.exists()) {
+			exec("rm -f " + remoteTemp.getPath(), session, ISession.Timeout.S);
+		    }
+		} catch (Exception e2) {
+		    session.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e2);
+		}
+	    }
+	    return new ReaderIterator(localTemp);
+	}
+    }
+
+    /**
      * Run a command and get the resulting ExecData, using the specified environment.
      *
      * @since 1.0
@@ -271,7 +346,7 @@ public class SafeCLI {
 		encoding = StringTools.ASCII;
 	    }
 	    BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding));
-	    List<String> lines = new Vector<String>();
+	    List<String> lines = new ArrayList<String>();
 	    String line = null;
 	    while((line = reader.readLine()) != null) {
 		lines.add(line);
@@ -317,7 +392,10 @@ public class SafeCLI {
 		p.start();
 		reader = PerishableReader.newInstance(p.getInputStream(), readTimeout);
 		reader.setLogger(session.getLogger());
-		if (errorGobbler != null) {
+		if (errorGobbler == null) {
+		    long timeout = session.getTimeout(ISession.Timeout.XL);
+		    new GobblerThread(new DevNull()).start(PerishableReader.newInstance(p.getErrorStream(), timeout));
+		} else {
 		    new GobblerThread(errorGobbler).start(PerishableReader.newInstance(p.getErrorStream(), readTimeout));
 		}
 		outputGobbler.gobble(reader);
@@ -420,6 +498,120 @@ public class SafeCLI {
 	    try {
 		gobbler.gobble(reader);
 	    } catch (IOException e) {
+	    }
+	}
+    }
+
+    static class DevNull implements IReaderGobbler {
+	DevNull() {}
+
+	// Implement IReaderGobbler
+
+	public void gobble(IReader reader) throws IOException {
+	    String line = null;
+	    while((line = reader.readLine()) != null) {
+	    }
+	}
+    }
+
+    static class ErrorLogger implements IReaderGobbler {
+	private ISession session;
+
+	ErrorLogger(ISession session) {
+	    this.session = session;
+	}
+
+	// Implement IReaderGobbler
+
+	public void gobble(IReader reader) throws IOException {
+	    String line = null;
+	    while((line = reader.readLine()) != null) {
+		session.getLogger().warn(Message.WARNING_COMMAND_OUTPUT, line);
+	    }
+	}
+    }
+
+    static class FileMonitor extends TimerTask {
+	private IFilesystem fs;
+	private String path;
+
+	FileMonitor(IFilesystem fs, String path) {
+	    this.fs = fs;
+	    this.path = path;
+	    fs.getLogger().info(Message.STATUS_COMMAND_OUTPUT_TEMP, path);
+	}
+
+	public void run() {
+	    try {
+		long len = fs.getFile(path, IFile.Flags.READVOLATILE).length();
+		fs.getLogger().info(Message.STATUS_COMMAND_OUTPUT_PROGRESS, len);
+	    } catch (IOException e) {
+	    }
+	}
+    }
+
+    static class ReaderIterator implements Iterator<String> {
+	File file;
+	IReader reader;
+	String next = null;
+
+	ReaderIterator(File file) throws IOException {
+	    this.file = file;
+	    try {
+		reader = new jsaf.io.BufferedReader(new GZIPInputStream(new FileInputStream(file)));
+	    } catch (IOException e) {
+		close();
+		throw e;
+	    }
+	}
+
+	// Implement Iterator<String>
+
+	public boolean hasNext() {
+	    if (next == null) {
+		try {
+		    next = next();
+		    return true;
+		} catch (NoSuchElementException e) {
+		    close();
+		    return false;
+		}
+	    } else {
+		return true;
+	    }
+	}
+
+	public String next() throws NoSuchElementException {
+	    if (next == null) {
+		try {
+		    if ((next = reader.readLine()) == null) {
+			try {
+			    reader.close();
+			} catch (IOException e) {
+			}
+			throw new NoSuchElementException();
+		    }
+		} catch (IOException e) {
+		    throw new NoSuchElementException(e.getMessage());
+		}
+	    }
+	    String temp = next;
+	    next = null;
+	    return temp;
+	}
+
+	public void remove() {
+	    throw new UnsupportedOperationException();
+	}
+
+	// Private
+
+	/**
+	 * Clean up the remote or local file.
+	 */
+	private void close() {
+	    if (file != null) {
+		file.delete();
 	    }
 	}
     }

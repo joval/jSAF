@@ -40,7 +40,7 @@ public class SWbemProperty implements ISWbemProperty {
     }
 
     public Object getValue() throws WmiException {
-	return value;
+	return value.isNull() ? null : value;
     }
 
     public Integer getValueAsInteger() throws WmiException {

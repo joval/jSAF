@@ -27,6 +27,8 @@ public interface ISWbemProperty {
     /**
      * Get the value of the property, wrapped by an object provided by the underlying implementation of the WMI provider.
      *
+     * @return null if the property has no value
+     *
      * @since 1.0
      */
     Object getValue() throws WmiException;

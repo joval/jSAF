@@ -41,12 +41,7 @@ public class FS {
 		ISearchable<IFile> searcher = fs.getSearcher();
 		String[] from = searcher.guessParent(pattern);
 		if (from == null) {
-		    Pattern filter = null;
-		    String s = session.getProperties().getProperty(IFilesystem.PROP_MOUNT_FSTYPE_FILTER);
-		    if (s != null) {
-			filter = Pattern.compile(s);
-		    }
-		    Collection<IFilesystem.IMount> mounts = fs.getMounts(filter);
+		    Collection<IFilesystem.IMount> mounts = fs.getMounts();
 		    from = new String[mounts.size()];
 		    int i=0;
 		    for (IFilesystem.IMount mount : mounts) {

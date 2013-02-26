@@ -36,17 +36,17 @@ import jsaf.util.StringTools;
  * @version %I% %G%
  */
 public class MacOSXDriver extends AbstractDriver {
+    private static final String STAT = "ls -ldnT";
+
     public MacOSXDriver(IUnixSession session) {
 	super(session);
     }
 
-    // Implement IUnixFilesystemDriver
-
     static final String OPEN = "(";
     static final String CLOSE = ")";
 
-    public Collection<IFilesystem.IMount> getMounts(Pattern typeFilter) throws Exception {
-	Collection<IFilesystem.IMount> mounts = new ArrayList<IFilesystem.IMount>();
+    void getMounts() throws Exception {
+	mounts = new ArrayList<IFilesystem.IMount>();
 	for (String line : SafeCLI.multiLine("mount", session, IUnixSession.Timeout.S)) {
 	    int ptr = line.indexOf(" on ");
 	    String device = line.substring(0, ptr);
@@ -64,17 +64,13 @@ public class MacOSXDriver extends AbstractDriver {
 		    break;
 		}
 	    }
-	    if (fsType != null) {
-		if (typeFilter != null && typeFilter.matcher(fsType).find()) {
-		    logger.info(Message.STATUS_FS_MOUNT_SKIP, path, fsType);
-		} else if (path.startsWith(IUnixFilesystem.DELIM_STR)) {
-		    logger.info(Message.STATUS_FS_MOUNT_ADD, path, fsType);
-		    mounts.add(new Mount(path, fsType));
-		}
+	    if (fsType != null && path.startsWith(IUnixFilesystem.DELIM_STR)) {
+		mounts.add(new Mount(path, fsType));
 	    }
 	}
-	return mounts;
     }
+
+    // Implement IUnixFilesystemDriver
 
     public String getFindCommand(List<ISearchable.ICondition> conditions) {
 	String from = null;
@@ -82,7 +78,7 @@ public class MacOSXDriver extends AbstractDriver {
 	boolean followLinks = false;
 	boolean xdev = false;
 	Pattern path = null, dirname = null, basename = null;
-	String literalBasename = null, antiBasename = null;
+	String literalBasename = null, antiBasename = null, fsType = null;
 	int depth = ISearchable.DEPTH_UNLIMITED;
 
 	for (ISearchable.ICondition condition : conditions) {
@@ -117,6 +113,9 @@ public class MacOSXDriver extends AbstractDriver {
 		    break;
 		}
 		break;
+	      case IFilesystem.FIELD_FSTYPE:
+		fsType = (String)condition.getValue();
+		break;
 	      case ISearchable.FIELD_DEPTH:
 		depth = ((Integer)condition.getValue()).intValue();
 		break;
@@ -134,6 +133,9 @@ public class MacOSXDriver extends AbstractDriver {
 	StringBuffer cmd = new StringBuffer(FIND).append(" ").append(from);
 	if (xdev) {
 	    cmd.append(" -mount");
+	}
+	if (fsType != null) {
+	    cmd.append(" -fstype ").append(fsType);
 	}
 	if (depth != ISearchable.DEPTH_UNLIMITED) {
 	    cmd.append(" -maxdepth ").append(Integer.toString(depth));
@@ -164,12 +166,12 @@ public class MacOSXDriver extends AbstractDriver {
 		}
 	    }
 	}
-	cmd.append(" | xargs -I{} ").append(getStatCommand()).append(" '{}'");
+	cmd.append(" | xargs -I{} ").append(STAT).append(" '{}'");
 	return cmd.toString();
     }
 
-    public String getStatCommand() {
-	return "ls -ldnT";
+    public String getStatCommand(String path) {
+	return new StringBuffer(STAT).append(" '").append(path).append("'").toString();
     }
 
     public UnixFileInfo nextFileInfo(Iterator<String> lines) {

@@ -21,14 +21,6 @@ import jsaf.intf.util.ISearchable;
  */
 public interface IFilesystem extends ILoggable {
     /**
-     * Property specifying a list of filesystem types that should not be preloaded by an IFilesystem implementation.
-     * Delimiter is the ':' character.
-     *
-     * @since 1.0
-     */
-    String PROP_MOUNT_FSTYPE_FILTER = "fs.localMount.filter";
-
-    /**
      * Property governing whether the filesystem cache layer should be JDBM-backed (true) or memory-backed (false).
      *
      * @since 1.0
@@ -63,6 +55,13 @@ public interface IFilesystem extends ILoggable {
      * @since 1.0
      */
     int FIELD_BASENAME = 53;
+
+    /**
+     * Condition field for a filesystem type.
+     *
+     * @since 1.0.1
+     */
+    int FIELD_FSTYPE = 54;
 
     /**
      * A condition value indicating a regular file, for conditions of type FIELD_FILETYPE.
@@ -155,12 +154,28 @@ public interface IFilesystem extends ILoggable {
     OutputStream getOutputStream(String path, boolean append) throws IOException;
 
     /**
-     * List the mounts on this filesystem, whose types do not match the specified typeFilter. Typically, for example,
-     * a type filter might be used to exclude network mounts. Use null for no filtering.
+     * Get all mounts; shortcut for getMounts(null).
+     *
+     * @since 1.0.1
+     */
+    Collection<IMount> getMounts() throws IOException;
+
+    /**
+     * Shortcut for getMounts(typeFilter, false).
      *
      * @since 1.0
      */
     Collection<IMount> getMounts(Pattern typeFilter) throws IOException;
+
+    /**
+     * List the mounts on this filesystem, filtered by the specified pattern.
+     *
+     * @param typeFilter the pattern to use as a filter. Use null for no filtering.
+     * @param include use true to return mounts matching the typeFilter, false to filter out mounts matching the typeFilter.
+     *
+     * @since 1.0.1
+     */
+    Collection<IMount> getMounts(Pattern typeFilter, boolean include) throws IOException;
 
     /**
      * An interface describing a filesystem mount point.

@@ -43,10 +43,16 @@ function Find-Files {
       $CurrentItem = Get-Item -literalPath $Path
     }
 
-    if (($PsCmdlet.ParameterSetName -eq "Literal") -and $Depth -eq -1) {
-      $ErrorActionPreference = "SilentlyContinue" 
-      Get-ChildItem $Path -recurse -force | Where-Object {$_.Name -eq $LiteralFilename}
-      $ErrorActionPreference = "Stop" 
+    if ($Depth -eq -1) {
+      if ($PsCmdlet.ParameterSetName -eq "Literal") {
+        $ErrorActionPreference = "SilentlyContinue" 
+        Get-ChildItem $Path -recurse -force | Where-Object {$_.Name -eq $LiteralFilename}
+        $ErrorActionPreference = "Stop"
+      } else {
+        $ErrorActionPreference = "SilentlyContinue" 
+        Get-ChildItem $Path -recurse -force | Where-Object {$_.Name -imatch $Filename -and $_.FullName -imatch $Pattern}
+        $ErrorActionPreference = "Stop"
+      } 
     } else {
       try {
 	if ($Pattern -eq ".*") {

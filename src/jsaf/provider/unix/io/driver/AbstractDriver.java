@@ -3,14 +3,20 @@
 
 package jsaf.provider.unix.io.driver;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.regex.Pattern;
+
 import org.slf4j.cal10n.LocLogger;
 
+import jsaf.Message;
 import jsaf.intf.io.IFilesystem;
 import jsaf.intf.unix.io.IUnixFilesystemDriver;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.intf.util.ILoggable;
 
 abstract class AbstractDriver implements IUnixFilesystemDriver {
+    protected Collection<IFilesystem.IMount> mounts;
     protected IUnixSession session;
     protected LocLogger logger;
 
@@ -35,6 +41,50 @@ abstract class AbstractDriver implements IUnixFilesystemDriver {
 
 	public String getType() {
 	    return type;
+	}
+    }
+
+    abstract void getMounts() throws Exception;
+
+    // Implement IUnixFilesystemDriver
+
+    public String getStatCommand() {
+	throw new UnsupportedOperationException();
+    }
+
+    public Collection<IFilesystem.IMount> getMounts(Pattern typeFilter) throws Exception {
+	return getMounts(typeFilter, false);
+    }
+
+    public Collection<IFilesystem.IMount> getMounts(Pattern typeFilter, boolean include) throws Exception {
+	if (mounts == null) {
+	    getMounts();
+	}
+	if (typeFilter == null) {
+	    for (IFilesystem.IMount mount : mounts) {
+		logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+	    }
+	    return mounts;
+	} else {
+	    Collection<IFilesystem.IMount> results = new ArrayList<IFilesystem.IMount>();
+	    for (IFilesystem.IMount mount : mounts) {
+		if (typeFilter.matcher(mount.getType()).find()) {
+		    if (include) {
+			logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+			results.add(mount);
+		    } else {
+			logger.debug(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
+		    }
+		} else {
+		    if (include) {
+			logger.debug(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
+		    } else {
+			logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+			results.add(mount);
+		    }
+		}
+	    }
+	    return results;
 	}
     }
 

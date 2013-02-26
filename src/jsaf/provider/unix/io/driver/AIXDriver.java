@@ -36,14 +36,14 @@ import jsaf.util.StringTools;
  * @version %I% %G%
  */
 public class AIXDriver extends AbstractDriver {
+    private static final String STAT = "ls -dn";
+
     public AIXDriver(IUnixSession session) {
 	super(session);
     }
 
-    // Implement IUnixFilesystemDriver
-
-    public Collection<IFilesystem.IMount> getMounts(Pattern typeFilter) throws Exception {
-	Collection<IFilesystem.IMount> mounts = new ArrayList<IFilesystem.IMount>();
+    void getMounts() throws Exception {
+	mounts = new ArrayList<IFilesystem.IMount>();
 	int lineNum = 0;
 	for (String line : SafeCLI.multiLine("mount", session, IUnixSession.Timeout.S)) {
 	    if (lineNum++ > 1) { // skip the first two lines
@@ -63,17 +63,14 @@ public class AIXDriver extends AbstractDriver {
 		    mountPoint = tok.nextToken();
 		}
 		fsType = tok.nextToken();
-
-		if (typeFilter != null && typeFilter.matcher(fsType).find()) {
-		    logger.info(Message.STATUS_FS_MOUNT_SKIP, mountPoint, fsType);
-		} else if (mountPoint.startsWith(IUnixFilesystem.DELIM_STR)) {
-		    logger.info(Message.STATUS_FS_MOUNT_ADD, mountPoint, fsType);
+		if (mountPoint.startsWith(IUnixFilesystem.DELIM_STR)) {
 		    mounts.add(new Mount(mountPoint, fsType));
 		}
 	    }
 	}
-	return mounts;
     }
+
+    // Implement IUnixFilesystemDriver
 
     public String getFindCommand(List<ISearchable.ICondition> conditions) {
 	String from = null;
@@ -81,7 +78,7 @@ public class AIXDriver extends AbstractDriver {
 	boolean followLinks = false;
 	boolean xdev = false;
 	Pattern path = null, dirname = null, basename = null;
-	String literalBasename = null, antiBasename = null;
+	String literalBasename = null, antiBasename = null, fsType = null;
 	int depth = ISearchable.DEPTH_UNLIMITED;
 
 	for (ISearchable.ICondition condition : conditions) {
@@ -116,6 +113,9 @@ public class AIXDriver extends AbstractDriver {
 		    break;
 		}
 		break;
+	      case IFilesystem.FIELD_FSTYPE:
+		fsType = (String)condition.getValue();
+		break;
 	      case ISearchable.FIELD_DEPTH:
 		depth = ((Integer)condition.getValue()).intValue();
 		break;
@@ -133,6 +133,9 @@ public class AIXDriver extends AbstractDriver {
 	StringBuffer cmd = new StringBuffer(FIND).append(" ").append(from);
 	if (xdev) {
 	    cmd.append(" -xdev");
+	}
+	if (fsType != null) {
+	    cmd.append(" -fstype ").append(fsType);
 	}
 	if (path == null) {
 	    if (dirname == null) {
@@ -190,12 +193,16 @@ public class AIXDriver extends AbstractDriver {
 	    cmd.append(" -type f");
 	    cmd.append(" | grep -E '").append(path.pattern()).append("'");
 	}
-	cmd.append(" | xargs -i ").append(getStatCommand()).append(" '{}'");
+	cmd.append(" | xargs -i ").append(STAT).append(" '{}'");
 	return cmd.toString();
     }
 
+    public String getStatCommand(String path) {
+	return new StringBuffer(STAT).append(" '").append(path).append("'").toString();
+    }
+
     public String getStatCommand() {
-	return "ls -dn";
+	throw new UnsupportedOperationException();
     }
 
     public UnixFileInfo nextFileInfo(Iterator<String> lines) {

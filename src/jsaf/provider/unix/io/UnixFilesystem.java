@@ -47,7 +47,6 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 
     private UnixFileSearcher searcher;
     private IUnixFilesystemDriver driver;
-    private Collection<IMount> mounts;
 
     public UnixFilesystem(IUnixSession session) {
 	super(session, DELIM_STR, "fs");
@@ -81,28 +80,12 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 	}
     }
 
-    public Collection<IMount> getMounts(Pattern filter) throws IOException {
-	if (mounts == null) {
-	    try {
-		mounts = getDriver().getMounts(null);
-	    } catch (Exception e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		throw new IOException(e);
-	    }
-	}
-	if (filter == null) {
-	    return mounts;
-	} else {
-	    Collection<IMount> results = new ArrayList<IMount>();
-	    for (IMount mount : mounts) {
-		if (filter.matcher(mount.getType()).find()) {
-		    logger.info(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
-		} else {
-		    logger.info(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
-		    results.add(mount);
-		}
-	    }
-	    return results;
+    public Collection<IMount> getMounts(Pattern filter, boolean include) throws IOException {
+	try {
+	    return getDriver().getMounts(filter, include);
+	} catch (Exception e) {
+	    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    throw new IOException(e);
 	}
     }
 
@@ -154,7 +137,7 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 	int exitCode = -1;
 	String data = null;
 	try {
-	    String cmd = new StringBuffer(getDriver().getStatCommand()).append(" ").append(path).toString();
+	    String cmd = new StringBuffer(getDriver().getStatCommand(path)).toString();
 	    SafeCLI.ExecData ed = SafeCLI.execData(cmd, null, session, S);
 	    exitCode = ed.getExitCode();
 	    data = new String(ed.getData(), StringTools.ASCII);

@@ -36,14 +36,14 @@ import jsaf.util.StringTools;
  * @version %I% %G%
  */
 public class SolarisDriver extends AbstractDriver {
+    private static final String STAT = "ls -dnE";
+
     public SolarisDriver(IUnixSession session) {
 	super(session);
     }
 
-    // Implement IUnixFilesystemDriver
-
-    public Collection<IFilesystem.IMount> getMounts(Pattern typeFilter) throws Exception {
-	Collection<IFilesystem.IMount> mounts = new ArrayList<IFilesystem.IMount>();
+    void getMounts() throws Exception {
+	mounts = new ArrayList<IFilesystem.IMount>();
 	IFile f = session.getFilesystem().getFile("/etc/vfstab");
 	IReader reader = PerishableReader.newInstance(f.getInputStream(), session.getTimeout(IUnixSession.Timeout.S));
 	String line = null;
@@ -54,16 +54,14 @@ public class SolarisDriver extends AbstractDriver {
 		String fixdev = tok.nextToken();
 		String mountPoint = tok.nextToken();
 		String fsType = tok.nextToken();
-		if (typeFilter != null && typeFilter.matcher(fsType).find()) {
-		    logger.info(Message.STATUS_FS_MOUNT_SKIP, mountPoint, fsType);
-		} else if (mountPoint.startsWith(IUnixFilesystem.DELIM_STR)) {
-		    logger.info(Message.STATUS_FS_MOUNT_ADD, mountPoint, fsType);
+		if (mountPoint.startsWith(IUnixFilesystem.DELIM_STR)) {
 		    mounts.add(new Mount(mountPoint, fsType));
 		}
 	    }
 	}
-	return mounts;
     }
+
+    // Implement IUnixFilesystemDriver
 
     public String getFindCommand(List<ISearchable.ICondition> conditions) {
 	String from = null;
@@ -71,7 +69,7 @@ public class SolarisDriver extends AbstractDriver {
 	boolean followLinks = false;
 	boolean xdev = false;
 	Pattern path = null, dirname = null, basename = null;
-	String literalBasename = null, antiBasename = null;
+	String literalBasename = null, antiBasename = null, fsType = null;
 	int depth = 1;
 
 	for (ISearchable.ICondition condition : conditions) {
@@ -106,6 +104,9 @@ public class SolarisDriver extends AbstractDriver {
 		    break;
 		}
 		break;
+	      case IFilesystem.FIELD_FSTYPE:
+		fsType = (String)condition.getValue();
+		break;
 	      case ISearchable.FIELD_DEPTH:
 		depth = ((Integer)condition.getValue()).intValue();
 		break;
@@ -123,6 +124,9 @@ public class SolarisDriver extends AbstractDriver {
 	StringBuffer cmd = new StringBuffer(FIND).append(" ").append(from);
 	if (xdev) {
 	    cmd.append(" -mount");
+	}
+	if (fsType != null) {
+	    cmd.append(" -fstype ").append(fsType);
 	}
 	if (path == null) {
 	    if (dirname == null) {
@@ -181,12 +185,12 @@ public class SolarisDriver extends AbstractDriver {
 	    cmd.append(" -type f");
 	    cmd.append(" | /usr/xpg4/bin/grep -E '").append(path.pattern()).append("'");
 	}
-	cmd.append(" | xargs -i ").append(getStatCommand()).append(" '{}'");
+	cmd.append(" | xargs -i ").append(STAT).append(" '{}'");
 	return cmd.toString();
     }
 
-    public String getStatCommand() {
-	return "ls -dnE";
+    public String getStatCommand(String path) {
+	return new StringBuffer(STAT).append(" '").append(path).append("'").toString();
     }
 
     public UnixFileInfo nextFileInfo(Iterator<String> lines) {

@@ -127,27 +127,39 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	return searcher;
     }
 
-    public Collection<IMount> getMounts(Pattern filter) throws IOException {
+    public Collection<IMount> getMounts(Pattern filter, boolean include) throws IOException {
 	try {
 	    if (mounts == null) {
 		mounts = new ArrayList<IMount>();
 		IWmiProvider wmi = ((IWindowsSession)session).getWmiProvider();
 		for (ISWbemObject obj : wmi.execQuery(IWmiProvider.CIMv2, DRIVE_QUERY)) {
 		    IMount mount = new WindowsMount(obj);
-		    logger.info(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
 		    mounts.add(mount);
 		}
 	    }
 	    if (filter == null) {
+		for (IMount mount : mounts) {
+		    logger.info(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+		}
 		return mounts;
 	    } else {
 		Collection<IMount> results = new ArrayList<IMount>();
 		for (IMount mount : mounts) {
 		    if (filter.matcher(mount.getType()).find()) {
-			logger.info(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
+			if (include) {
+			    logger.info(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+			    results.add(mount);
+			} else {
+			    logger.info(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
+			}
 		    } else {
-			results.add(mount);
-		    } 
+			if (include) {
+			    logger.info(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
+			} else {
+			    logger.info(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+			    results.add(mount);
+			}
+		    }
 		}
 		return results;
 	    }

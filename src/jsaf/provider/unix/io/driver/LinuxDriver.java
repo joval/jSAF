@@ -3,6 +3,7 @@
 
 package jsaf.provider.unix.io.driver;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -37,32 +38,29 @@ import jsaf.util.StringTools;
  * @version %I% %G%
  */
 public class LinuxDriver extends AbstractDriver {
+    private static final String PRINTF = " -printf \"%M\\0%Z\\0%U\\0%G\\0%s\\0%A@\\0%C@\\0%T@\\0%p\\0%l\\n\"";
+    private static final String WILDCARD = ".*";
+
     public LinuxDriver(IUnixSession session) {
 	super(session);
     }
 
-    // Implement IUnixFilesystemDriver
-
-    public Collection<IFilesystem.IMount> getMounts(Pattern typeFilter) throws Exception {
-	Collection<IFilesystem.IMount> mounts = new ArrayList<IFilesystem.IMount>();
-	for (String line : SafeCLI.multiLine("mount", session, IUnixSession.Timeout.S)) {
-	    if (line.length() > 0) {
-		StringTokenizer tok = new StringTokenizer(line);
-		String device = tok.nextToken();
-		tok.nextToken(); // on
+    void getMounts() throws Exception {
+	mounts = new ArrayList<IFilesystem.IMount>();
+	String command = "mount | awk '{print $3}' | xargs -I{} find {} -prune -printf \"%p %F\\n\" 2>/dev/null";
+	for (String line : SafeCLI.multiLine(command, session, IUnixSession.Timeout.S)) {
+	    StringTokenizer tok = new StringTokenizer(line);
+	    if (tok.countTokens() == 2) {
 		String mountPoint = tok.nextToken();
-		tok.nextToken(); // type
 		String fsType = tok.nextToken();
-		if (typeFilter != null && typeFilter.matcher(fsType).find()) {
-		    logger.info(Message.STATUS_FS_MOUNT_SKIP, mountPoint, fsType);
-		} else if (mountPoint.startsWith(IUnixFilesystem.DELIM_STR)) {
-		    logger.info(Message.STATUS_FS_MOUNT_ADD, mountPoint, fsType);
+		if (mountPoint.startsWith(IUnixFilesystem.DELIM_STR)) {
 		    mounts.add(new Mount(mountPoint, fsType));
 		}
 	    }
 	}
-	return mounts;
     }
+
+    // Implement IUnixFilesystemDriver
 
     public String getFindCommand(List<ISearchable.ICondition> conditions) {
 	String from = null;
@@ -70,7 +68,7 @@ public class LinuxDriver extends AbstractDriver {
 	boolean followLinks = false;
 	boolean xdev = false;
 	Pattern path = null, dirname = null, basename = null;
-	String literalBasename = null, antiBasename = null;
+	String literalBasename = null, antiBasename = null, fsType = null;
 	int depth = ISearchable.DEPTH_UNLIMITED;
 
 	for (ISearchable.ICondition condition : conditions) {
@@ -105,6 +103,9 @@ public class LinuxDriver extends AbstractDriver {
 		    break;
 		}
 		break;
+	      case IFilesystem.FIELD_FSTYPE:
+		fsType = (String)condition.getValue();
+		break;
 	      case ISearchable.FIELD_DEPTH:
 		depth = ((Integer)condition.getValue()).intValue();
 		break;
@@ -123,17 +124,27 @@ public class LinuxDriver extends AbstractDriver {
 	if (xdev) {
 	    cmd.append(" -mount");
 	}
+	if (fsType != null) {
+	    cmd.append(" -fstype ").append(fsType);
+	}
 	if (depth != ISearchable.DEPTH_UNLIMITED) {
 	    cmd.append(" -maxdepth ").append(Integer.toString(depth));
 	}
+
 	if (dirOnly) {
 	    cmd.append(" -type d");
+	    cmd.append(PRINTF);
 	    if (dirname != null) {
-		cmd.append(" | grep -E \"").append(dirname.pattern()).append("\"");
+		if (!dirname.pattern().equals(WILDCARD)) {
+		    cmd.append(" | awk --posix -F\\\\0 '$9 ~ /").append(escape(dirname)).append("/'");
+		}
 	    }
 	} else {
 	    if (path != null) {
-		cmd.append(" | grep -E '").append(path.pattern()).append("'");
+		cmd.append(PRINTF);
+		if (!path.pattern().equals(WILDCARD)) {
+		    cmd.append(" | awk --posix -F\\\\0 '$9 ~ /").append(escape(path)).append("/'");
+		}
 	    } else {
 		if (dirname != null) {
 		    cmd.append(" -type d");
@@ -142,108 +153,116 @@ public class LinuxDriver extends AbstractDriver {
 		}
 		cmd.append(" -type f");
 		if (basename != null) {
-		    cmd.append(" | awk --posix -F/ '$NF ~ /");
-		    cmd.append(basename.pattern());
-		    cmd.append("/'");
+		    cmd.append(PRINTF);
+		    if (!basename.pattern().equals(WILDCARD)) {
+			cmd.append(" | awk --posix -F\\\\0 '{n=split($9,a,\"/\");if(match(a[n],\"");
+			cmd.append(basename.pattern());
+			cmd.append("\") > 0) print $0}'");
+		    }
 		} else if (antiBasename != null) {
 		    cmd.append(" ! -name '").append(antiBasename).append("'");
+		    cmd.append(PRINTF);
 		} else if (literalBasename != null) {
 		    cmd.append(" -name '").append(literalBasename).append("'");
+		    cmd.append(PRINTF);
 		}
 	    }
 	}
-	cmd.append(" | xargs -I{} ").append(getStatCommand()).append(" '{}'");
 	return cmd.toString();
     }
 
-    public String getStatCommand() {
-	return "ls -dnZ --full-time";
+    public String getStatCommand(String path) {
+	return new StringBuffer("find '").append(path).append("'").append(PRINTF).append(" -prune").toString();
     }
+
+    private static final String NULL = new String(new byte[] {0x00}, StringTools.ASCII);
 
     public UnixFileInfo nextFileInfo(Iterator<String> lines) {
 	String line = null;
-	while(lines.hasNext()) {
-	    if ((line = lines.next()).length() > 11) {
+	while (lines.hasNext()) {
+	    line = lines.next().trim();
+	    if (line.length() > 0) {
 		break;
 	    }
 	}
 	if (line == null || line.length() == 0) {
 	    return null;
 	}
+	StringTokenizer tok = new StringTokenizer(line, NULL);
+	if (tok.countTokens() < 9) {
+	    return nextFileInfo(lines);
+	} else {
+	    String permissions = tok.nextToken();
+	    char unixType = permissions.charAt(0);
+	    permissions = permissions.substring(1);
+	    boolean hasExtendedAcl = false;
 
-	char unixType = line.charAt(0);
-	String permissions = line.substring(1, 10);
-	boolean hasExtendedAcl = false;
-	if (line.charAt(10) == '+') {
-	    hasExtendedAcl = true;
-	}
-
-	StringTokenizer tok = new StringTokenizer(line.substring(11));
-	String linkCount = tok.nextToken();
-	String selinux = tok.nextToken();
-	int uid = -1;
-	try {
-	    uid = Integer.parseInt(tok.nextToken());
-	} catch (NumberFormatException e) {
-	    //DAS -- could be, e.g., 4294967294 (illegal "nobody" value)
-	}
-	int gid = -1;
-	try {
-	    gid = Integer.parseInt(tok.nextToken());
-	} catch (NumberFormatException e) {
-	    //DAS -- could be, e.g., 4294967294 (illegal "nobody" value)
-	}
-
-	IFileMetadata.Type type = IFileMetadata.Type.FILE;
-	switch(unixType) {
-	  case IUnixFileInfo.DIR_TYPE:
-	    type = IFileMetadata.Type.DIRECTORY;
-	    break;
-
-	  case IUnixFileInfo.LINK_TYPE:
-	    type = IFileMetadata.Type.LINK;
-	    break;
-
-	  case IUnixFileInfo.CHAR_TYPE:
-	  case IUnixFileInfo.BLOCK_TYPE:
-	    int ptr = -1;
-	    if ((ptr = line.indexOf(",")) > 11) {
-		tok = new StringTokenizer(line.substring(ptr+1));
+	    String selinux = tok.nextToken();
+	    int uid = -1;
+	    try {
+		uid = Integer.parseInt(tok.nextToken());
+	    } catch (NumberFormatException e) {
+		//DAS -- could be, e.g., 4294967294 (illegal "nobody" value)
 	    }
-	    break;
-	}
-
-	long length = 0;
-	try {
-	    length = Long.parseLong(tok.nextToken());
-	} catch (NumberFormatException e) {
-	}
-
-	long mtime = IFile.UNKNOWN_TIME;
-	String dateStr = tok.nextToken("/").trim();
-	try {
-	    String parsable = new StringBuffer(dateStr.substring(0, 23)).append(dateStr.substring(29)).toString();
-	    mtime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z").parse(parsable).getTime();
-	} catch (ParseException e) {
-	    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	}
-
-	String path = null, linkPath = null;
-	int begin = line.indexOf(session.getFilesystem().getDelimiter());
-	if (begin > 0) {
-	    int end = line.indexOf("->");
-	    if (end == -1) {
-		path = line.substring(begin).trim();
-	    } else if (end > begin) {
-		path = line.substring(begin, end).trim();
-		linkPath = line.substring(end+2).trim();
+	    int gid = -1;
+	    try {
+		gid = Integer.parseInt(tok.nextToken());
+	    } catch (NumberFormatException e) {
+		//DAS -- could be, e.g., 4294967294 (illegal "nobody" value)
 	    }
+
+	    IFileMetadata.Type type = IFileMetadata.Type.FILE;
+	    switch(unixType) {
+	      case IUnixFileInfo.DIR_TYPE:
+		type = IFileMetadata.Type.DIRECTORY;
+		break;
+
+	      case IUnixFileInfo.LINK_TYPE:
+		type = IFileMetadata.Type.LINK;
+		break;
+	    }
+
+	    long length = 0;
+	    try {
+		length = Long.parseLong(tok.nextToken());
+	    } catch (NumberFormatException e) {
+	    }
+
+	    long atime = IFile.UNKNOWN_TIME;
+	    try {
+		 atime = new BigDecimal(tok.nextToken()).movePointRight(3).longValue();
+	    } catch (NumberFormatException e) {
+	    }
+
+	    long ctime = IFile.UNKNOWN_TIME;
+	    try {
+		 ctime = new BigDecimal(tok.nextToken()).movePointRight(3).longValue();
+	    } catch (NumberFormatException e) {
+	    }
+
+	    long mtime = IFile.UNKNOWN_TIME;
+	    try {
+		 mtime = new BigDecimal(tok.nextToken()).movePointRight(3).longValue();
+	    } catch (NumberFormatException e) {
+	    }
+
+	    String path = tok.nextToken();
+	    String linkPath = null;
+	    if (tok.hasMoreTokens()) {
+		linkPath = tok.nextToken();
+	    }
+
+	    Properties extended = new Properties();
+	    extended.setProperty(IUnixFileInfo.SELINUX_DATA, selinux);
+
+	    return new UnixFileInfo(type, path, linkPath, ctime, mtime, atime, length,
+				    unixType, permissions, uid, gid, hasExtendedAcl, extended);
 	}
+    }
 
-	Properties extended = new Properties();
-	extended.setProperty(IUnixFileInfo.SELINUX_DATA, selinux);
+    // Private
 
-	return new UnixFileInfo(type, path, linkPath, IFile.UNKNOWN_TIME, mtime, IFile.UNKNOWN_TIME, length,
-				unixType, permissions, uid, gid, hasExtendedAcl, extended);
+    private String escape(Pattern p) {
+	return p.pattern().replace("/", "\\/");
     }
 }

@@ -255,6 +255,14 @@ public abstract class AbstractFilesystem implements IFilesystem {
 
     // Implement IFilesystem (partially)
 
+    public Collection<IMount> getMounts() throws IOException {
+	return getMounts(null);
+    }
+
+    public Collection<IMount> getMounts(Pattern typeFilter) throws IOException {
+	return getMounts(typeFilter, false);
+    }
+
     public String getDelimiter() {
 	return DELIM;
     }

@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -97,9 +98,8 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
     }
 
     public Collection<IFile> search(List<ISearchable.ICondition> conditions) throws Exception {
-	String from = null;
+	String from = null, basename = null, fsType = null;
 	Pattern pathPattern = null, dirPattern = null, basenamePattern = null;
-	String basename = null;
 	int maxDepth = DEPTH_UNLIMITED;
 	boolean dirOnly = false;
 	for (ISearchable.ICondition condition : conditions) {
@@ -135,6 +135,26 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 		    dirOnly = true;
 		}
 		break;
+	      case IFilesystem.FIELD_FSTYPE:
+		fsType = (String)condition.getValue();
+		break;
+	    }
+	}
+	if (fsType != null) {
+	    //
+	    // Verify that we're starting from a drive of the specified type
+	    //
+	    boolean ok = false;
+	    for (IFilesystem.IMount mount : fs.getMounts()) {
+		if (mount.getType().equals(fsType) && from.toUpperCase().startsWith(mount.getPath().toUpperCase())) {
+		    ok = true;
+		    break;
+		}
+	    }
+	    if (!ok) {
+		@SuppressWarnings("unchecked")
+		Collection<IFile> empty = (Collection<IFile>)Collections.EMPTY_LIST;
+		return empty;
 	    }
 	}
 	StringBuffer command = null;

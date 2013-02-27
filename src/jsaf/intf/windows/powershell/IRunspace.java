@@ -10,7 +10,7 @@ import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.provider.windows.powershell.PowershellException;
 
 /**
- * An interface to a powershell runspace.
+ * An interface to a Powershell 2.0 runspace.
  *
  * @author David A. Solin
  * @version %I% %G%

@@ -538,7 +538,7 @@ public class SafeCLI {
 	FileMonitor(IFilesystem fs, String path) {
 	    this.fs = fs;
 	    this.path = path;
-	    fs.getLogger().info(Message.STATUS_COMMAND_OUTPUT_TEMP, path);
+	    fs.getLogger().debug(Message.STATUS_COMMAND_OUTPUT_TEMP, path);
 	}
 
 	public void run() {

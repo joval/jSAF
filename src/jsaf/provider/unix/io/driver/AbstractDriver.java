@@ -16,6 +16,8 @@ import jsaf.intf.unix.system.IUnixSession;
 import jsaf.intf.util.ILoggable;
 
 abstract class AbstractDriver implements IUnixFilesystemDriver {
+    protected static final String WILDCARD = ".*";
+
     protected Collection<IFilesystem.IMount> mounts;
     protected IUnixSession session;
     protected LocLogger logger;

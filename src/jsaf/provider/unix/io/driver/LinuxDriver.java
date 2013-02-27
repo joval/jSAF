@@ -39,7 +39,6 @@ import jsaf.util.StringTools;
  */
 public class LinuxDriver extends AbstractDriver {
     private static final String PRINTF = " -printf \"%M\\0%Z\\0%U\\0%G\\0%s\\0%A@\\0%C@\\0%T@\\0%p\\0%l\\n\"";
-    private static final String WILDCARD = ".*";
 
     public LinuxDriver(IUnixSession session) {
 	super(session);
@@ -133,18 +132,16 @@ public class LinuxDriver extends AbstractDriver {
 
 	if (dirOnly) {
 	    cmd.append(" -type d");
-	    cmd.append(PRINTF);
-	    if (dirname != null) {
-		if (!dirname.pattern().equals(WILDCARD)) {
-		    cmd.append(" | awk --posix -F\\\\0 '$9 ~ /").append(escape(dirname)).append("/'");
-		}
+	    if (dirname != null && !dirname.pattern().equals(WILDCARD)) {
+		cmd.append(" -regextype posix-egrep -regex '").append(dirname.pattern()).append("'");
 	    }
+	    cmd.append(PRINTF);
 	} else {
 	    if (path != null) {
-		cmd.append(PRINTF);
 		if (!path.pattern().equals(WILDCARD)) {
-		    cmd.append(" | awk --posix -F\\\\0 '$9 ~ /").append(escape(path)).append("/'");
+		    cmd.append(" -regextype posix-egrep -regex '").append(path.pattern()).append("'");
 		}
+		cmd.append(PRINTF);
 	    } else {
 		if (dirname != null) {
 		    cmd.append(" -type d");
@@ -258,11 +255,5 @@ public class LinuxDriver extends AbstractDriver {
 	    return new UnixFileInfo(type, path, linkPath, ctime, mtime, atime, length,
 				    unixType, permissions, uid, gid, hasExtendedAcl, extended);
 	}
-    }
-
-    // Private
-
-    private String escape(Pattern p) {
-	return p.pattern().replace("/", "\\/");
     }
 }

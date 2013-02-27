@@ -130,10 +130,11 @@ public class MacOSXDriver extends AbstractDriver {
 	    sb.append(" -L");
 	}
 	String FIND = sb.toString();
-	StringBuffer cmd = new StringBuffer(FIND).append(" ").append(from);
+	StringBuffer cmd = new StringBuffer(FIND).append(" -E");
 	if (xdev) {
-	    cmd.append(" -mount");
+	    cmd.append("x");
 	}
+	cmd.append(" ").append(from);
 	if (fsType != null) {
 	    cmd.append(" -fstype ").append(fsType);
 	}
@@ -142,17 +143,19 @@ public class MacOSXDriver extends AbstractDriver {
 	}
 	if (dirOnly) {
 	    cmd.append(" -type d");
-	    if (dirname != null) {
-		cmd.append(" | grep -E \"").append(dirname.pattern()).append("\"");
+	    if (dirname != null && !dirname.pattern().equals(WILDCARD)) {
+		cmd.append(" -regex '").append(dirname.pattern()).append("'");
 	    }
 	} else {
-	    if (path != null) {
-		cmd.append(" | grep -E \"").append(path.pattern()).append("\"");
+	    if (path != null && !path.pattern().equals(WILDCARD)) {
+		cmd.append(" -regex '").append(path.pattern()).append("'");
 	    } else {
 		if (dirname != null) {
 		    cmd.append(" -type d");
-		    cmd.append(" | grep -E \"").append(dirname.pattern()).append("\"");
-		    cmd.append(" | xargs -I{} ").append(FIND).append(" '{}' -maxdepth 1");
+		    if (!dirname.pattern().equals(WILDCARD)) {
+			cmd.append(" -regex '").append(dirname.pattern()).append("'");
+		    }
+		    cmd.append(" -print0 | xargs -0 -I{} ").append(FIND).append(" '{}' -maxdepth 1");
 		}
 		cmd.append(" -type f");
 		if (basename != null) {
@@ -160,9 +163,9 @@ public class MacOSXDriver extends AbstractDriver {
 		    cmd.append(basename.pattern());
 		    cmd.append("/'");
 		} else if (antiBasename != null) {
-		    cmd.append(" ! -name \"").append(antiBasename).append("\"");
+		    cmd.append(" ! -name '").append(antiBasename).append("'");
 		} else if (literalBasename != null) {
-		    cmd.append(" -name \"").append(literalBasename).append("\"");
+		    cmd.append(" -name '").append(literalBasename).append("'");
 		}
 	    }
 	}

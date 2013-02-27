@@ -12,48 +12,24 @@ function Find-RegKeys {
     [int]$Depth = 1 
   )
 
-  try {
-    if ($Key.Length -eq 0) {
-      $FullPath = "Registry::$Hive"
-    } else {
-      $FullPath = "Registry::$Hive\$Key"
+  if ($Key.Length -eq 0) {
+    $FullPath = "Registry::$Hive"
+  } else {
+    $FullPath = "Registry::$Hive\$Key"
+  }
+  $ErrorActionPreference = "SilentlyContinue"
+  $CurrentKey = Get-Item -literalPath $FullPath
+  if ($CurrentKey -ne $null) {
+    if ($Key -imatch $Pattern) {
+      Filter-KeyConditions -RegKey $CurrentKey -WithLiteralVal $WithLiteralVal -WithValPattern $WithValPattern -WithEncodedVal $WithEncodedVal
     }
-    $CurrentKey = Get-Item -literalPath $FullPath
-    if ($CurrentKey -ne $null) {
-      $NextDepth = $Depth - 1
-      if ($Key -imatch $Pattern) {
-        if ($WithLiteralVal -ne "") {
-          foreach ($ValName in $CurrentKey.GetValueNames()) {
-            if ($ValName -eq $WithLiteralVal) {
-              $CurrentKey
-              break
-            }
-          }
-        } else {
-          if ($WithValPattern -ne "") {
-            foreach ($ValName in $CurrentKey.GetValueNames()) {
-              if ($ValName -imatch $WithValPattern) {
-                $CurrentKey
-                break
-              }
-            }
-          } else {
-            if ($WithEncodedVal -ne "") {
-              $DecodedVal = [System.Convert]::FromBase64String($WithEncodedVal)
-              foreach ($ValName in $CurrentKey.GetValueNames()) {
-                if ($ValName -eq $DecodedVal) {
-                  $CurrentKey
-                  break
-                }
-              }
-            } else {
-              $CurrentKey
-            }
-          }
-        }
+    if ($Depth -eq -1) {
+      foreach ($RegKey in Get-ChildItem $FullPath -recurse -force | Where-Object {$_.Name.Substring($_.Name.IndexOf("\") + 1) -imatch $Pattern}) {
+        Filter-KeyConditions -RegKey $RegKey -WithLiteralVal $WithLiteralVal -WithValPattern $WithValPattern -WithEncodedVal $WithEncodedVal
       }
-      if ($Depth -ne 0) {
-        $ErrorActionPreference = "SilentlyContinue"
+    } else {
+      if ($Depth -gt 0) {
+        $NextDepth = $Depth - 1
         foreach ($SubKeyName in $CurrentKey.GetSubKeyNames()) {
           if ($Key.Length -eq 0) {
             $SubKeyPath = $SubKeyName
@@ -64,5 +40,45 @@ function Find-RegKeys {
         }
       }
     }
-  } catch {}
+  }
+  $ErrorActionPreference = "Stop"
+}
+
+function Filter-KeyConditions {
+  param(
+    [Microsoft.Win32.RegistryKey]$RegKey,
+    [String]$WithLiteralVal = "",
+    [String]$WithEncodedVal = "",
+    [String]$WithValPattern = ""
+  )
+
+  if ($WithLiteralVal -ne "") {
+    foreach ($ValName in $RegKey.GetValueNames()) {
+      if ($ValName -eq $WithLiteralVal) {
+        $RegKey
+        break
+      }
+    }
+  } else {
+    if ($WithValPattern -ne "") {
+      foreach ($ValName in $RegKey.GetValueNames()) {
+        if ($ValName -imatch $WithValPattern) {
+          $RegKey
+          break
+        }
+      }
+    } else {
+      if ($WithEncodedVal -ne "") {
+        $DecodedVal = [System.Convert]::FromBase64String($WithEncodedVal)
+        foreach ($ValName in $RegKey.GetValueNames()) {
+          if ($ValName -eq $DecodedVal) {
+            $RegKey
+            break
+          }
+        }
+      } else {
+        $RegKey
+      }
+    }
+  }
 }

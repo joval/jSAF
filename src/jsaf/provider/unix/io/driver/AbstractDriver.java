@@ -103,9 +103,10 @@ abstract class AbstractDriver implements IUnixFilesystemDriver {
     // Internal
 
     /**
-     * Get the number of times the character '/' appears in the path.
+     * Get the number of times the character '/' appears in the path, or 0 if the path is /.
      */
     int getDepth(String path) {
+	if (path.equals("/")) return 0;
 	int depth = 0;
 	int ptr = 0;
 	while((ptr = path.indexOf("/", ptr)) != -1) {

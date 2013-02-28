@@ -99,6 +99,9 @@ public class Runspace implements IRunspace {
     }
 
     public synchronized void loadModule(InputStream in, long millis) throws IOException, PowershellException {
+	if (!p.isRunning()) {
+	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, p.exitValue()));
+	}
 	try {
 	    ByteArrayOutputStream buff = new ByteArrayOutputStream();
 	    StreamLogger input = new StreamLogger(null, in, buff);
@@ -148,6 +151,9 @@ public class Runspace implements IRunspace {
     }
 
     public synchronized String invoke(String command, long millis) throws IOException, PowershellException {
+	if (!p.isRunning()) {
+	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, p.exitValue()));
+	}
 	logger.debug(Message.STATUS_POWERSHELL_INVOKE, id, command);
 	byte[] bytes = command.trim().getBytes();
 	stdin.write(bytes);

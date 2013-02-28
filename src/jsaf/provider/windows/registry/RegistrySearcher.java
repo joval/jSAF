@@ -146,7 +146,7 @@ public class RegistrySearcher implements ISearchable<IKey> {
 		    results.add(registry.getKey(fullPath));
 		}
 	    } else {
-		String paths = runspace.invoke(sb.toString(), session.getTimeout(IWindowsSession.Timeout.XL));
+		String paths = runspace.invoke(command, session.getTimeout(IWindowsSession.Timeout.XL));
 		if (paths == null) {
 		    searchMap.put(command, new ArrayList<String>());
 		} else {

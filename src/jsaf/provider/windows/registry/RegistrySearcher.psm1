@@ -21,12 +21,11 @@ function Find-RegKeys {
   $CurrentKey = Get-Item -literalPath $FullPath
   if ($CurrentKey -ne $null) {
     if ($Key -imatch $Pattern) {
-      Filter-KeyConditions -RegKey $CurrentKey -WithLiteralVal $WithLiteralVal -WithValPattern $WithValPattern -WithEncodedVal $WithEncodedVal
+      Filter-KeyConditions $CurrentKey -WithLiteralVal $WithLiteralVal -WithValPattern $WithValPattern -WithEncodedVal $WithEncodedVal
     }
     if ($Depth -eq -1) {
-      foreach ($RegKey in Get-ChildItem $FullPath -recurse -force | Where-Object {$_.Name.Substring($_.Name.IndexOf("\") + 1) -imatch $Pattern}) {
-        Filter-KeyConditions -RegKey $RegKey -WithLiteralVal $WithLiteralVal -WithValPattern $WithValPattern -WithEncodedVal $WithEncodedVal
-      }
+      Get-ChildItem $FullPath -recurse -force | Where-Object {$_.Name.Substring($_.Name.IndexOf("\") + 1) -imatch $Pattern} |
+        Filter-KeyConditions -WithLiteralVal $WithLiteralVal -WithValPattern $WithValPattern -WithEncodedVal $WithEncodedVal
     } else {
       if ($Depth -gt 0) {
         $NextDepth = $Depth - 1
@@ -46,38 +45,41 @@ function Find-RegKeys {
 
 function Filter-KeyConditions {
   param(
+    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
     [Microsoft.Win32.RegistryKey]$RegKey,
     [String]$WithLiteralVal = "",
     [String]$WithEncodedVal = "",
     [String]$WithValPattern = ""
   )
 
-  if ($WithLiteralVal -ne "") {
-    foreach ($ValName in $RegKey.GetValueNames()) {
-      if ($ValName -eq $WithLiteralVal) {
-        $RegKey
-        break
-      }
-    }
-  } else {
-    if ($WithValPattern -ne "") {
+  PROCESS {
+    if ($WithLiteralVal -ne "") {
       foreach ($ValName in $RegKey.GetValueNames()) {
-        if ($ValName -imatch $WithValPattern) {
+        if ($ValName -eq $WithLiteralVal) {
           $RegKey
           break
         }
       }
     } else {
-      if ($WithEncodedVal -ne "") {
-        $DecodedVal = [System.Convert]::FromBase64String($WithEncodedVal)
+      if ($WithValPattern -ne "") {
         foreach ($ValName in $RegKey.GetValueNames()) {
-          if ($ValName -eq $DecodedVal) {
+          if ($ValName -imatch $WithValPattern) {
             $RegKey
             break
           }
         }
       } else {
-        $RegKey
+        if ($WithEncodedVal -ne "") {
+          $DecodedVal = [System.Convert]::FromBase64String($WithEncodedVal)
+          foreach ($ValName in $RegKey.GetValueNames()) {
+            if ($ValName -eq $DecodedVal) {
+              $RegKey
+              break
+            }
+          }
+        } else {
+          $RegKey
+        }
       }
     }
   }

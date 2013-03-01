@@ -193,7 +193,7 @@ public class AIXDriver extends AbstractDriver {
 	    cmd.append(" -type f");
 	    cmd.append(" | grep -E '").append(path.pattern()).append("'");
 	}
-	cmd.append(" | xargs -i ").append(STAT).append(" '{}'");
+	cmd.append(" | xargs -I{} ").append(STAT).append(" '{}'");
 	return cmd.toString();
     }
 

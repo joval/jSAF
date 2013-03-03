@@ -148,6 +148,9 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	 * simplistic, we invoke the native shell to interpret the command string.
 	 */
 	public void start() throws Exception {
+	    if (p != null) {
+		throw new IllegalStateException(Message.getMessage(Message.ERROR_PROCESS_RUNNING));
+	    }
 	    logger.debug(Message.STATUS_PROCESS_START, getCommand());
 	    List<String>args = new Vector<String>();
 	    args.addAll(getBaseCommand());
@@ -174,7 +177,9 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	}
 
 	public InputStream getInputStream() throws IOException {
-	    if (debug) {
+	    if (p == null) {
+		return null;
+	    } else if (debug) {
 		if (debugIn == null) {
 		    File f = null;
 		    if (wsdir == null) {
@@ -191,7 +196,9 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	}
 
 	public InputStream getErrorStream() throws IOException {
-	    if (debug) {
+	    if (p == null) {
+		return null;
+	    } else if (debug) {
 		if (debugErr == null) {
 		    File f = null;
 		    if (wsdir == null) {
@@ -208,11 +215,17 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	}
 
 	public OutputStream getOutputStream() {
-	    return p.getOutputStream();
+	    if (p == null) {
+		return null;
+	    } else {
+		return p.getOutputStream();
+	    }
 	}
 
 	public void waitFor(long millis) throws InterruptedException {
-	    if (millis == 0) {
+	    if (p == null) {
+		return;
+	    } if (millis == 0) {
 		p.waitFor();
 	    } else {
 		TimerTask task = new InterruptTask(Thread.currentThread());
@@ -234,6 +247,9 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	}
 
 	public int exitValue() throws IllegalThreadStateException {
+	    if (p == null) {
+		throw new IllegalStateException(Message.getMessage(Message.ERROR_PROCESS_STOPPED));
+	    }
 	    if (ec == null) {
 		ec = new Integer(p.exitValue());
 		logger.debug(Message.STATUS_PROCESS_END, getCommand(), ec);
@@ -242,7 +258,9 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	}
 
 	public void destroy() {
-	    p.destroy();
+	    if (p != null) {
+		p.destroy();
+	    }
 	}
 
 	public boolean isRunning() {

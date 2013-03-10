@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -202,10 +203,10 @@ public class SolarisDriver extends AbstractDriver {
 	}
 
 	char unixType = line.charAt(0);
-	String permissions = line.substring(1, 10);
-	boolean hasExtendedAcl = false;
+	String perms = line.substring(1, 10);
+	Boolean hasAcl = Boolean.FALSE;
 	if (line.charAt(10) == '+') {
-	    hasExtendedAcl = true;
+	    hasAcl = Boolean.TRUE;
 	}
 
 	StringTokenizer tok = new StringTokenizer(line.substring(11));
@@ -248,11 +249,11 @@ public class SolarisDriver extends AbstractDriver {
 	} catch (NumberFormatException e) {
 	}
 
-	long mtime = IFile.UNKNOWN_TIME;
+	Date mtime = null;
 	String dateStr = tok.nextToken("/").trim();
 	try {
 	    String parsable = new StringBuffer(dateStr.substring(0, 23)).append(dateStr.substring(29)).toString();
-	    mtime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z").parse(parsable).getTime();
+	    mtime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z").parse(parsable);
 	} catch (ParseException e) {
 	    e.printStackTrace();
 	}
@@ -273,8 +274,7 @@ public class SolarisDriver extends AbstractDriver {
 	    logger.warn(Message.ERROR_LINK_NOWHERE, path);
 	    return nextFileInfo(lines);
 	} else {
-	    return new UnixFileInfo(type, path, linkPath, IFile.UNKNOWN_TIME, mtime, IFile.UNKNOWN_TIME, length,
-				    unixType, permissions, uid, gid, hasExtendedAcl, null);
+	    return new UnixFileInfo(type, path, linkPath, null, mtime, null, length, unixType, perms, uid, gid, hasAcl, null);
 	}
     }
 }

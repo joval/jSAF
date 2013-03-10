@@ -7,6 +7,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Properties;
 
 import org.apache.jdbm.Serializer;
@@ -39,10 +40,13 @@ public class UnixFileSerializer implements Serializer<IFile>, Serializable {
 
     public IFile deserialize(DataInput in) throws IOException {
 	String path = in.readUTF();
-	String linkTarget = null;
-	long ctime = in.readLong();
-	long mtime = in.readLong();
-	long atime = in.readLong();
+	String link = null;
+	long temp = in.readLong();
+	Date ctime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
+	temp = in.readLong();
+	Date mtime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
+	temp = in.readLong();
+	Date atime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
 	IFileMetadata.Type type = IFileMetadata.Type.FILE;
 	switch(in.readInt()) {
 	  case SER_DIRECTORY:
@@ -50,25 +54,32 @@ public class UnixFileSerializer implements Serializer<IFile>, Serializable {
 	    break;
 	  case SER_LINK:
 	    type = IFileMetadata.Type.LINK;
-	    linkTarget = in.readUTF();
+	    link = in.readUTF();
 	    break;
 	}
 	long len = in.readLong();
-	char unixType = in.readChar();
-	String permissions = in.readUTF();
+	char uType = in.readChar();
+	String perms = in.readUTF();
 	int uid = in.readInt();
 	int gid = in.readInt();
-	boolean hasExtendedAcl = in.readBoolean();
-	Properties extended = null;
+	Boolean hasAcl = null;
+	switch(in.readShort()) {
+	  case 0:
+	    hasAcl = Boolean.FALSE;
+	    break;
+	  case 1:
+	    hasAcl = Boolean.FALSE;
+	    break;
+	}
+	Properties ext = null;
 	if (in.readBoolean()) {
-	    extended = new Properties();
+	    ext = new Properties();
 	    int propertyCount = in.readInt();
 	    for (int i=0; i < propertyCount; i++) {
-		extended.setProperty(in.readUTF(), in.readUTF());
+		ext.setProperty(in.readUTF(), in.readUTF());
 	    }
 	}
-	UnixFileInfo info = new UnixFileInfo(type, path, linkTarget, ctime, mtime, atime, len, unixType,
-					     permissions, uid, gid, hasExtendedAcl, extended);
+	UnixFileInfo info = new UnixFileInfo(type, path, link, ctime, mtime, atime, len, uType, perms, uid, gid, hasAcl, ext);
 	if (fs == null) {
 	    fs = AbstractFilesystem.instances.get(instanceKey);
 	}
@@ -92,18 +103,18 @@ public class UnixFileSerializer implements Serializer<IFile>, Serializable {
 	}
 	out.writeLong(f.length());
 
-	String unixType = info.getUnixFileType();
-	if (IUnixFileInfo.FILE_TYPE_DIR.equals(unixType)) {
+	String uType = info.getUnixFileType();
+	if (IUnixFileInfo.FILE_TYPE_DIR.equals(uType)) {
 	    out.writeChar(IUnixFileInfo.DIR_TYPE);
-	} else if (IUnixFileInfo.FILE_TYPE_FIFO.equals(unixType)) {
+	} else if (IUnixFileInfo.FILE_TYPE_FIFO.equals(uType)) {
 	    out.writeChar(IUnixFileInfo.FIFO_TYPE);
-	} else if (IUnixFileInfo.FILE_TYPE_LINK.equals(unixType)) {
+	} else if (IUnixFileInfo.FILE_TYPE_LINK.equals(uType)) {
 	    out.writeChar(IUnixFileInfo.LINK_TYPE);
-	} else if (IUnixFileInfo.FILE_TYPE_BLOCK.equals(unixType)) {
+	} else if (IUnixFileInfo.FILE_TYPE_BLOCK.equals(uType)) {
 	    out.writeChar(IUnixFileInfo.BLOCK_TYPE);
-	} else if (IUnixFileInfo.FILE_TYPE_CHAR.equals(unixType)) {
+	} else if (IUnixFileInfo.FILE_TYPE_CHAR.equals(uType)) {
 	    out.writeChar(IUnixFileInfo.CHAR_TYPE);
-	} else if (IUnixFileInfo.FILE_TYPE_SOCK.equals(unixType)) {
+	} else if (IUnixFileInfo.FILE_TYPE_SOCK.equals(uType)) {
 	    out.writeChar(IUnixFileInfo.SOCK_TYPE);
 	} else {
 	    out.writeChar(IUnixFileInfo.FILE_TYPE);
@@ -112,7 +123,14 @@ public class UnixFileSerializer implements Serializer<IFile>, Serializable {
 	out.writeUTF(info.getPermissions());
 	out.writeInt(info.getUserId());
 	out.writeInt(info.getGroupId());
-	out.writeBoolean(info.hasExtendedAcl());
+	Boolean hasAcl = info.hasPosixAcl();
+	if (hasAcl == null) {
+	    out.writeShort(2);
+	} else if (Boolean.TRUE.equals(hasAcl)) {
+	    out.writeShort(1);
+	} else {
+	    out.writeShort(0);
+	}
 	String[] extendedKeys = info.getExtendedKeys();
 	if (extendedKeys == null) {
 	    out.writeBoolean(false);

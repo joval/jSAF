@@ -4,6 +4,7 @@
 package jsaf.io.fs;
 
 import java.io.IOException;
+import java.util.Date;
 
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFileEx;
@@ -27,7 +28,8 @@ import jsaf.util.StringTools;
  */
 public class DefaultMetadata implements IFileMetadata, IFileEx {
     protected String path, linkPath, canonicalPath;
-    protected long ctime=IFile.UNKNOWN_TIME, mtime=IFile.UNKNOWN_TIME, atime=IFile.UNKNOWN_TIME, length=-1L;
+    protected long length=-1L;
+    protected Date ctime, mtime, atime;
     protected Type type = null;
 
     protected DefaultMetadata() {}
@@ -46,7 +48,7 @@ public class DefaultMetadata implements IFileMetadata, IFileEx {
     }
 
     public DefaultMetadata(Type type, String path, String linkPath, String canonicalPath,
-		long ctime, long mtime, long atime, long length) {
+		Date ctime, Date mtime, Date atime, long length) {
 
 	this.path = path;
 	this.linkPath = linkPath;
@@ -60,16 +62,28 @@ public class DefaultMetadata implements IFileMetadata, IFileEx {
 
     // Implement IFileMetadata
 
-    public long createTime() {
+    public Date getCreateTime() {
 	return ctime;
     }
 
-    public long lastModified() {
+    public long createTime() {
+	return ctime == null ? IFile.UNKNOWN_TIME : ctime.getTime();
+    }
+
+    public Date getLastModified() {
 	return mtime;
     }
 
-    public long accessTime() {
+    public long lastModified() {
+	return mtime == null ? IFile.UNKNOWN_TIME : mtime.getTime();
+    }
+
+    public Date getAccessTime() {
 	return atime;
+    }
+
+    public long accessTime() {
+	return atime == null ? IFile.UNKNOWN_TIME : atime.getTime();
     }
 
     public long length() {

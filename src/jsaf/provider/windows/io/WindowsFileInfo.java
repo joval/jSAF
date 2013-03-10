@@ -4,6 +4,7 @@
 package jsaf.provider.windows.io;
 
 import java.io.IOException;
+import java.util.Date;
 
 import jsaf.io.fs.DefaultMetadata;
 import jsaf.intf.windows.io.IWindowsFilesystem;
@@ -18,7 +19,7 @@ import jsaf.intf.windows.io.IWindowsFileInfo;
 public class WindowsFileInfo extends DefaultMetadata implements IWindowsFileInfo {
     private int winType;
 
-    public WindowsFileInfo(Type type, String path, String canonicalPath, long ctime, long mtime, long atime, long length,	
+    public WindowsFileInfo(Type type, String path, String canonicalPath, Date ctime, Date mtime, Date atime, long length,	
 		int winType) {
 
 	super(type, path, null, canonicalPath, ctime, mtime, atime, length);

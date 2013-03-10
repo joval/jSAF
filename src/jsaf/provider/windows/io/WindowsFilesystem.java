@@ -12,6 +12,7 @@ import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -208,7 +209,8 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	    }
 	}
 	if (start) {
-	    long ctime=IFile.UNKNOWN_TIME, mtime=IFile.UNKNOWN_TIME, atime=IFile.UNKNOWN_TIME, len=-1L;
+	    Date ctime=null, mtime=null, atime=null;
+	    long len=-1L;
 	    IFileMetadata.Type type = IFileMetadata.Type.FILE;
 	    int winType = IWindowsFileInfo.FILE_TYPE_UNKNOWN;
 	    String path = null;
@@ -232,11 +234,11 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 			} else {
 			    try {
 				if ("Ctime".equals(key)) {
-				    ctime = Timestamp.getTime(new BigInteger(val));
+				    ctime = new Date(Timestamp.getTime(new BigInteger(val)));
 				} else if ("Mtime".equals(key)) {
-				    mtime = Timestamp.getTime(new BigInteger(val));
+				    mtime = new Date(Timestamp.getTime(new BigInteger(val)));
 				} else if ("Atime".equals(key)) {
-				    atime = Timestamp.getTime(new BigInteger(val));
+				    atime = new Date(Timestamp.getTime(new BigInteger(val)));
 				} else if ("Length".equals(key)) {
 				    len = Long.parseLong(val);
 				} else if ("WinType".equals(key)) {

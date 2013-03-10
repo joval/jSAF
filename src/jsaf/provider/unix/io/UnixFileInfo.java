@@ -3,6 +3,7 @@
 
 package jsaf.provider.unix.io;
 
+import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Stack;
@@ -23,21 +24,21 @@ public class UnixFileInfo extends DefaultMetadata implements IUnixFileInfo {
     private String path;
     private String linkTarget;
     private String canonicalPath;
-    private boolean hasExtendedAcl = false;
+    private Boolean hasPosixAcl = null;
     private String permissions = null;
     private int uid, gid;
     private char unixType = FILE_TYPE;
     private Properties extended;
 
-    public UnixFileInfo(Type type, String path, String linkTarget, long ctime, long mtime, long atime, long length,
-			char unixType, String permissions, int uid, int gid, boolean hasExtendedAcl, Properties extended) {
+    public UnixFileInfo(Type type, String path, String linkTarget, Date ctime, Date mtime, Date atime, long length,
+			char unixType, String permissions, int uid, int gid, Boolean hasPosixAcl, Properties extended) {
 
 	super(type, path, linkTarget, linkTarget == null ? path : resolvePath(path, linkTarget), ctime, mtime, atime, length);
 	this.unixType = unixType;
 	this.permissions = permissions;
 	this.uid = uid;
 	this.gid = gid;
-	this.hasExtendedAcl = hasExtendedAcl;
+	this.hasPosixAcl = hasPosixAcl;
 	this.extended = extended; // extended data
     }
 
@@ -123,8 +124,12 @@ public class UnixFileInfo extends DefaultMetadata implements IUnixFileInfo {
 	return permissions.charAt(8) == 't';
     }
 
+    public Boolean hasPosixAcl() {
+	return hasPosixAcl;
+    }
+
     public boolean hasExtendedAcl() {
-	return hasExtendedAcl;
+	return Boolean.TRUE.equals(hasPosixAcl);
     }
 
     public String[] getExtendedKeys() {

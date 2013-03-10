@@ -6,6 +6,7 @@ package jsaf.io.fs;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
 
 import jsaf.intf.io.IRandomAccess;
 
@@ -19,9 +20,9 @@ import jsaf.intf.io.IRandomAccess;
 public interface IAccessor {
     boolean exists();
     DefaultMetadata getInfo() throws IOException;
-    long getCtime() throws IOException;
-    long getMtime() throws IOException;
-    long getAtime() throws IOException;
+    Date getCtime() throws IOException;
+    Date getMtime() throws IOException;
+    Date getAtime() throws IOException;
     long getLength() throws IOException;
     IRandomAccess getRandomAccess(String mode) throws IOException;
     InputStream getInputStream() throws IOException;

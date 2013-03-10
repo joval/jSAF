@@ -6,8 +6,9 @@ package jsaf.provider.unix.io.driver;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -189,10 +190,9 @@ public class LinuxDriver extends AbstractDriver {
 	if (tok.countTokens() < 9) {
 	    return nextFileInfo(lines);
 	} else {
-	    String permissions = tok.nextToken();
-	    char unixType = permissions.charAt(0);
-	    permissions = permissions.substring(1);
-	    boolean hasExtendedAcl = false;
+	    String perms = tok.nextToken();
+	    char unixType = perms.charAt(0);
+	    perms = perms.substring(1);
 
 	    String selinux = tok.nextToken();
 	    int uid = -1;
@@ -225,21 +225,17 @@ public class LinuxDriver extends AbstractDriver {
 	    } catch (NumberFormatException e) {
 	    }
 
-	    long atime = IFile.UNKNOWN_TIME;
+	    Date atime=null, ctime=null, mtime=null;
 	    try {
-		 atime = new BigDecimal(tok.nextToken()).movePointRight(3).longValue();
+		 atime = new Date(new BigDecimal(tok.nextToken()).movePointRight(3).longValue());
 	    } catch (NumberFormatException e) {
 	    }
-
-	    long ctime = IFile.UNKNOWN_TIME;
 	    try {
-		 ctime = new BigDecimal(tok.nextToken()).movePointRight(3).longValue();
+		 ctime = new Date(new BigDecimal(tok.nextToken()).movePointRight(3).longValue());
 	    } catch (NumberFormatException e) {
 	    }
-
-	    long mtime = IFile.UNKNOWN_TIME;
 	    try {
-		 mtime = new BigDecimal(tok.nextToken()).movePointRight(3).longValue();
+		 mtime = new Date(new BigDecimal(tok.nextToken()).movePointRight(3).longValue());
 	    } catch (NumberFormatException e) {
 	    }
 
@@ -249,11 +245,10 @@ public class LinuxDriver extends AbstractDriver {
 		linkPath = tok.nextToken();
 	    }
 
-	    Properties extended = new Properties();
-	    extended.setProperty(IUnixFileInfo.SELINUX_DATA, selinux);
+	    Properties ext = new Properties();
+	    ext.setProperty(IUnixFileInfo.SELINUX_DATA, selinux);
 
-	    return new UnixFileInfo(type, path, linkPath, ctime, mtime, atime, length,
-				    unixType, permissions, uid, gid, hasExtendedAcl, extended);
+	    return new UnixFileInfo(type, path, linkPath, ctime, mtime, atime, length, unixType, perms, uid, gid, null, ext);
 	}
     }
 }

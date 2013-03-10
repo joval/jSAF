@@ -15,6 +15,7 @@ import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -357,17 +358,33 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    return getInfo().getLinkPath();
 	}
 
+	public Date getAccessTime() throws IOException {
+	    return getInfo().getAccessTime();
+	}
+
 	public long accessTime() throws IOException {
 	    return getInfo().accessTime();
+	}
+
+	public Date getCreateTime() throws IOException {
+	    return getInfo().getCreateTime();
 	}
 
 	public long createTime() throws IOException {
 	    return getInfo().createTime();
 	}
 
-	public long lastModified() throws IOException {
+	public Date getLastModified() throws IOException {
 	    if (info == null) {
 		return accessor.getMtime();
+	    } else {
+		return info.getLastModified();
+	    }
+	}
+
+	public long lastModified() throws IOException {
+	    if (info == null) {
+		return accessor.getMtime() == null ? IFile.UNKNOWN_TIME : accessor.getMtime().getTime();
 	    } else {
 		return info.lastModified();
 	    }
@@ -601,11 +618,6 @@ public abstract class AbstractFilesystem implements IFilesystem {
 
 	public DefaultMetadata getInfo() throws IOException {
 	    if (exists()) {
-		long ctime = getCtime();
-		long mtime = getMtime();
-		long atime = getAtime();
-		long length = getLength();
-
 		// Determine the file type...
 
 		IFileMetadata.Type type = IFileMetadata.Type.FILE;
@@ -634,16 +646,16 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    }
 	}
 
-	public long getCtime() throws IOException {
-	    return IFile.UNKNOWN_TIME;
+	public Date getCtime() throws IOException {
+	    return null;
 	}
 
-	public long getAtime() throws IOException {
-	    return IFile.UNKNOWN_TIME;
+	public Date getAtime() throws IOException {
+	    return null;
 	}
 
-	public long getMtime() throws IOException {
-	    return file.lastModified();
+	public Date getMtime() throws IOException {
+	    return new Date(file.lastModified());
 	}
 
 	public long getLength() throws IOException {

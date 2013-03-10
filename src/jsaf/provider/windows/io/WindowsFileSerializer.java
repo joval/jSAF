@@ -7,6 +7,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 
 import org.apache.jdbm.Serializer;
 
@@ -39,9 +40,12 @@ public class WindowsFileSerializer implements Serializer<IFile>, Serializable {
     public IFile deserialize(DataInput in) throws IOException {
 	String path = in.readUTF();
 	String canonicalPath = in.readUTF();
-	long ctime = in.readLong();
-	long mtime = in.readLong();
-	long atime = in.readLong();
+	long temp = in.readLong();
+	Date ctime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
+	temp = in.readLong();
+	Date mtime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
+	temp = in.readLong();
+	Date atime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
 	IFileMetadata.Type type = IFileMetadata.Type.FILE;
 	switch(in.readInt()) {
 	  case SER_DIRECTORY:

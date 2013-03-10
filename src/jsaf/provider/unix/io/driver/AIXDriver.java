@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -214,10 +215,10 @@ public class AIXDriver extends AbstractDriver {
 	}
 
 	char unixType = line.charAt(0);
-	String permissions = line.substring(1, 10);
-	boolean hasExtendedAcl = false;
+	String perms = line.substring(1, 10);
+	Boolean hasAcl = Boolean.FALSE;
 	if (line.charAt(10) == '+') {
-	    hasExtendedAcl = true;
+	    hasAcl = Boolean.TRUE;
 	}
 
 	StringTokenizer tok = new StringTokenizer(line.substring(11));
@@ -260,19 +261,19 @@ public class AIXDriver extends AbstractDriver {
 	} catch (NumberFormatException e) {
 	}
 
-	long mtime = IFile.UNKNOWN_TIME;
+	Date mtime = null;
 	String dateStr = tok.nextToken("/").trim();
 	try {
 	    if (dateStr.indexOf(":") == -1) {
-		mtime = new SimpleDateFormat("MMM dd yyyy").parse(dateStr).getTime();
+		mtime = new SimpleDateFormat("MMM dd yyyy").parse(dateStr);
 	    } else {
-		mtime = new SimpleDateFormat("MMM dd HH:mm").parse(dateStr).getTime();
+		mtime = new SimpleDateFormat("MMM dd HH:mm").parse(dateStr);
 	    }
 	} catch (ParseException e) {
 	    e.printStackTrace();
 	}
 
-	String path = null, linkPath = null;
+	String path = null, link = null;
 	int begin = line.indexOf(session.getFilesystem().getDelimiter());
 	if (begin > 0) {
 	    int end = line.indexOf("->");
@@ -280,11 +281,10 @@ public class AIXDriver extends AbstractDriver {
 		path = line.substring(begin).trim();
 	    } else if (end > begin) {
 		path = line.substring(begin, end).trim();
-		linkPath = line.substring(end+2).trim();
+		link = line.substring(end+2).trim();
 	    }
 	}
 
-	return new UnixFileInfo(type, path, linkPath, IFile.UNKNOWN_TIME, mtime, IFile.UNKNOWN_TIME, length,
-				unixType, permissions, uid, gid, hasExtendedAcl, null);
+	return new UnixFileInfo(type, path, link, null, mtime, null, length, unixType, perms, uid, gid, hasAcl, null);
     }
 }

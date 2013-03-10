@@ -6,6 +6,7 @@ package jsaf.intf.io;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 /**
@@ -28,13 +29,6 @@ public interface IFileMetadata {
     }
 
     /**
-     * Constant indicating the time value is unknown.
-     *
-     * @since 1.0
-     */
-    long UNKNOWN_TIME = -1L;
-
-    /**
      * Obtain the file type.
      *
      * @since 1.0
@@ -47,27 +41,6 @@ public interface IFileMetadata {
      * @since 1.0
      */
     String getLinkPath() throws IllegalStateException, IOException;
-
-    /**
-     * Get the time that the file was last accessed.
-     *
-     * @since 1.0
-     */
-    public long accessTime() throws IOException;
-
-    /**
-     * Get the time that the file was created.
-     *
-     * @since 1.0
-     */
-    public long createTime() throws IOException;
-
-    /**
-     * Get the time this file was last modified.
-     *
-     * @since 1.0
-     */
-    public long lastModified() throws IOException;
 
     /**
      * Get the size (in bytes) of this file.
@@ -96,4 +69,59 @@ public interface IFileMetadata {
      * @since 1.0
      */
     public IFileEx getExtended() throws IOException;
+
+    /**
+     * Get the time the file was last accessed. Returns null if unknown.
+     *
+     * @since 1.0.1
+     */
+    public Date getAccessTime() throws IOException;
+
+    /**
+     * Get the time the file was last modified. Returns null if unknown.
+     *
+     * @since 1.0.1
+     */
+    public Date getLastModified() throws IOException;
+
+    /**
+     * Get the time the file was created. Returns null if unknown.
+     *
+     * @since 1.0.1
+     */
+    public Date getCreateTime() throws IOException;
+
+    // Deprecated
+
+    /**
+     * Constant indicating the time value is unknown.
+     *
+     * @since 1.0
+     * @deprecated
+     */
+    long UNKNOWN_TIME = -1L;
+
+    /**
+     * Get the time that the file was last accessed.
+     *
+     * @since 1.0
+     * @deprecated
+     */
+    public long accessTime() throws IOException;
+
+    /**
+     * Get the time that the file was created.
+     *
+     * @since 1.0
+     * @deprecated
+     */
+    public long createTime() throws IOException;
+
+    /**
+     * Get the time this file was last modified.
+     *
+     * @since 1.0
+     * @deprecated
+     */
+    public long lastModified() throws IOException;
 }

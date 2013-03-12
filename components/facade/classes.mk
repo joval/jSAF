@@ -62,6 +62,8 @@ CLASSES=\
 	jsaf.intf.windows.wmi.IWmiProvider	\
 	jsaf.io.LittleEndian    \
 	jsaf.io.StreamTool      \
+	jsaf.protocol.zip.ZipURLConnection	\
+	jsaf.protocol.zip.ZipURLStreamHandler	\
 	jsaf.provider.SessionException	\
 	jsaf.provider.SessionFactory	\
 	jsaf.provider.windows.Timestamp	\

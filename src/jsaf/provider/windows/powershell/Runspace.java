@@ -31,7 +31,7 @@ import jsaf.util.StringTools;
  * @author David A. Solin
  * @version %I% %G%
  */
-public class Runspace implements IRunspace {
+class Runspace implements IRunspace {
     public static final String INIT_COMMAND = "powershell -version 2.0 -NoProfile -File -";
 
     private long timeout;		// contains default timeout
@@ -44,30 +44,20 @@ public class Runspace implements IRunspace {
     private OutputStream stdin;		// Input to the powershell process
     private HashSet<String> modules;
     private Charset encoding = null;
-
-    /**
-     * Create a new Runspace, based on the default architecture.
-     */
-    public Runspace(String id, IWindowsSession session) throws Exception {
-	this(id, session, session.supports(IWindowsSession.View._64BIT) ? IWindowsSession.View._64BIT : null);
-    }
-
-    /**
-     * Create a new Runspace, using the specified architecture (null for default).
-     */
-    public Runspace(String id, IWindowsSession session, IWindowsSession.View view) throws Exception {
-	this(id, session, view, StringTools.ASCII);
-    }
+    private boolean buffered;
 
     /**
      * Create a new Runspace, using the specified architecture (null for default) and encoding.
      */
-    public Runspace(String id, IWindowsSession session, IWindowsSession.View view, Charset encoding) throws Exception {
+    public Runspace(String id, IWindowsSession session, IWindowsSession.View view, Charset encoding, boolean buffered)
+		throws Exception {
+
 	this.id = id;
 	this.timeout = session.getTimeout(IWindowsSession.Timeout.M);
 	this.logger = session.getLogger();
 	this.view = view;
 	this.encoding = encoding;
+	this.buffered = buffered;
 	modules = new HashSet<String>();
 	if (view == IWindowsSession.View._32BIT) {
 	    String cmd = new StringBuffer("%SystemRoot%\\SysWOW64\\cmd.exe /c ").append(INIT_COMMAND).toString();
@@ -119,11 +109,19 @@ public class Runspace implements IRunspace {
 		while((line = reader.readLine()) != null) {
 		    stdin.write(line.getBytes());
 		    stdin.write("\r\n".getBytes());
+		    if (!buffered) {
+			stdin.flush();
+			readPrompt(millis);
+		    }
 		    lines++;
 		}
-		stdin.flush();
-		for (int i=0; i < lines; i++) {
-		    readPrompt(millis);
+		if (buffered) {
+		    if (lines > 0) {
+			stdin.flush();
+		    }
+		    for (int i=0; i < lines; i++) {
+			readPrompt(millis);
+		    }
 		}
 		if (">> ".equals(getPrompt())) {
 		    invoke("");
@@ -283,7 +281,7 @@ public class Runspace implements IRunspace {
 	//
 	// Poll the streams for no more than timeout millis if there is no data.
 	//
-	int interval = 250;
+	int interval = 25;
 	int max_iterations = (int)(millis / interval);
 	for (int i=0; i < max_iterations; i++) {
 	    int avail = 0;

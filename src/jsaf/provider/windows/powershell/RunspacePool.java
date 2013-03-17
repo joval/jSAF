@@ -25,21 +25,28 @@ import jsaf.util.StringTools;
  * @version %I% %G%
  */
 public class RunspacePool implements IRunspacePool {
+    /**
+     * Until Java 1.7, a process locks up when its output buffer fills up.
+     */
+    static final boolean PRE_17 = new Float("1.7").compareTo(new Float(System.getProperty("java.specification.version"))) > 0;
+
     private LocLogger logger;
     private IWindowsSession session;
     private Charset encoding;
+    private boolean buffered;
     private HashMap<String, Runspace> pool;
     private int capacity;
 
     public RunspacePool(IWindowsSession session, int capacity) {
-	this(session, capacity, StringTools.ASCII);
+	this(session, capacity, StringTools.ASCII, !PRE_17);
     }
 
-    public RunspacePool(IWindowsSession session, int capacity, Charset encoding) {
+    public RunspacePool(IWindowsSession session, int capacity, Charset encoding, boolean buffered) {
 	this.session = session;
 	logger = session.getLogger();
 	this.capacity = capacity;
 	this.encoding = encoding;
+	this.buffered = buffered;
 	pool = new HashMap<String, Runspace>();
     }
 
@@ -93,7 +100,7 @@ public class RunspacePool implements IRunspacePool {
     public synchronized IRunspace spawn(IWindowsSession.View view) throws Exception {
 	if (pool.size() < capacity()) {
 	    String id = Integer.toString(pool.size());
-	    Runspace runspace = new Runspace(id, session, view, encoding);
+	    Runspace runspace = new Runspace(id, session, view, encoding, buffered);
 	    logger.debug(Message.STATUS_POWERSHELL_SPAWN, id);
 	    pool.put(id, runspace);
 	    runspace.invoke("$host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(512,2000)");

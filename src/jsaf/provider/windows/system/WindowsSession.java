@@ -176,13 +176,7 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
     public String getMachineName() {
 	if (isConnected()) {
 	    try {
-		IKey key = reg.getKey(IRegistry.Hive.HKLM, IRegistry.COMPUTERNAME_KEY);
-		IValue val = key.getValue(IRegistry.COMPUTERNAME_VAL);
-		if (val.getType() == IValue.Type.REG_SZ) {
-		    return ((IStringValue)val).getData();
-		} else {
-		    logger.warn(Message.ERROR_MACHINENAME);
-		}
+		return reg.getStringValue(IRegistry.Hive.HKLM, IRegistry.COMPUTERNAME_KEY, IRegistry.COMPUTERNAME_VAL);
 	    } catch (Exception e) {
 		logger.warn(Message.ERROR_MACHINENAME);
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);

@@ -26,9 +26,11 @@ import org.slf4j.cal10n.LocLogger;
 import jsaf.Message;
 import jsaf.intf.util.ISearchable;
 import jsaf.intf.windows.powershell.IRunspace;
+import jsaf.intf.windows.registry.IExpandStringValue;
 import jsaf.intf.windows.registry.IKey;
 import jsaf.intf.windows.registry.ILicenseData;
 import jsaf.intf.windows.registry.IRegistry;
+import jsaf.intf.windows.registry.IStringValue;
 import jsaf.intf.windows.registry.IValue;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.util.Base64;
@@ -74,7 +76,7 @@ public class Registry implements IRegistry {
 	if (runspace == null) {
 	    runspace = session.getRunspacePool().spawn(view);
 	}
-	runspace.loadModule(getClass().getResourceAsStream("Registry.psm1"));
+	runspace.loadModule(Registry.class.getResourceAsStream("Registry.psm1"));
 	keyMap = new HashMap<String, IKey>();
 	valueMap = new HashMap<String, IValue[]>();
     }
@@ -255,6 +257,18 @@ public class Registry implements IRegistry {
 	IValue[] result = values.toArray(new IValue[values.size()]);
 	valueMap.put(key.toString(), result);
 	return result;
+    }
+
+    public String getStringValue(Hive hive, String subkey, String value) throws Exception {
+	IValue val = getKey(hive, subkey).getValue(value);
+	switch(val.getType()) {
+	  case REG_SZ:
+	    return ((IStringValue)val).getData();
+	  case REG_EXPAND_SZ:
+	    return ((IExpandStringValue)val).getExpandedData(session.getEnvironment());
+	  default:
+	    return null;
+	}
     }
 
     // Private

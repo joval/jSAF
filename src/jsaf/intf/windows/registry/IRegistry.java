@@ -228,4 +228,11 @@ public interface IRegistry extends ILoggable {
      * @since 1.0
      */
     IValue[] enumValues(IKey key) throws RegistryException;
+
+    /**
+     * A convenience method for retrieving a string value from the registry.
+     *
+     * @since 1.0.1
+     */
+    String getStringValue(Hive hive, String subkey, String value) throws Exception;
 }

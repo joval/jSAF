@@ -34,6 +34,8 @@ resources:
 	cp $(SRC)/jsaf/provider/windows/identity/*.psm1 $(BUILD)/jsaf/provider/windows/identity/
 	rm -f $(BUILD)/jsaf/provider/windows/io/*.psm1
 	cp $(SRC)/jsaf/provider/windows/io/*.psm1 $(BUILD)/jsaf/provider/windows/io/
+	rm -f $(BUILD)/jsaf/provider/windows/powershell/*.psm1
+	cp $(SRC)/jsaf/provider/windows/powershell/*.psm1 $(BUILD)/jsaf/provider/windows/powershell/
 	rm -f $(BUILD)/jsaf/provider/windows/registry/*.psm1
 	cp $(SRC)/jsaf/provider/windows/registry/*.psm1 $(BUILD)/jsaf/provider/windows/registry/
 

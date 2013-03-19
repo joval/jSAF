@@ -232,10 +232,11 @@ public class Registry implements IRegistry {
 	if (path != null) {
 	    sb.append(" -Key \"").append(path).append("\"");
 	}
+	sb.append(" | Transfer-Encode");
 	ArrayList<IValue> values = new ArrayList<IValue>();
 	String data = null;
 	try {
-	    data = runspace.invoke(sb.toString());
+	    data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.ASCII);
 	} catch (Exception e) {
 	    throw new RegistryException(e);
 	}
@@ -353,7 +354,7 @@ public class Registry implements IRegistry {
 		    value = new QwordValue(key, name, new BigInteger(data, 16));
 		    break;
 		  case REG_BINARY:
-		    value = new BinaryValue(key, name, Base64.decode(data));
+		    value = new BinaryValue(key, name, Base64.decode(data, Base64.DONT_GUNZIP));
 		    break;
 		}
 		logger.trace(Message.STATUS_WINREG_VALINSTANCE, value.toString());

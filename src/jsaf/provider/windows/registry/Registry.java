@@ -236,7 +236,7 @@ public class Registry implements IRegistry {
 	ArrayList<IValue> values = new ArrayList<IValue>();
 	String data = null;
 	try {
-	    data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.ASCII);
+	    data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.UTF8);
 	} catch (Exception e) {
 	    throw new RegistryException(e);
 	}

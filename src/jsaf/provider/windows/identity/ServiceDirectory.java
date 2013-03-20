@@ -13,6 +13,8 @@ import jsaf.Message;
 import jsaf.intf.windows.identity.IUser;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.intf.windows.powershell.IRunspace;
+import jsaf.util.Base64;
+import jsaf.util.StringTools;
 
 /**
  * The ServiceDirectory class provides a mechanism to handle NT service SID mappings.
@@ -93,7 +95,7 @@ class ServiceDirectory {
 	try {
 	    runspace.loadModule(getClass().getResourceAsStream("Service.psm1"));
 	    String name=null, sid=null;
-	    String data = runspace.invoke("Get-ServiceSids");
+	    String data = new String(Base64.decode(runspace.invoke("Get-ServiceSids | Transfer-Encode")), StringTools.UTF8);
 	    for (String line : data.split("\r\n")) {
 		if (line.startsWith("NAME:")) {
 		    name = line.substring(5).trim();

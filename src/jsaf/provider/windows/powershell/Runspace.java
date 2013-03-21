@@ -59,7 +59,7 @@ class Runspace implements IRunspace {
 	this.encoding = encoding;
 	this.buffered = buffered;
 	modules = new HashSet<String>();
-	if (view == IWindowsSession.View._32BIT) {
+	if (view == IWindowsSession.View._32BIT && session.getNativeView() == IWindowsSession.View._64BIT) {
 	    String cmd = new StringBuffer("%SystemRoot%\\SysWOW64\\cmd.exe /c ").append(INIT_COMMAND).toString();
 	    p = session.createProcess(cmd, null, null);
 	} else {

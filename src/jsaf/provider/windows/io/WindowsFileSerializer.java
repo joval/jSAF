@@ -8,6 +8,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.jdbm.Serializer;
 
@@ -57,7 +59,15 @@ public class WindowsFileSerializer implements Serializer<IFile>, Serializable {
 	}
 	long len = in.readLong();
 	int winType = in.readInt();
-	WindowsFileInfo info = new WindowsFileInfo(type, path, canonicalPath, ctime, mtime, atime, len, winType);
+	Map<String, String> peHeaders = null;
+	int numHeaders = in.readInt();
+	if (numHeaders > 0) {
+	    peHeaders = new HashMap<String, String>();
+	    for (int i=0; i < numHeaders; i++) {
+		peHeaders.put(in.readUTF(), in.readUTF());
+	    }
+	}
+	WindowsFileInfo info = new WindowsFileInfo(type, path, canonicalPath, ctime, mtime, atime, len, winType, peHeaders);
 	if (fs == null) {
 	    fs = AbstractFilesystem.instances.get(instanceKey);
 	}
@@ -80,5 +90,16 @@ public class WindowsFileSerializer implements Serializer<IFile>, Serializable {
 	out.writeLong(f.length());
 	IWindowsFileInfo info = (IWindowsFileInfo)f.getExtended();
 	out.writeInt(info.getWindowsFileType());
+	Map<String, String> peHeaders = info.getPEHeaders();
+	if (peHeaders == null) {
+	    out.writeInt(0);
+	} else {
+	    int size = peHeaders.size();
+	    out.writeInt(size);
+	    for (Map.Entry<String, String> entry : peHeaders.entrySet()) {
+		out.writeUTF(entry.getKey());
+		out.writeUTF(entry.getValue());
+	    }
+	}
     }
 }

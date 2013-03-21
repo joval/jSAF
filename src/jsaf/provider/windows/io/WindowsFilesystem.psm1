@@ -8,7 +8,7 @@ function Print-FileInfo {
   )
 
   BEGIN {
-    $code = @"
+    $Source = @"
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -81,6 +81,9 @@ namespace jOVAL.File {
 	[DllImport("kernel32.dll")]
 	static extern uint GetShortPathName(string longpath, StringBuilder sb, int buffer); 
 
+	[DllImport("Imagehlp.dll", EntryPoint="MapFileAndCheckSum", ExactSpelling=false,  CharSet=CharSet.Auto, SetLastError=true)]
+	static extern uint MapFileAndCheckSum(string Filename, out uint HeaderSum, out uint CheckSum);
+
 	public static int GetFileType(string Path) {
 	    IntPtr hSecurityAttributes = IntPtr.Zero;
 	    IntPtr hTemplate = IntPtr.Zero;
@@ -91,6 +94,15 @@ namespace jOVAL.File {
 	    }
 	    hFile.Close();
 	    return (int)type;
+	}
+
+	public static string GetChecksum(string Path) {
+	    uint HeaderSum, CheckSum = 0;
+	    uint result = MapFileAndCheckSum(Path, out HeaderSum, out CheckSum);
+	    if (result != 0) {
+		throw new System.ComponentModel.Win32Exception((int)result);
+	    }
+	    return CheckSum.ToString();
 	}
 
 	public static string GetWindowsPhysicalPath(string path) {
@@ -126,11 +138,10 @@ namespace jOVAL.File {
 "@
 
     $ErrorActionPreference = "SilentlyContinue" 
-    $type = [jOVAL.File.Probe]
-
+    $Type = [jOVAL.File.Probe]
     $ErrorActionPreference = "Stop" 
-    if($type -eq $null){
-      add-type $code
+    if($Type -eq $null){
+      Add-Type $Source
     }
   }
 
@@ -165,6 +176,36 @@ namespace jOVAL.File {
 	  Write-Output "Atime: $atime"
 	  $length = $inputObject.Length
 	  Write-Output "Length: $length"
+	  if ($length -gt 0) {
+	    $CheckSum = [jOVAL.File.Probe]::getChecksum($Path)
+	    Write-Output "pe.MSChecksum: $($CheckSum)"
+	  }
+	  $Info = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($path)
+	  if ($Info.FileVersion -ne $null) {
+	    Write-Output "pe.FileVersion: $($Info.FileVersion)"
+	    Write-Output "pe.FileMajorPart: $($Info.FileMajorPart)"
+	    Write-Output "pe.FileMinorPart: $($Info.FileMinorPart)"
+	    Write-Output "pe.FileBuildPart: $($Info.FileBuildPart)"
+	    Write-Output "pe.FilePrivatePart: $($Info.FilePrivatePart)"
+	  }
+	  if ($Info.ProductName -ne $null) {
+	    Write-Output "pe.ProductName: $($Info.ProductName)"
+	  }
+	  if ($Info.ProductVersion -ne $null) {
+	    Write-Output "pe.ProductVersion: $($Info.ProductVersion)"
+	  }
+	  if ($Info.CompanyName -ne $null) {
+	    Write-Output "pe.CompanyName: $($Info.CompanyName)"
+	  }
+	  if ($Info.Language -ne $null) {
+	    Write-Output "pe.Language: $($Info.Language)"
+	  }
+	  if ($Info.OriginalFilename -ne $null) {
+	    Write-Output "pe.OriginalFilename: $($Info.OriginalFilename)"
+	  }
+	  if ($Info.InternalName -ne $null) {
+	    Write-Output "pe.InternalName: $($Info.InternalName)"
+	  }
 	  Write-Output "}"
 	}
       }

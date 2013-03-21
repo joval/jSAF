@@ -4,6 +4,7 @@
 package jsaf.intf.windows.io;
 
 import java.io.IOException;
+import java.util.Map;
 
 import jsaf.intf.io.IFileEx;
 
@@ -63,4 +64,72 @@ public interface IWindowsFileInfo extends IFileEx {
      * @since 1.0
      */
     int getWindowsFileType() throws IOException;
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_MS_CHECKSUM = "MSChecksum";
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_VERSION = "FileVersion";
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_VERSION_MAJOR_PART = "FileMajorPart";
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_VERSION_MINOR_PART = "FileMinorPart";
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_VERSION_BUILD_PART = "FileBuildPart";
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_VERSION_PRIVATE_PART = "FilePrivatePart";
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_PRODUCT_NAME = "ProductName";
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_PRODUCT_VERSION = "ProductVersion";
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_COMPANY_NAME = "CompanyName";
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_LANGUAGE = "Language";
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_ORIGINAL_NAME = "OriginalFilename";
+
+    /**
+     * @since 1.0.1
+     */
+    String PE_INTERNAL_NAME = "InternalName";
+
+    /**
+     * Retrieve information from the Portable Execution (PE) format file headers.
+     *
+     * @return null if not a PE-format file
+     * @since 1.0.1
+     */
+    Map<String, String> getPEHeaders() throws IOException;
 }

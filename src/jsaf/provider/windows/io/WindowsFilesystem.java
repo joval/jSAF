@@ -213,6 +213,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	    long len=-1L;
 	    IFileMetadata.Type type = IFileMetadata.Type.FILE;
 	    int winType = IWindowsFileInfo.FILE_TYPE_UNKNOWN;
+	    Map<String, String> peHeaders = null;
 	    String path = null;
 
 	    while(input.hasNext()) {
@@ -231,6 +232,12 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 			String val = line.substring(ptr+1).trim();
 			if ("Path".equals(key)) {
 			    path = val;
+			} else if (key.startsWith("pe.")) {
+			    if (peHeaders == null) {
+				peHeaders = new HashMap<String, String>();
+			    }
+			    String header = key.substring(3);
+			    peHeaders.put(header, val);
 			} else {
 			    try {
 				if ("Ctime".equals(key)) {
@@ -251,7 +258,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 		    }
 		}
 	    }
-	    return new WindowsFileInfo(type, path, path, ctime, mtime, atime, len, winType);
+	    return new WindowsFileInfo(type, path, path, ctime, mtime, atime, len, winType, peHeaders);
 	}
 	return null;
     }

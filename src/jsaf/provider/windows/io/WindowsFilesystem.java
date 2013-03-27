@@ -10,10 +10,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -40,6 +42,8 @@ import jsaf.io.fs.DefaultMetadata;
 import jsaf.io.fs.IAccessor;
 import jsaf.provider.windows.Timestamp;
 import jsaf.provider.windows.wmi.WmiException;
+import jsaf.util.Base64;
+import jsaf.util.SafeCLI;
 import jsaf.util.StringTools;
 
 /**
@@ -180,6 +184,49 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	    return new WindowsFile((WindowsFileInfo)info);
 	} else {
 	    return super.createFileFromInfo(info);
+	}
+    }
+
+    @Override
+    public IFile[] getFiles(String[] paths) throws IOException {
+	try {
+	    HashSet<String> uniquePaths = new HashSet<String>();
+	    for (String path : paths) {
+		uniquePaths.add(path);
+	    }
+	    StringBuffer sb = new StringBuffer();
+	    for (String path : uniquePaths) {
+		SafeCLI.checkArgument(path, session);
+		if (sb.length() > 0) {
+		    sb.append(",");
+		}
+		sb.append("\"").append(path).append("\"");
+	    }
+	    sb.append(" | Print-FileInfo | Transfer-Encode");
+	    String data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.UTF8);
+	    Map<String, IFile> fileMap = new HashMap<String, IFile>();
+	    Iterator<String> iter = Arrays.asList(data.split("\r\n")).iterator();
+	    IWindowsFileInfo info = null;
+	    while ((info = nextFileInfo(iter)) != null) {
+		switch(info.getWindowsFileType()) {
+		  case IWindowsFileInfo.FILE_TYPE_UNKNOWN:
+		    break;
+		  default:
+		    IFile f = createFileFromInfo((IFileMetadata)info);
+		    fileMap.put(f.getPath().toLowerCase(), f);
+		    break;
+		}
+	    }
+	    IFile[] files = new IFile[paths.length];
+	    for (int i=0; i < paths.length; i++) {
+		files[i] = fileMap.get(paths[i].toLowerCase());
+	    }
+	    return files;
+	} catch (IOException e) {
+	    throw e;
+	} catch (Exception e) {
+	    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    throw new IOException(e.getMessage());
 	}
     }
 

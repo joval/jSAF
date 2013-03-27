@@ -148,66 +148,76 @@ namespace jOVAL.File {
   PROCESS {
     if (!($inputObject -eq $null)) {
       $type = $inputObject | Get-Member | %{$_.TypeName}
-      if ($type -eq "System.IO.DirectoryInfo") {
-	Write-Output "{"
-	Write-Output "Type: Directory"
-	$path = [jOVAL.File.Probe]::GetWindowsPhysicalPath($inputObject.FullName)
-	Write-Output "Path: $path"
-	$ctime = $inputObject.CreationTimeUtc.toFileTimeUtc()
-	$mtime = $inputObject.LastWriteTimeUtc.toFileTimeUtc()
-	$atime = $inputObject.LastAccessTimeUtc.toFileTimeUtc()
-	Write-Output "Ctime: $ctime"
-	Write-Output "Mtime: $mtime"
-	Write-Output "Atime: $atime"
-	Write-Output "}"
-      } else {
-	if ($type -eq "System.IO.FileInfo") {
-	  Write-Output "{"
-	  Write-Output "Type: File"
-	  $path = [jOVAL.File.Probe]::GetWindowsPhysicalPath($inputObject.FullName)
-	  $winType = [jOVAL.File.Probe]::GetFileType($path)
-	  Write-Output "WinType: $winType"
-	  Write-Output "Path: $path"
-	  $ctime = $inputObject.CreationTimeUtc.toFileTimeUtc()
-	  $mtime = $inputObject.LastWriteTimeUtc.toFileTimeUtc()
-	  $atime = $inputObject.LastAccessTimeUtc.toFileTimeUtc()
-	  Write-Output "Ctime: $ctime"
-	  Write-Output "Mtime: $mtime"
-	  Write-Output "Atime: $atime"
-	  $length = $inputObject.Length
-	  Write-Output "Length: $length"
-	  if ($length -gt 0) {
-	    $CheckSum = [jOVAL.File.Probe]::getChecksum($Path)
-	    Write-Output "pe.MSChecksum: $($CheckSum)"
-	  }
-	  $Info = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($path)
-	  if ($Info.FileVersion -ne $null) {
-	    Write-Output "pe.FileVersion: $($Info.FileVersion)"
-	    Write-Output "pe.FileMajorPart: $($Info.FileMajorPart)"
-	    Write-Output "pe.FileMinorPart: $($Info.FileMinorPart)"
-	    Write-Output "pe.FileBuildPart: $($Info.FileBuildPart)"
-	    Write-Output "pe.FilePrivatePart: $($Info.FilePrivatePart)"
-	  }
-	  if ($Info.ProductName -ne $null) {
-	    Write-Output "pe.ProductName: $($Info.ProductName)"
-	  }
-	  if ($Info.ProductVersion -ne $null) {
-	    Write-Output "pe.ProductVersion: $($Info.ProductVersion)"
-	  }
-	  if ($Info.CompanyName -ne $null) {
-	    Write-Output "pe.CompanyName: $($Info.CompanyName)"
-	  }
-	  if ($Info.Language -ne $null) {
-	    Write-Output "pe.Language: $($Info.Language)"
-	  }
-	  if ($Info.OriginalFilename -ne $null) {
-	    Write-Output "pe.OriginalFilename: $($Info.OriginalFilename)"
-	  }
-	  if ($Info.InternalName -ne $null) {
-	    Write-Output "pe.InternalName: $($Info.InternalName)"
-	  }
-	  Write-Output "}"
+      if ($type -eq "System.String") {
+	if (Test-Path $inputObject) {
+	  Get-Item $inputObject | Print-FileInfo
+	} else {
+          Write-Output "{"
+          Write-Output "Path: $($inputObject)"
+          Write-Output "}"
 	}
+      } else {
+        if ($type -eq "System.IO.DirectoryInfo") {
+          Write-Output "{"
+          Write-Output "Type: Directory"
+          $path = [jOVAL.File.Probe]::GetWindowsPhysicalPath($inputObject.FullName)
+          Write-Output "Path: $path"
+          $ctime = $inputObject.CreationTimeUtc.toFileTimeUtc()
+          $mtime = $inputObject.LastWriteTimeUtc.toFileTimeUtc()
+          $atime = $inputObject.LastAccessTimeUtc.toFileTimeUtc()
+          Write-Output "Ctime: $ctime"
+          Write-Output "Mtime: $mtime"
+          Write-Output "Atime: $atime"
+          Write-Output "}"
+        } else {
+          if ($type -eq "System.IO.FileInfo") {
+            Write-Output "{"
+            Write-Output "Type: File"
+            $path = [jOVAL.File.Probe]::GetWindowsPhysicalPath($inputObject.FullName)
+            $winType = [jOVAL.File.Probe]::GetFileType($path)
+            Write-Output "WinType: $winType"
+            Write-Output "Path: $path"
+            $ctime = $inputObject.CreationTimeUtc.toFileTimeUtc()
+            $mtime = $inputObject.LastWriteTimeUtc.toFileTimeUtc()
+            $atime = $inputObject.LastAccessTimeUtc.toFileTimeUtc()
+            Write-Output "Ctime: $ctime"
+            Write-Output "Mtime: $mtime"
+            Write-Output "Atime: $atime"
+            $length = $inputObject.Length
+            Write-Output "Length: $length"
+            if ($length -gt 0) {
+              $CheckSum = [jOVAL.File.Probe]::getChecksum($Path)
+              Write-Output "pe.MSChecksum: $($CheckSum)"
+            }
+            $Info = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($path)
+            if ($Info.FileVersion -ne $null) {
+              Write-Output "pe.FileVersion: $($Info.FileVersion)"
+              Write-Output "pe.FileMajorPart: $($Info.FileMajorPart)"
+              Write-Output "pe.FileMinorPart: $($Info.FileMinorPart)"
+              Write-Output "pe.FileBuildPart: $($Info.FileBuildPart)"
+              Write-Output "pe.FilePrivatePart: $($Info.FilePrivatePart)"
+            }
+            if ($Info.ProductName -ne $null) {
+              Write-Output "pe.ProductName: $($Info.ProductName)"
+            }
+            if ($Info.ProductVersion -ne $null) {
+              Write-Output "pe.ProductVersion: $($Info.ProductVersion)"
+            }
+            if ($Info.CompanyName -ne $null) {
+              Write-Output "pe.CompanyName: $($Info.CompanyName)"
+            }
+            if ($Info.Language -ne $null) {
+              Write-Output "pe.Language: $($Info.Language)"
+            }
+            if ($Info.OriginalFilename -ne $null) {
+              Write-Output "pe.OriginalFilename: $($Info.OriginalFilename)"
+            }
+            if ($Info.InternalName -ne $null) {
+              Write-Output "pe.InternalName: $($Info.InternalName)"
+            }
+            Write-Output "}"
+          }
+        }
       }
     }
   }

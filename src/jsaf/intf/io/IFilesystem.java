@@ -117,6 +117,14 @@ public interface IFilesystem extends ILoggable {
     IFile getFile(String path) throws IOException;
 
     /**
+     * Retrieve multiple IFiles at once, all with default (IFile.READONLY) access. The order of the files corresponds to the
+     * order of the path argument array.
+     *
+     * @since 1.0.1
+     */
+    IFile[] getFiles(String[] paths) throws IOException;
+
+    /**
      * Retrieve an IFile with the specified flags.
      *
      * @arg flags IFile.READONLY, IFile.READWRITE, IFile.READVOLATILE, IFile.NOCACHE

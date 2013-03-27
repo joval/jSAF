@@ -272,6 +272,14 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	return getFile(path, IFile.Flags.READONLY);
     }
 
+    public IFile[] getFiles(String[] paths) throws IOException {
+	IFile[] files = new IFile[paths.length];
+	for (int i=0; i < paths.length; i++) {
+	    files[i] = getFile(paths[i], IFile.Flags.READONLY);
+	}
+	return files;
+    }
+
     public final IFile getFile(String path, IFile.Flags flags) throws IOException {
         if (autoExpand) {
             path = env.expand(path);
@@ -339,7 +347,12 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    // Place in the cache if READONLY
 	    //
 	    if (flags == IFile.Flags.READONLY) {
-		putCache(this);
+		try {
+		    putCache(this);
+		} catch (Exception e) {
+		    logger.error("Exception caching entry for " + toString());
+		    logger.error(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		}
 	    }
 	}
 

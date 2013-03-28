@@ -157,11 +157,15 @@ namespace jOVAL.File {
           Write-Output "}"
 	}
       } else {
+	$OwnerSid = $inputObject.GetAccessControl().GetOwner([System.Security.Principal.SecurityIdentifier]).ToString()
+	$OwnerAccount = $inputObject.GetAccessControl().GetOwner([System.Security.Principal.NTAccount]).ToString()
         if ($type -eq "System.IO.DirectoryInfo") {
           Write-Output "{"
           Write-Output "Type: Directory"
           $path = [jOVAL.File.Probe]::GetWindowsPhysicalPath($inputObject.FullName)
           Write-Output "Path: $path"
+	  Write-Output "Owner.SID: $($OwnerSid)"
+	  Write-Output "Owner.Account: $($OwnerAccount)"
           $ctime = $inputObject.CreationTimeUtc.toFileTimeUtc()
           $mtime = $inputObject.LastWriteTimeUtc.toFileTimeUtc()
           $atime = $inputObject.LastAccessTimeUtc.toFileTimeUtc()
@@ -177,6 +181,8 @@ namespace jOVAL.File {
             $winType = [jOVAL.File.Probe]::GetFileType($path)
             Write-Output "WinType: $winType"
             Write-Output "Path: $path"
+	    Write-Output "Owner.SID: $($OwnerSid)"
+	    Write-Output "Owner.Account: $($OwnerAccount)"
             $ctime = $inputObject.CreationTimeUtc.toFileTimeUtc()
             $mtime = $inputObject.LastWriteTimeUtc.toFileTimeUtc()
             $atime = $inputObject.LastAccessTimeUtc.toFileTimeUtc()

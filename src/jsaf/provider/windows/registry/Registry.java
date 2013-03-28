@@ -10,6 +10,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -191,6 +192,50 @@ public class Registry implements IRegistry {
 	}
     }
 
+    public IKey[] getKeys(Hive hive, String[] paths) throws RegistryException {
+	Map<String, IKey> keys = new HashMap<String, IKey>();
+	HashSet<String> uniquePaths = new HashSet<String>();
+	for (String path : paths) {
+	    IKey key = new Key(this, hive, path);
+	    if (keyMap.containsKey(key.toString())) {
+		keys.put(path, keyMap.get(key.toString()));
+	    } else {
+		uniquePaths.add(path);
+	    }
+	}
+	if (uniquePaths.size() > 0) {
+	    getHive(hive); // idempotent hive initialization
+	    String[] testPaths = uniquePaths.toArray(new String[uniquePaths.size()]);
+	    StringBuffer sb = new StringBuffer();
+	    for (String path : testPaths) {
+		if (sb.length() > 0) {
+		    sb.append(",");
+		}
+		sb.append(getItemPath(new Key(this, hive, path)));
+	    }
+	    sb.append(" | %{Test-Path -LiteralPath $_} | Transfer-Encode");
+	    try {
+		String data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.UTF8);
+		int i=0;
+		for (String result : data.split("\r\n")) {
+		    if ("true".equalsIgnoreCase(result)) {
+			IKey key = new Key(this, hive, testPaths[i]);
+			keyMap.put(key.toString(), key);
+		    }
+		    i++;
+		}
+	    } catch (Exception e) {
+		throw new RegistryException(e);
+	    }
+	}
+	IKey[] results = new IKey[paths.length];
+	for (int i=0; i < paths.length; i++) {
+	    IKey key = new Key(this, hive, paths[i]);
+	    results[i] = keyMap.get(key.toString());
+	}
+	return results;
+    }
+
     public IKey[] enumSubkeys(IKey key) throws RegistryException {
 	try {
 	    StringBuffer sb = new StringBuffer("Get-Item -LiteralPath ").append(getItemPath(key));
@@ -260,6 +305,59 @@ public class Registry implements IRegistry {
 	return result;
     }
 
+    public IValue[] enumValues(Hive hive, String[] paths) throws RegistryException {
+	List<IValue> results = new ArrayList<IValue>();
+	HashSet<String> uniquePaths = new HashSet<String>();
+	for (String path : paths) {
+	    if (!uniquePaths.contains(path)) {
+		Key key = new Key(this, hive, path);
+		if (valueMap.containsKey(key.toString())) {
+		    results.addAll(Arrays.asList(valueMap.get(key.toString())));
+		} else {
+		    uniquePaths.add(path);
+		}
+	    }
+	}
+	if (uniquePaths.size() > 0) {
+	    StringBuffer sb = new StringBuffer();
+	    for (String path : uniquePaths) {
+		if (sb.length() > 0) {
+		    sb.append(",");
+		}
+		sb.append("\"").append(path).append("\"");
+	    }
+	    sb.append(" | Print-RegValues -Hive ").append(hive.getName()).append(" | Transfer-Encode");
+	    String data = null;
+	    try {
+		data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.UTF8);
+	    } catch (Exception e) {
+		throw new RegistryException(e);
+	    }
+	    if (data != null) {
+		Iterator<String> iter = StringTools.toList(data.split("\r\n")).iterator();
+		IKey key = null;
+		while((key = nextKey(iter)) != null) {
+		    ArrayList<IValue> values = new ArrayList<IValue>();
+		    while(true) {
+			try {
+			    IValue value = nextValue(key, iter);
+			    if (value == null) {
+				break;
+			    } else {
+				values.add(value);
+			    }
+			} catch (Exception e) {
+			    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+			}
+		    }
+		    valueMap.put(key.toString(), values.toArray(new IValue[values.size()]));
+		    results.addAll(values);
+		}
+	    }
+	}
+	return results.toArray(new IValue[results.size()]);
+    }
+
     public String getStringValue(Hive hive, String subkey, String value) throws Exception {
 	IValue val = getKey(hive, subkey).getValue(value);
 	switch(val.getType()) {
@@ -289,33 +387,63 @@ public class Registry implements IRegistry {
 
     static final String START = "{";
     static final String END = "}";
+    static final String EOF = "[EOF]";
+
+    /**
+     * Generate the next key from the input.
+     */
+    private IKey nextKey(Iterator<String> input) {
+	while(input.hasNext()) {
+	    String line = input.next().trim();
+	    if (line.startsWith("[") && line.endsWith("]")) {
+		String fullPath = line.substring(1,line.length()-1);
+		Hive hive = null;
+		String path = null;
+		int ptr = fullPath.indexOf(DELIM_STR);
+		if (ptr == -1) {
+		    hive = Hive.fromName(fullPath);
+		} else {
+		    hive = Hive.fromName(fullPath.substring(0, ptr));
+		    path = fullPath.substring(ptr+1);
+		}
+		IKey key = new Key(this, hive, path);
+		if (!keyMap.containsKey(key.toString())) {
+		    keyMap.put(key.toString(), key);
+		}
+		return key;
+	    }
+	}
+	return null;
+    }
 
     /**
      * Generate the next value for the key from the input.
      */
     private IValue nextValue(IKey key, Iterator<String> input) throws Exception {
-        boolean start = false;
-        while(input.hasNext()) {
-            String line = input.next();
-            if (line.trim().equals(START)) {
-                start = true;
-                break;
-            }
-        }
-        if (start) {
+	boolean start = false;
+	while(input.hasNext()) {
+	    String line = input.next();
+	    if (line.trim().equals(START)) {
+		start = true;
+		break;
+	    } else if (line.trim().equals(EOF)) {
+		break;
+	    }
+	}
+	if (start) {
 	    String name = null;
 	    IValue.Type type = null;
 	    String data = null;
 	    List<String> multiData = null;
-            while(input.hasNext()) {
-                String line = input.next();
-                if (line.equals(END)) {
-                    break;
-                } else if (line.startsWith("Kind: ")) {
-                    type = IValue.Type.fromKind(line.substring(6));
-                } else if (line.startsWith("Name: ")) {
+	    while(input.hasNext()) {
+		String line = input.next();
+		if (line.equals(END)) {
+		    break;
+		} else if (line.startsWith("Kind: ")) {
+		    type = IValue.Type.fromKind(line.substring(6));
+		} else if (line.startsWith("Name: ")) {
 		    name = line.substring(6);
-                } else if (line.startsWith("Data: ")) {
+		} else if (line.startsWith("Data: ")) {
 		    if (type == IValue.Type.REG_MULTI_SZ) {
 			if (multiData == null) {
 			    multiData = new ArrayList<String>();
@@ -324,14 +452,14 @@ public class Registry implements IRegistry {
 		    } else {
 			data = line.substring(6);
 		    }
-                } else if (data != null) {
+		} else if (data != null) {
 		    // continuation of data beyond a line-break
 		    data = data + line;
 		} else if (multiData != null) {
 		    // continuation of last data entry beyond a line-break
 		    multiData.add(new StringBuffer(multiData.remove(multiData.size() - 1)).append(line).toString());
 		}
-            }
+	    }
 	    if (type != null) {
 		IValue value = null;
 		switch(type) {
@@ -360,7 +488,7 @@ public class Registry implements IRegistry {
 		logger.trace(Message.STATUS_WINREG_VALINSTANCE, value.toString());
 		return value;
 	    }
-        }
-        return null;
+	}
+	return null;
     }
 }

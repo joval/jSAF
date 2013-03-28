@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import jsaf.intf.io.IFileEx;
+import jsaf.intf.windows.identity.IUser;
 
 /**
  * Defines extended attributes of a file on Windows.
@@ -124,6 +125,11 @@ public interface IWindowsFileInfo extends IFileEx {
      * @since 1.0.1
      */
     String PE_INTERNAL_NAME = "InternalName";
+
+    /**
+     * Get the file owner.
+     */
+    IUser getOwner() throws IOException;
 
     /**
      * Retrieve information from the Portable Execution (PE) format file headers.

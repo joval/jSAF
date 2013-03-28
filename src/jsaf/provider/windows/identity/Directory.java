@@ -97,8 +97,8 @@ public class Directory implements IDirectory {
 	service = new ServiceDirectory(session);
     }
 
-    public IWmiProvider getWmiProvider() {
-	return session.getWmiProvider();
+    IWindowsSession getSession() {
+	return session;
     }
 
     // Implement ILoggable

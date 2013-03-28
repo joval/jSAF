@@ -30,6 +30,7 @@ import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFileMetadata;
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.util.ISearchable;
+import jsaf.intf.windows.identity.IUser;
 import jsaf.intf.windows.io.IWindowsFileInfo;
 import jsaf.intf.windows.io.IWindowsFilesystem;
 import jsaf.intf.windows.powershell.IRunspace;
@@ -41,6 +42,7 @@ import jsaf.io.fs.AbstractFilesystem;
 import jsaf.io.fs.DefaultMetadata;
 import jsaf.io.fs.IAccessor;
 import jsaf.provider.windows.Timestamp;
+import jsaf.provider.windows.identity.User;
 import jsaf.provider.windows.wmi.WmiException;
 import jsaf.util.Base64;
 import jsaf.util.SafeCLI;
@@ -260,8 +262,8 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	    long len=-1L;
 	    IFileMetadata.Type type = IFileMetadata.Type.FILE;
 	    int winType = IWindowsFileInfo.FILE_TYPE_UNKNOWN;
-	    Map<String, String> peHeaders = null;
-	    String path = null;
+	    Map<String, String> pe = null;
+	    String path = null, ownerSid = null, ownerAccount = null;
 
 	    while(input.hasNext()) {
 		String line = input.next().trim();
@@ -279,12 +281,16 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 			String val = line.substring(ptr+1).trim();
 			if ("Path".equals(key)) {
 			    path = val;
+			} else if ("Owner.SID".equals(key)) {
+			    ownerAccount = val;
+			} else if ("Owner.Account".equals(key)) {
+			    ownerSid = val;
 			} else if (key.startsWith("pe.")) {
-			    if (peHeaders == null) {
-				peHeaders = new HashMap<String, String>();
+			    if (pe == null) {
+				pe = new HashMap<String, String>();
 			    }
 			    String header = key.substring(3);
-			    peHeaders.put(header, val);
+			    pe.put(header, val);
 			} else {
 			    try {
 				if ("Ctime".equals(key)) {
@@ -305,7 +311,11 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 		    }
 		}
 	    }
-	    return new WindowsFileInfo(type, path, path, ctime, mtime, atime, len, winType, peHeaders);
+	    IUser owner = null;
+	    if (ownerAccount != null && ownerSid != null) {
+		owner = new User((IWindowsSession)session, ownerAccount, ownerSid);
+	    }
+	    return new WindowsFileInfo(type, path, path, ctime, mtime, atime, len, winType, owner, pe);
 	}
 	return null;
     }

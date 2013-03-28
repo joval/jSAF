@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.intf.windows.identity.IPrincipal;
 
 /**
@@ -152,6 +153,18 @@ abstract class Principal implements IPrincipal {
     Principal(String domain, String name, String sid) {
 	this.domain = domain;
 	this.name = name;
+	this.sid = sid;
+    }
+
+    Principal(IWindowsSession session, String accountName, String sid) {
+	int ptr = accountName.indexOf("\\");
+	if (ptr == -1) {
+	    domain = session.getMachineName();
+	    name = accountName;
+	} else {
+	    domain = accountName.substring(0,ptr);
+	    name = accountName.substring(ptr+1);
+	}
 	this.sid = sid;
     }
 

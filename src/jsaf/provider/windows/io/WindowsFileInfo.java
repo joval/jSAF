@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Map;
 
 import jsaf.io.fs.DefaultMetadata;
+import jsaf.intf.windows.identity.IUser;
 import jsaf.intf.windows.io.IWindowsFilesystem;
 import jsaf.intf.windows.io.IWindowsFileInfo;
 
@@ -18,13 +19,15 @@ import jsaf.intf.windows.io.IWindowsFileInfo;
  * @version %I% %G%
  */
 public class WindowsFileInfo extends DefaultMetadata implements IWindowsFileInfo {
+    private IUser owner;
     private int winType;
     private Map<String, String> peHeaders;
 
     public WindowsFileInfo(Type type, String path, String canonicalPath, Date ctime, Date mtime, Date atime, long length,	
-		int winType, Map<String, String> peHeaders) {
+		int winType, IUser owner, Map<String, String> peHeaders) {
 
 	super(type, path, null, canonicalPath, ctime, mtime, atime, length);
+	this.owner = owner;
 	this.winType = winType;
 	this.peHeaders = peHeaders;
     }
@@ -36,6 +39,10 @@ public class WindowsFileInfo extends DefaultMetadata implements IWindowsFileInfo
      */
     public int getWindowsFileType() throws IOException {
 	return winType;
+    }
+
+    public IUser getOwner() throws IOException {
+	return owner;
     }
 
     public Map<String, String> getPEHeaders() throws IOException {

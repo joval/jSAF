@@ -35,6 +35,6 @@ public class ExpandStringValue extends Value implements IExpandStringValue {
     }
 
     public String toString() {
-	return "StringValue [Name=\"" + name + "\" Value=\"" + data + "\"]";
+	return "ExpandStringValue [Name=\"" + name + "\" Value=\"" + data + "\"]";
     }
 }

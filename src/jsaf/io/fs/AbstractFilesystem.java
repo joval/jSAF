@@ -100,6 +100,10 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	this.autoExpand = autoExpand;
     }
 
+    public ISession getSession() {
+	return session;
+    }
+
     public void dispose() {
 	if (db != null) {
 	    try {

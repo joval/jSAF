@@ -200,11 +200,19 @@ public interface IRegistry extends ILoggable {
     IKey getKey(String fullPath) throws NoSuchElementException, RegistryException;
 
     /**
-     * Return a key from a hive using the specified redirection mode.
+     * Return a key from a hive.
      *
      * @since 1.0
      */
     IKey getKey(Hive hive, String path) throws NoSuchElementException, RegistryException;
+
+    /**
+     * Return multiple subkeys from a hive all at once. Results will be in the same order as the paths argument. Non-existent
+     * paths will be reflected by null entries in the results.
+     *
+     * @since 1.0.1
+     */
+    IKey[] getKeys(Hive hive, String[] paths) throws RegistryException;
 
     /**
      * Return the child subkeys of the specified key.
@@ -228,6 +236,13 @@ public interface IRegistry extends ILoggable {
      * @since 1.0
      */
     IValue[] enumValues(IKey key) throws RegistryException;
+
+    /**
+     * Enumerate all the values beneath multiple subkeys of a hive.
+     *
+     * @since 1.0.1
+     */
+    IValue[] enumValues(Hive hive, String[] paths) throws RegistryException;
 
     /**
      * A convenience method for retrieving a string value from the registry.

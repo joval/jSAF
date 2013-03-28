@@ -15,7 +15,10 @@ import org.apache.jdbm.Serializer;
 
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFileMetadata;
+import jsaf.intf.windows.identity.IUser;
 import jsaf.intf.windows.io.IWindowsFileInfo;
+import jsaf.intf.windows.system.IWindowsSession;
+import jsaf.provider.windows.identity.User;
 import jsaf.io.fs.AbstractFilesystem;
 
 /**
@@ -59,18 +62,21 @@ public class WindowsFileSerializer implements Serializer<IFile>, Serializable {
 	}
 	long len = in.readLong();
 	int winType = in.readInt();
-	Map<String, String> peHeaders = null;
+	String accountName = in.readUTF();
+	String sid = in.readUTF();
+	Map<String, String> pe = null;
 	int numHeaders = in.readInt();
 	if (numHeaders > 0) {
-	    peHeaders = new HashMap<String, String>();
+	    pe = new HashMap<String, String>();
 	    for (int i=0; i < numHeaders; i++) {
-		peHeaders.put(in.readUTF(), in.readUTF());
+		pe.put(in.readUTF(), in.readUTF());
 	    }
 	}
-	WindowsFileInfo info = new WindowsFileInfo(type, path, canonicalPath, ctime, mtime, atime, len, winType, peHeaders);
 	if (fs == null) {
 	    fs = AbstractFilesystem.instances.get(instanceKey);
 	}
+	IUser owner = new User((IWindowsSession)fs.getSession(), accountName, sid);
+	WindowsFileInfo info = new WindowsFileInfo(type, path, canonicalPath, ctime, mtime, atime, len, winType, owner, pe);
 	return fs.createFileFromInfo(info);
     }
 
@@ -90,13 +96,15 @@ public class WindowsFileSerializer implements Serializer<IFile>, Serializable {
 	out.writeLong(f.length());
 	IWindowsFileInfo info = (IWindowsFileInfo)f.getExtended();
 	out.writeInt(info.getWindowsFileType());
-	Map<String, String> peHeaders = info.getPEHeaders();
-	if (peHeaders == null) {
+	out.writeUTF(info.getOwner().getNetbiosName());
+	out.writeUTF(info.getOwner().getSid());
+	Map<String, String> pe = info.getPEHeaders();
+	if (pe == null) {
 	    out.writeInt(0);
 	} else {
-	    int size = peHeaders.size();
+	    int size = pe.size();
 	    out.writeInt(size);
-	    for (Map.Entry<String, String> entry : peHeaders.entrySet()) {
+	    for (Map.Entry<String, String> entry : pe.entrySet()) {
 		out.writeUTF(entry.getKey());
 		out.writeUTF(entry.getValue());
 	    }

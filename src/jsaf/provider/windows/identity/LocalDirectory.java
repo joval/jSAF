@@ -69,7 +69,7 @@ class LocalDirectory implements ILoggable {
 	usersBySid = new Hashtable<String, IUser>();
 	groupsByNetbiosName = new Hashtable<String, IGroup>();
 	groupsBySid = new Hashtable<String, IGroup>();
-	wmi = parent.getWmiProvider();
+	wmi = parent.getSession().getWmiProvider();
     }
 
     IUser queryUserBySid(String sid) throws NoSuchElementException, WmiException {

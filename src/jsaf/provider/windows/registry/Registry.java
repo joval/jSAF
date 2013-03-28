@@ -426,6 +426,8 @@ public class Registry implements IRegistry {
 	    if (line.trim().equals(START)) {
 		start = true;
 		break;
+	    } else if (line.startsWith("Error:")) {
+		throw new RegistryException(line);
 	    } else if (line.trim().equals(EOF)) {
 		break;
 	    }

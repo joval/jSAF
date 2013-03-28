@@ -45,8 +45,7 @@ function Find-RegKeys {
 
 function Filter-KeyConditions {
   param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [Microsoft.Win32.RegistryKey]$RegKey,
+    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)][Microsoft.Win32.RegistryKey]$RegKey,
     [String]$WithLiteralVal = "",
     [String]$WithEncodedVal = "",
     [String]$WithValPattern = ""

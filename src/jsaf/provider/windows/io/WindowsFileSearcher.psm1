@@ -8,21 +8,29 @@ function Find-Directories {
     [int]$Depth = 1 
   )
 
-  try {
+  if (Test-Path -literalPath $Path) {
     $CurrentItem = Get-Item -literalPath $Path
-    if (($CurrentItem -ne $null) -and $CurrentItem.PSIsContainer) {
-      $NextDepth = $Depth - 1
-      if ($Path -imatch $Pattern) {
-	$CurrentItem
-      }
-      if ($Depth -ne 0) {
-	$ErrorActionPreference = "SilentlyContinue"
-	Get-ChildItem $CurrentItem | Where-Object {$_.PSIsContainer} | %{
-	  Find-Directories -Path $_.FullName -Pattern $Pattern -Depth $NextDepth
-	}
-      }
+    if ($Depth -eq -1) {
+      $ErrorActionPreference = "SilentlyContinue" 
+      Get-ChildItem $Path -recurse -force | Where-Object {$_.PSIsContainer -and ($_.FullName -imatch $Pattern)}
+      $ErrorActionPreference = "Stop"
+    } else {
+      try {
+        if (($CurrentItem -ne $null) -and $CurrentItem.PSIsContainer) {
+          $NextDepth = $Depth - 1
+          if ($Path -imatch $Pattern) {
+            $CurrentItem
+          }
+          if ($Depth -ne 0) {
+            $ErrorActionPreference = "SilentlyContinue"
+            Get-ChildItem $CurrentItem | Where-Object {$_.PSIsContainer} | %{
+              Find-Directories -Path $_.FullName -Pattern $Pattern -Depth $NextDepth
+            }
+          }
+        }
+      } catch {}
     }
-  } catch {}
+  }
 }
 
 function Find-Files {

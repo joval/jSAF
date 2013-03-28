@@ -3,8 +3,7 @@
 #
 function Print-RegValues {
   param(
-    [Parameter(Position=0, ValueFromPipeline=$true)]
-    [string]$Key = "",
+    [Parameter(Position=0, ValueFromPipeline=$true)][string]$Key = "",
     [string]$Hive = "HKEY_LOCAL_MACHINE"
   )
 

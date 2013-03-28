@@ -3,8 +3,7 @@
 #
 function Print-FileInfo {
   param(
-    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)]
-    [PSObject]$inputObject
+    [Parameter(Mandatory=$true, Position=0, ValueFromPipeline=$true)][PSObject]$inputObject
   )
 
   BEGIN {

@@ -323,12 +323,16 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    recman.delete(tree.getRecid());
 	    recman.commit();
 	    recman.close();
+	    cleanFiles();
 	}
 
 	// Implement Map
 
 	public boolean containsKey(Object key) {
 	    try {
+		//
+		// Using a separate tree for the index prevents a deserialization infinite loop.
+		//
 		return index.find(key) != null;
 	    } catch (IOException e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);

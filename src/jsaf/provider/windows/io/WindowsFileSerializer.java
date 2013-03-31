@@ -3,15 +3,18 @@
 
 package jsaf.provider.windows.io;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
-import java.io.DataOutput;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.jdbm.Serializer;
+import jdbm.helper.Serializer;
 
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFileMetadata;
@@ -24,25 +27,25 @@ import jsaf.io.fs.AbstractFilesystem;
 /**
  * JDBM Serilizer implementation for Windows IFiles
  */
-public class WindowsFileSerializer implements Serializer<IFile>, Serializable {
+public class WindowsFileSerializer implements Serializer, Serializable {
     static final int SER_FILE = 0;
     static final int SER_DIRECTORY = 1;
     static final int SER_LINK = 2;
 
-    private Integer instanceKey;
     private transient AbstractFilesystem fs;
 
     /**
      * The serializer relies on an active IFilesystem, which cannot be serialized, so we serialize the hashcode
      * of the IFilesystem, and maintain a static Map in the parent class. 
      */
-    public WindowsFileSerializer(Integer instanceKey) {
-	this.instanceKey = instanceKey;
+    public WindowsFileSerializer(AbstractFilesystem fs) {
+	this.fs = fs;
     }
 
-    // Implement Serializer<IFile>
+    // Implement Serializer
 
-    public IFile deserialize(DataInput in) throws IOException {
+    public Object deserialize(byte[] serialized) throws IOException {
+	DataInput in = new DataInputStream(new ByteArrayInputStream(serialized));
 	String path = in.readUTF();
 	String canonicalPath = in.readUTF();
 	long temp = in.readLong();
@@ -72,15 +75,15 @@ public class WindowsFileSerializer implements Serializer<IFile>, Serializable {
 		pe.put(in.readUTF(), in.readUTF());
 	    }
 	}
-	if (fs == null) {
-	    fs = AbstractFilesystem.instances.get(instanceKey);
-	}
 	IUser owner = new User((IWindowsSession)fs.getSession(), accountName, sid);
 	WindowsFileInfo info = new WindowsFileInfo(type, path, canonicalPath, ctime, mtime, atime, len, winType, owner, pe);
 	return fs.createFileFromInfo(info);
     }
 
-    public void serialize(DataOutput out, IFile f) throws IOException {
+    public byte[] serialize(Object obj) throws IOException {
+	ByteArrayOutputStream buff = new ByteArrayOutputStream();
+	DataOutputStream out = new DataOutputStream(buff);
+	IFile f = (IFile)obj;
 	out.writeUTF(f.getPath());
 	out.writeUTF(f.getCanonicalPath());
 	out.writeLong(f.createTime());
@@ -109,5 +112,7 @@ public class WindowsFileSerializer implements Serializer<IFile>, Serializable {
 		out.writeUTF(entry.getValue());
 	    }
 	}
+	out.close();
+	return buff.toByteArray();
     }
 }

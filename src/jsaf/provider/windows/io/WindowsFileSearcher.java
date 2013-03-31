@@ -55,13 +55,9 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
     private AbstractFilesystem fs;
     private IRunspace runspace;
     private LocLogger logger;
-    private Map<String, Collection<String>> searchMap;
 
-    public WindowsFileSearcher(IWindowsSession session, IRunspace runspace, Map<String, Collection<String>> searchMap)
-		throws Exception {
-
+    public WindowsFileSearcher(IWindowsSession session, IRunspace runspace) throws Exception {
 	this.session = session;
-	this.searchMap = searchMap;
 	logger = session.getLogger();
 	this.runspace = runspace;
 	runspace.loadModule(getClass().getResourceAsStream("WindowsFileSearcher.psm1"));
@@ -180,11 +176,7 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	String cmd = command.toString();
 
 	Collection<IFile> results = new ArrayList<IFile>();
-	if (searchMap.containsKey(cmd)) {
-	    for (String path : searchMap.get(cmd)) {
-		results.add(fs.getFile(path));
-	    }
-	} else if (fs.getFile(from).isDirectory()) {
+	if (fs.getFile(from).isDirectory()) {
 	    logger.debug(Message.STATUS_FS_SEARCH_START, cmd);
 	    File localTemp = null;
 	    IFile remoteTemp = null;
@@ -234,7 +226,6 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 		    }
 		}
 	    }
-	    searchMap.put(cmd, paths);
 	}
 	return results;
     }

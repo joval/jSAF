@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 import org.slf4j.cal10n.LocLogger;
 
-import org.apache.jdbm.Serializer;
+import jdbm.helper.Serializer;
 
 import jsaf.Message;
 import jsaf.intf.io.IFile;
@@ -106,24 +106,10 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	return path;
     }
 
-    @Override
-    public void setLogger(LocLogger logger) {
-	super.setLogger(logger);
-	if (searcher != null) {
-	    searcher.setLogger(logger);
-	}
-    }
-
     public synchronized ISearchable<IFile> getSearcher() throws IOException {
 	if (searcher == null) {
 	    try {
-		Map<String, Collection<String>> searchMap;
-		if (db == null) {
-		    searchMap = new HashMap<String, Collection<String>>();
-		} else {
-		    searchMap = db.createHashMap("searches");
-		}
-		searcher = new WindowsFileSearcher((IWindowsSession)session, runspace, searchMap);
+		searcher = new WindowsFileSearcher((IWindowsSession)session, runspace);
 	    } catch (IOException e) {
 		throw e;
 	    } catch (Exception e) {
@@ -132,6 +118,14 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	    }
 	}
 	return searcher;
+    }
+
+    @Override
+    public void setLogger(LocLogger logger) {
+	super.setLogger(logger);
+	if (searcher != null) {
+	    searcher.setLogger(logger);
+	}
     }
 
     public Collection<IMount> getMounts(Pattern filter, boolean include) throws IOException {
@@ -176,8 +170,8 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	}
     }
 
-    public Serializer<IFile> getFileSerializer(Integer instanceKey) {
-	return new WindowsFileSerializer(instanceKey);
+    public Serializer getFileSerializer(AbstractFilesystem fs) {
+	return new WindowsFileSerializer(fs);
     }
 
     @Override

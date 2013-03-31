@@ -17,18 +17,25 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.slf4j.cal10n.LocLogger;
 
-import org.apache.jdbm.DB;
-import org.apache.jdbm.DBMaker;
-import org.apache.jdbm.Serializer;
+import jdbm.RecordManager;
+import jdbm.RecordManagerFactory;
+import jdbm.RecordManagerOptions;
+import jdbm.btree.BTree;
+import jdbm.helper.Serializer;
+import jdbm.helper.StringComparator;
+import jdbm.helper.Tuple;
+import jdbm.helper.TupleBrowser;
 
 import jsaf.Message;
 import jsaf.intf.io.IFile;
@@ -52,17 +59,11 @@ import jsaf.util.StringTools;
  * @version %I% %G%
  */
 public abstract class AbstractFilesystem implements IFilesystem {
-    /**
-     * Static map of filesystem instances indexed by hashcode for reference by deserialized serializers.
-     */
-    public static Map<Integer, AbstractFilesystem> instances = new HashMap<Integer, AbstractFilesystem>();
-
     protected boolean autoExpand = true;
     protected IProperty props;
     protected ISession session;
     protected IEnvironment env;
     protected LocLogger logger;
-    protected DB db;
 
     protected final String ESCAPED_DELIM;
     protected final String DELIM;
@@ -76,23 +77,14 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	env = session.getEnvironment();
 
 	if (session.getProperties().getBooleanProperty(IFilesystem.PROP_CACHE_JDBM)) {
-	    for (File f : session.getWorkspace().listFiles()) {
-		if (f.getName().startsWith(dbkey)) {
-		    f.delete();
-		}
+	    try {
+		cache = new JDBMCache(dbkey);
+	    } catch (IOException e) {
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		cache = new HashMap<String, IFile>();
 	    }
-	    DBMaker dbm = DBMaker.openFile(new File(session.getWorkspace(), dbkey).toString());
-	    dbm.disableTransactions();
-	    dbm.closeOnExit();
-	    dbm.deleteFilesAfterClose();
-	    db = dbm.make();
-	    Integer instanceKey = new Integer(hashCode());
-	    instances.put(instanceKey, this);
-	    cache = db.createHashMap("files", null, getFileSerializer(instanceKey));
-	    index = db.createHashSet("index");
 	} else {
 	    cache = new HashMap<String, IFile>();
-	    index = cache.keySet();
 	}
     }
 
@@ -105,28 +97,14 @@ public abstract class AbstractFilesystem implements IFilesystem {
     }
 
     public void dispose() {
-	if (db != null) {
+	if (cache instanceof JDBMCache) {
 	    try {
-		db.close();
+		((JDBMCache)cache).dispose();
 	    } catch (Exception e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
-	    db = null;
 	}
-	instances.remove(new Integer(hashCode()));
-    }
-
-    /**
-     * Create a hash-map. If JDBM caching is enabled, the map will be backed by a b-tree file.
-     */
-    public <J, K> Map<J, K> createHashMap(String name, Serializer<J> keySerializer, Serializer<K> valueSerializer) {
-	if (db == null) {
-	    return new HashMap<J, K>();
-	} else if (valueSerializer == null) {
-	    return db.createHashMap(name);
-	} else {
-	    return db.createHashMap(name, keySerializer, valueSerializer);
-	}
+	cache = null;
     }
 
     /**
@@ -226,10 +204,9 @@ public abstract class AbstractFilesystem implements IFilesystem {
     }
 
     /**
-     * Return an implementation-specific IFile serializer for JDBM. The instanceKey is used to re-associate
-     * deserialized IFile instances back with this AbstractFilesystem instance.
+     * Return an implementation-specific IFile serializer for JDBM.
      */
-    public abstract Serializer<IFile> getFileSerializer(Integer instanceKey);
+    public abstract Serializer getFileSerializer(AbstractFilesystem fs);
 
     /**
      * Return an implementation-specific IFile instance based on an IAccessor. The AbstractFilesystem base class invokes
@@ -285,13 +262,13 @@ public abstract class AbstractFilesystem implements IFilesystem {
     }
 
     public final IFile getFile(String path, IFile.Flags flags) throws IOException {
-        if (autoExpand) {
-            path = env.expand(path);
-        }
-        switch(flags) {
-          case READONLY:
+	if (autoExpand) {
+	    path = env.expand(path);
+	}
+	switch(flags) {
+	  case READONLY:
 	    try {
-                return getCache(path);
+		return getCache(path);
 	    } catch (NoSuchElementException e) {
 	    }
 	    // fall-thru
@@ -319,6 +296,152 @@ public abstract class AbstractFilesystem implements IFilesystem {
     }
 
     // Inner Classes
+
+    /**
+     * A JDBM-backed implementation of the cache Map.
+     */
+    public class JDBMCache implements Map<String, IFile> {
+	private RecordManager recman;
+	private String dbkey;
+	private BTree tree;
+	private BTree index;
+	private int writes = 0;
+
+	JDBMCache(String dbkey) throws IOException {
+	    this.dbkey = dbkey;
+	    cleanFiles();
+	    String basename = new File(session.getWorkspace(), dbkey).toString();
+	    Properties props = new Properties();
+	    props.setProperty(RecordManagerOptions.CACHE_TYPE, RecordManagerOptions.NORMAL_CACHE);
+	    props.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "true");
+	    recman = RecordManagerFactory.createRecordManager(basename, props);
+	    tree = BTree.createInstance(recman, new StringComparator(), null, getFileSerializer(AbstractFilesystem.this));
+	    index = BTree.createInstance(recman, new StringComparator());
+	}
+
+	void dispose() throws IOException {
+	    recman.delete(tree.getRecid());
+	    recman.commit();
+	    recman.close();
+	}
+
+	// Implement Map
+
+	public boolean containsKey(Object key) {
+	    try {
+		return index.find(key) != null;
+	    } catch (IOException e) {
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
+	    return false;
+	}
+
+	public boolean containsValue(Object value) {
+	    try {
+		Tuple t = new Tuple();
+		TupleBrowser iter = tree.browse();
+		while(iter.getNext(t)) {
+		    if (t.getValue().equals(value)) {
+			return true;
+		    }
+		}
+	    } catch (IOException e) {
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
+	    return false;
+	}
+
+	public IFile get(Object key) {
+	    try {
+		return (IFile)tree.find(key);
+	    } catch (IOException e) {
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
+	    return null;
+	}
+
+	public boolean isEmpty() {
+	    return size() == 0;
+	}
+
+	public IFile put(String key, IFile value) {
+	    try {
+		IFile f = (IFile)tree.insert(key, value, true);
+		index.insert(key, "", false);
+		wrote();
+		return f;
+	    } catch (IOException e) {
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
+	    return null;
+	}
+
+	public void putAll(Map<? extends String, ? extends IFile> m) {
+	    try {
+		for (Map.Entry<? extends String, ? extends IFile> entry : m.entrySet()) {
+		    tree.insert(entry.getKey(), entry.getValue(), true);
+		    index.insert(entry.getKey(), "", true);
+		}
+		wrote();
+	    } catch (IOException e) {
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
+	}
+
+	public IFile remove(Object key) {
+	    try {
+		IFile f = (IFile)tree.remove(key);
+		index.remove(key);
+		wrote();
+		return f;
+	    } catch (IOException e) {
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
+	    return null;
+	}
+
+	public int size() {
+	    return index.size();
+	}
+
+	public void clear() {
+	    throw new UnsupportedOperationException();
+	}
+
+	public Set<Map.Entry<String, IFile>> entrySet() {
+	    throw new UnsupportedOperationException();
+	}
+
+	public Set<String> keySet() {
+	    throw new UnsupportedOperationException();
+	}
+
+	public Collection<IFile> values() {
+	    throw new UnsupportedOperationException();
+	}
+
+	// Private
+
+	private void cleanFiles() throws IOException {
+	    for (File f : session.getWorkspace().listFiles()) {
+		if (f.getName().startsWith(dbkey)) {
+		    if (!f.delete()) {
+			throw new IOException("Failed to delete " + f.toString());
+		    }
+		}
+	    }
+	}
+
+	/**
+	 * Register performance of a write operation to the cache.  This triggers the occasional commit to disk.
+	 */
+	private void wrote() throws IOException {
+	    if (++writes % 10000 == 0) {
+		recman.commit();
+		writes = 0;
+	    }
+	}
+    }
 
     /**
      * The default implementation of an IFile -- works with Java (local) Files.
@@ -754,7 +877,6 @@ public abstract class AbstractFilesystem implements IFilesystem {
     // Private
 
     private Map<String, IFile> cache;
-    private Set<String> index;
 
     /**
      * Attempt to retrieve an IFile from the cache.
@@ -762,11 +884,13 @@ public abstract class AbstractFilesystem implements IFilesystem {
      * TBD: expire objects that get too old
      */
     private IFile getCache(String path) throws NoSuchElementException {
-        if (cache.containsKey(path)) {
+	IFile f = cache.get(path);
+	if (f == null) {
+	    throw new NoSuchElementException(path);
+	} else {
 	    logger.trace(Message.STATUS_FS_CACHE_RETRIEVE, path);
-            return cache.get(path);
+	    return f;
 	}
-	throw new NoSuchElementException(path);
     }
 
     /**
@@ -777,13 +901,11 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	String path = file.getPath();
 
 	//
-	// Check the index rather than the cache, to avoid a potential infinite loop in JDBM deserialization.
 	// TBD: see if the data is newer than what's already in the cache?
 	//
-	if (!index.contains(path)) {
+	if (!cache.containsKey(path)) {
 	    logger.trace(Message.STATUS_FS_CACHE_STORE, path);
 	    cache.put(path, file);
-	    index.add(path);
 	}
     }
 }

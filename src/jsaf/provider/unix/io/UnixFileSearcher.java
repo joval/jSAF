@@ -32,14 +32,12 @@ public class UnixFileSearcher implements ISearchable<IFile>, ILoggable {
     private IUnixFilesystemDriver driver;
     private AbstractFilesystem fs;
     private LocLogger logger;
-    private Map<String, Collection<String>> searchMap;
 
-    public UnixFileSearcher(IUnixSession session, IUnixFilesystemDriver driver, Map<String, Collection<String>> searchMap) {
+    public UnixFileSearcher(IUnixSession session, IUnixFilesystemDriver driver) {
 	this.session = session;
 	this.driver = driver;
 	logger = session.getLogger();
 	fs = (AbstractFilesystem)session.getFilesystem();
-	this.searchMap = searchMap;
     }
 
     // Implement ILogger
@@ -73,29 +71,20 @@ public class UnixFileSearcher implements ISearchable<IFile>, ILoggable {
 
     public Collection<IFile> search(List<ISearchable.ICondition> conditions) throws Exception {
 	String cmd = driver.getFindCommand(conditions);
+	logger.debug(Message.STATUS_FS_SEARCH_START, cmd);
 	Collection<IFile> results = new ArrayList<IFile>();
-	if (searchMap.containsKey(cmd)) {
-	    for (String path : searchMap.get(cmd)) {
-		results.add(fs.getFile(path));
+	try {
+	    Iterator<String> iter = SafeCLI.manyLines(cmd, null, session);
+	    IFile file = null;
+	    while ((file = createObject(iter)) != null) {
+		String path = file.getPath();
+		logger.debug(Message.STATUS_FS_SEARCH_MATCH, path);
+		results.add(file);
 	    }
-	} else {
-	    logger.debug(Message.STATUS_FS_SEARCH_START, cmd);
-	    Collection<String> paths = new ArrayList<String>();
-	    try {
-		Iterator<String> iter = SafeCLI.manyLines(cmd, null, session);
-		IFile file = null;
-		while ((file = createObject(iter)) != null) {
-		    String path = file.getPath();
-		    logger.debug(Message.STATUS_FS_SEARCH_MATCH, path);
-		    results.add(file);
-		    paths.add(path);
-		}
-		logger.debug(Message.STATUS_FS_SEARCH_DONE, results.size(), cmd);
-	    } catch (Exception e) {
-		logger.warn(Message.ERROR_FS_SEARCH);
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    }
-	    searchMap.put(cmd, paths);
+	    logger.debug(Message.STATUS_FS_SEARCH_DONE, results.size(), cmd);
+	} catch (Exception e) {
+	    logger.warn(Message.ERROR_FS_SEARCH);
+	    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	}
 	return results;
     }

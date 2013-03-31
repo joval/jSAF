@@ -3,14 +3,17 @@
 
 package jsaf.provider.unix.io;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
-import java.io.DataOutput;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Properties;
 
-import org.apache.jdbm.Serializer;
+import jdbm.helper.Serializer;
 
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFileMetadata;
@@ -20,25 +23,25 @@ import jsaf.io.fs.AbstractFilesystem;
 /**
  * JDBM Serilizer implementation for Unix IFiles
  */
-public class UnixFileSerializer implements Serializer<IFile>, Serializable {
+public class UnixFileSerializer implements Serializer, Serializable {
     static final int SER_FILE = 0;
     static final int SER_DIRECTORY = 1;
     static final int SER_LINK = 2;
 
-    private Integer instanceKey;
     private transient AbstractFilesystem fs;
 
     /**
      * The serializer relies on an active IFilesystem, which cannot be serialized, so we serialize the hashcode
      * of the IFilesystem, and maintain a static Map in the parent class. 
      */
-    public UnixFileSerializer(Integer instanceKey) {
-	this.instanceKey = instanceKey;
+    public UnixFileSerializer(AbstractFilesystem fs) {
+	this.fs = fs;
     }
 
-    // Implement Serializer<IFile>
+    // Implement Serializer
 
-    public IFile deserialize(DataInput in) throws IOException {
+    public Object deserialize(byte[] serialized) throws IOException {
+	DataInput in = new DataInputStream(new ByteArrayInputStream(serialized));
 	String path = in.readUTF();
 	String link = null;
 	long temp = in.readLong();
@@ -80,13 +83,13 @@ public class UnixFileSerializer implements Serializer<IFile>, Serializable {
 	    }
 	}
 	UnixFileInfo info = new UnixFileInfo(type, path, link, ctime, mtime, atime, len, uType, perms, uid, gid, hasAcl, ext);
-	if (fs == null) {
-	    fs = AbstractFilesystem.instances.get(instanceKey);
-	}
 	return fs.createFileFromInfo(info);
     }
 
-    public void serialize(DataOutput out, IFile f) throws IOException {
+    public byte[] serialize(Object obj) throws IOException {
+	ByteArrayOutputStream buff = new ByteArrayOutputStream();
+	DataOutputStream out = new DataOutputStream(buff);
+	IFile f = (IFile)obj;
 	out.writeUTF(f.getPath());
 	out.writeLong(f.createTime());
 	out.writeLong(f.lastModified());
@@ -142,5 +145,7 @@ public class UnixFileSerializer implements Serializer<IFile>, Serializable {
 		out.writeUTF(info.getExtendedData(extendedKeys[i]));
 	    }
 	}
+	out.close();
+	return buff.toByteArray();
     }
 }

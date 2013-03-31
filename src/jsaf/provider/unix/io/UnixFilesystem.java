@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 import org.slf4j.cal10n.LocLogger;
 
-import org.apache.jdbm.Serializer;
+import jdbm.helper.Serializer;
 
 import jsaf.Message;
 import jsaf.intf.io.IFile;
@@ -58,13 +58,7 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 
     public ISearchable<IFile> getSearcher() {
 	if (searcher == null) {
-	    Map<String, Collection<String>> searchMap;
-	    if (db == null) {
-		searchMap = new HashMap<String, Collection<String>>();
-	    } else {
-		searchMap = db.createHashMap("searches");
-	    }
-	    searcher = new UnixFileSearcher((IUnixSession)session, getDriver(), searchMap);
+	    searcher = new UnixFileSearcher((IUnixSession)session, getDriver());
 	}
 	return searcher;
     }
@@ -89,8 +83,8 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 	}
     }
 
-    public Serializer<IFile> getFileSerializer(Integer instanceKey) {
-	return new UnixFileSerializer(instanceKey);
+    public Serializer getFileSerializer(AbstractFilesystem fs) {
+	return new UnixFileSerializer(fs);
     }
 
     @Override

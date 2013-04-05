@@ -14,6 +14,13 @@ import java.util.Properties;
  */
 public interface IProperty extends Iterable<String> {
     /**
+     * Returns whether or not the specified key maps to a value.
+     *
+     * @since 1.0.1
+     */
+    boolean containsKey(String key);
+
+    /**
      * Returns the value associates with the key.  Returns null if there is no corresponding value defined for the key.
      *
      * @since 1.0

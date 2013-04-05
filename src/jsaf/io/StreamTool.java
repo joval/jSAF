@@ -58,14 +58,15 @@ public class StreamTool {
      * @since 1.0
      */
     public static final void readFully(InputStream in, byte[] buff) throws IOException {
-	for (int i=0; i < buff.length; i++) {
-	    int ch = in.read();
-	    if (ch == -1) {
+	int offset = 0;
+	do {
+	    int bytesRead = in.read(buff, offset, buff.length);
+	    if (bytesRead == 0) {
 	        throw new EOFException(Message.getMessage(Message.ERROR_EOS));
 	    } else {
-	        buff[i] = (byte)(ch & 0xFF);
+		offset += bytesRead;
 	    }
-	}
+	} while (offset < buff.length);
     }
 
     /**

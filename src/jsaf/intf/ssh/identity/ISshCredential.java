@@ -25,14 +25,14 @@ public interface ISshCredential extends ICredential {
     /**
      * Get the passphrase required to decrypt the private key file.
      *
-     * @since 1.0
+     * @since 1.0.1
      */
-    String getPassphrase();
+    char[] getPassphrase();
 
     /**
-     * Get the file containing the user's SSH private key.
+     * Get the SSH private key bytes (potentially password-encrypted).
      *
-     * @since 1.0
+     * @since 1.0.1
      */
-    File getPrivateKey();
+    byte[] getPrivateKey();
 }

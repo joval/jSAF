@@ -4,6 +4,8 @@
 package jsaf.util;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -149,33 +151,39 @@ public class StringTools {
     }
 
     /**
-     * Convert byte[] to char[], assuming the buffer is ASCII-encoded.
+     * Convert a char array to a byte array using UTF16 encoding.
      *
-     * @since 1.0
+     * @since 1.0.1
      */
-    public static char[] toASCIICharArray(byte[] buff) throws IllegalArgumentException {
-	char[] ca = new char[buff.length];
-	for (int i=0; i < buff.length; i++) {
-	    int ch = buff[i]&0xFF;
-	    switch(ch) {
-	      case 0x00:
-	      case 0x09:
-	      case 0x0A:
-	      case 0x0D:
-		ca[i] = (char)buff[i];
-		break;
+    public static byte[] toBytes(char[] chars) {
+	return UTF16.encode(CharBuffer.wrap(chars)).array();
+    }
 
-	      default:
-		if ((0x20 <= ch && ch <= 0x7E)) {
-		    ca[i] = (char)buff[i];
-		    break;
-		} else {
-		    String msg = Message.getMessage(Message.ERROR_ASCII_CONVERSION, i, Byte.toString(buff[i]));
-		    throw new IllegalArgumentException(msg);
-		}
-	    }
-	}
-	return ca;
+    /**
+     * Convert a char array to a byte array using the specified encoding.
+     *
+     * @since 1.0.1
+     */
+    public static byte[] toBytes(char[] chars, Charset charset) {
+	return charset.encode(CharBuffer.wrap(chars)).array();
+    }
+
+    /**
+     * Convert a byte array in the specified encoding to a char array.
+     *
+     * @since 1.0.1
+     */
+    public static char[] toChars(byte[] bytes, Charset charset) {
+	return toChars(bytes, 0, bytes.length, charset);
+    }
+
+    /**
+     * Convert len bytes of the specified array in the specified encoding, starting from offset, to a char array.
+     *
+     * @since 1.0.1
+     */
+    public static char[] toChars(byte[] bytes, int offset, int len, Charset charset) {
+	return charset.decode(ByteBuffer.wrap(bytes, offset, len)).array();
     }
 
     /**

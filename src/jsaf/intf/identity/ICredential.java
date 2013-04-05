@@ -21,7 +21,7 @@ public interface ICredential {
     /**
      * Get the password.
      *
-     * @since 1.0
+     * @since 1.0.1
      */
-    String getPassword();
+    char[] getPassword();
 }

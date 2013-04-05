@@ -4,6 +4,9 @@
 package jsaf.identity;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.IOException;
 import java.security.AccessControlException;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -15,6 +18,7 @@ import jsaf.intf.ssh.identity.ISshCredential;
 import jsaf.intf.system.ISession;
 import jsaf.intf.util.IProperty;
 import jsaf.intf.windows.identity.IWindowsCredential;
+import jsaf.io.StreamTool;
 import jsaf.util.PropertyUtil;
 
 /**
@@ -77,12 +81,12 @@ public class SimpleCredentialStore implements ICredentialStore {
 	if (prop == null) {
 	    return null;
 	}
-	String domain		= prop.getProperty(PROP_DOMAIN);
-	String username		= prop.getProperty(PROP_USERNAME);
-	String password		= prop.getProperty(PROP_PASSWORD);
-	String passphrase	= prop.getProperty(PROP_PASSPHRASE);
-	String rootPassword	= prop.getProperty(PROP_ROOT_PASSWORD);
-	String privateKey	= prop.getProperty(PROP_PRIVATE_KEY);
+	String domain = prop.getProperty(PROP_DOMAIN);
+	String username = prop.getProperty(PROP_USERNAME);
+	char[] password = prop.containsKey(PROP_PASSWORD) ? prop.getProperty(PROP_PASSWORD).toCharArray() : null;
+	char[] passphrase = prop.containsKey(PROP_PASSPHRASE) ? prop.getProperty(PROP_PASSPHRASE).toCharArray() : null;
+	char[] rootPassword = prop.containsKey(PROP_ROOT_PASSWORD) ? prop.getProperty(PROP_ROOT_PASSWORD).toCharArray() : null;
+	String privateKey = prop.getProperty(PROP_PRIVATE_KEY);
 
 	ICredential cred = null;
 	if (session.getHostname().equalsIgnoreCase(prop.getProperty(PROP_HOSTNAME))) {
@@ -95,8 +99,9 @@ public class SimpleCredentialStore implements ICredentialStore {
 		break;
 
 	      default:
-		if (privateKey != null) {
-		    cred = new SshCredential(username, new File(privateKey), passphrase, rootPassword);
+		File pkf = null;
+		if (privateKey != null && (pkf = new File(privateKey)).exists()) {
+		    cred = new SshCredential(username, pkf, passphrase, rootPassword);
 		} else if (rootPassword != null) {
 		    cred = new SshCredential(username, password, rootPassword);
 		} else if (username != null && password != null) {
@@ -118,7 +123,7 @@ public class SimpleCredentialStore implements ICredentialStore {
      */
     public class Credential implements ICredential {
 	protected String username;
-	protected String password;
+	protected char[] password;
     
 	public Credential() {
 	    username = null;
@@ -128,7 +133,7 @@ public class SimpleCredentialStore implements ICredentialStore {
 	/**
 	 * Create a Credential using a username and password.
 	 */
-	public Credential(String username, String password) {
+	public Credential(String username, char[] password) {
 	    this.username = username;
 	    this.password = password;
 	}
@@ -137,7 +142,7 @@ public class SimpleCredentialStore implements ICredentialStore {
 	    this.username = username;
 	}
     
-	public void setPassword(String password) {
+	public void setPassword(char[] password) {
 	    this.password = password;
 	}
     
@@ -147,7 +152,7 @@ public class SimpleCredentialStore implements ICredentialStore {
 	    return username;
 	}
     
-	public String getPassword() {
+	public char[] getPassword() {
 	    return password;
 	}
     }
@@ -156,11 +161,10 @@ public class SimpleCredentialStore implements ICredentialStore {
      * A representation of a Unix credential.
      */
     public class SshCredential extends Credential implements ISshCredential {
-	private String passphrase;
-	private String rootPassword;
-	private File privateKey;
+	private char[] passphrase, rootPassword;
+	private byte[] privateKey;
 
-	public SshCredential(String username, String password, String rootPassword) {
+	public SshCredential(String username, char[] password, char[] rootPassword) {
 	    super(username, password);
 	    this.rootPassword = rootPassword;
 	}
@@ -168,10 +172,25 @@ public class SimpleCredentialStore implements ICredentialStore {
 	/**
 	 * Create a Credential for a certificate.
 	 */
-	public SshCredential(String username, File privateKey, String passphrase, String rootPassword) {
+	public SshCredential(String username, File file, char[] passphrase, char[] rootPassword) {
 	    this(username, null, rootPassword);
 	    this.passphrase = passphrase;
-	    this.privateKey = privateKey;
+	    InputStream in = null;
+	    try {
+		privateKey = new byte[(int)file.length()];
+		in = new FileInputStream(file);
+		StreamTool.readFully(in, privateKey);
+	    } catch (IOException e) {
+		privateKey = null;
+		Message.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    } finally {
+		if (in != null) {
+		    try {
+			in.close();
+		    } catch (IOException e) {
+		    }
+		}
+	    }
 	}
 
 	// Implement ISshCredential
@@ -184,11 +203,11 @@ public class SimpleCredentialStore implements ICredentialStore {
 	    }
 	}
 
-	public String getPassphrase() {
+	public char[] getPassphrase() {
 	    return passphrase;
 	}
 
-	public File getPrivateKey() {
+	public byte[] getPrivateKey() {
 	    return privateKey;
 	}
     }
@@ -211,13 +230,13 @@ public class SimpleCredentialStore implements ICredentialStore {
 	    ptr = data.indexOf(":");
 	    if (ptr > 0) {
 		username = data.substring(0, ptr);
-		password = data.substring(ptr+1);
+		password = data.substring(ptr+1).toCharArray();
 	    } else {
 		username = data;
 	    }
 	}
 
-	public WindowsCredential(String domain, String username, String password) {
+	public WindowsCredential(String domain, String username, char[] password) {
 	    super(username, password);
 	    this.domain = domain;
 	}

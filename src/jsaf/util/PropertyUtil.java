@@ -56,6 +56,10 @@ public class PropertyUtil implements IProperty {
 	return prop.getBooleanProperty(key);
     }
 
+    public boolean containsKey(String key) {
+	return prop.containsKey(key);
+    }
+
     public String getProperty(String key) {
 	return prop.getProperty(key);
     }
@@ -84,6 +88,10 @@ public class PropertyUtil implements IProperty {
 	}
 
 	// Implement IProperty
+
+	public boolean containsKey(String key) {
+	    return props.containsKey(key);
+	}
 
 	public String getProperty(String key) {
 	    return props.getProperty(key);

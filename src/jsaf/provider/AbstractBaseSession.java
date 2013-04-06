@@ -150,6 +150,10 @@ public abstract class AbstractBaseSession implements IConfigurable, ISession {
 	    handlePropertyChange(key, value);
 	}
 
+	public boolean containsKey(String key) {
+	    return getProperty(key) != null;
+	}
+
 	/**
 	 * First checks for a property with the override key, then returns the requested key if none exists.
 	 */

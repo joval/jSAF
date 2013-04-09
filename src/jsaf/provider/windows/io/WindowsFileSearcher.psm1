@@ -54,14 +54,14 @@ function Find-Files {
 
     if ($Depth -eq -1) {
       if ($PsCmdlet.ParameterSetName -eq "Literal") {
-	$ErrorActionPreference = "SilentlyContinue" 
+	$ErrorActionPreference = "SilentlyContinue"
 	Get-ChildItem $Path -recurse -force | Where-Object {$_.Name -eq $LiteralFilename}
 	$ErrorActionPreference = "Stop"
       } else {
-	$ErrorActionPreference = "SilentlyContinue" 
+	$ErrorActionPreference = "SilentlyContinue"
 	Get-ChildItem $Path -recurse -force | Where-Object {$_.Name -imatch $Filename -and $_.FullName -imatch $Pattern}
 	$ErrorActionPreference = "Stop"
-      } 
+      }
     } else {
       try {
 	if ($Pattern -eq ".*") {
@@ -105,7 +105,8 @@ function Find-Files {
 	    }
 	  }
 	}
-      } catch {}
+      } catch {
+      }
     }
   }
 }

@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.StringTokenizer;
 import java.util.HashSet;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.cal10n.LocLogger;
 
@@ -31,7 +32,7 @@ import jsaf.util.StringTools;
  * @author David A. Solin
  * @version %I% %G%
  */
-class Runspace implements IRunspace {
+public class Runspace implements IRunspace {
     public static final String INIT_COMMAND = "powershell -version 2.0 -NoProfile -File -";
 
     private long timeout;		// contains default timeout
@@ -129,6 +130,8 @@ class Runspace implements IRunspace {
 		// DAS: add only if there was no error?
 		modules.add(cs);
 	    }
+	} catch (TimeoutException e) {
+	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
 	} finally {
 	    if (in != null) {
 		try {
@@ -157,13 +160,17 @@ class Runspace implements IRunspace {
 	stdin.write(bytes);
 	stdin.write("\r\n".getBytes());
 	stdin.flush();
-	String result = read(millis);
-	if (err == null) {
-	    return result;
-	} else {
-	    String error = err.toString();
-	    err = null;
-	    throw new PowershellException(error);
+	try {
+	    String result = read(millis);
+	    if (err == null) {
+		return result;
+	    } else {
+		String error = err.toString();
+		err = null;
+		throw new PowershellException(error);
+	    }
+	} catch (TimeoutException e) {
+	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
 	}
     }
 
@@ -180,7 +187,7 @@ class Runspace implements IRunspace {
     /**
      * Read lines until the next prompt is reached. If there are errors, they are buffered in err.
      */
-    protected String read(long millis) throws IOException {
+    protected String read(long millis) throws IOException, TimeoutException {
 	StringBuffer sb = null;
 	String line = null;
 	while((line = readLine(millis)) != null) {
@@ -202,7 +209,7 @@ class Runspace implements IRunspace {
      * Read a single line, or the next prompt. Returns null if the line is a prompt. If there are errors, they are
      * buffered in err.
      */
-    private String readLine(long millis) throws IOException {
+    private String readLine(long millis) throws IOException, TimeoutException {
 	StringBuffer sb = new StringBuffer();
 	//
 	// Poll the streams for no more than timeout millis if there is no data.
@@ -270,13 +277,13 @@ class Runspace implements IRunspace {
 		}
 	    }
 	}
-	throw new IOException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
+	throw new TimeoutException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
     }
 
     /**
      * Read a prompt. There must be NO other output to stdout, or this call will time out. Error data is buffered to err.
      */
-    private synchronized void readPrompt(long millis) throws IOException {
+    private synchronized void readPrompt(long millis) throws IOException, TimeoutException {
 	StringBuffer sb = new StringBuffer();
 	//
 	// Poll the streams for no more than timeout millis if there is no data.
@@ -312,7 +319,7 @@ class Runspace implements IRunspace {
 		}
 	    }
 	}
-	throw new InterruptedIOException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
+	throw new TimeoutException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
     }
 
     private boolean isPrompt(String str) {

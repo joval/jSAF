@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -263,10 +264,14 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	logger.debug(Message.STATUS_FS_SEARCH_CACHE_TEMP, tempPath);
 
 	String cmd = new StringBuffer(command).append(" | Out-File ").append(tempPath).toString();
+
 	FileWatcher fw = new FileWatcher(tempPath);
 	fw.start();
-	runspace.invoke(cmd, session.getTimeout(IWindowsSession.Timeout.XL));
-	fw.interrupt();
+	try {
+	    runspace.invoke(cmd, session.getTimeout(IWindowsSession.Timeout.XL));
+	} finally {
+	    fw.interrupt();
+	}
 	runspace.invoke("Gzip-File " + tempPath);
 	return fs.getFile(tempPath + ".gz", IFile.Flags.READWRITE);
     }
@@ -360,11 +365,11 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 		    } else {
 			cancel = true;
 		    }
-	        } catch (IOException e) {
+		} catch (IOException e) {
 		    cancel = true;
-	        } catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 		    cancel = true;
-	        }
+		}
 	    }
 	}
     }

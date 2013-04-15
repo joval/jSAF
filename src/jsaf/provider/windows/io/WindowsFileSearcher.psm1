@@ -9,21 +9,17 @@ function Find-Directories {
   )
 
   if (Test-Path -literalPath $Path) {
-    $CurrentItem = Get-Item -literalPath $Path
+    $CurrentItem = Get-Item -literalPath $Path -Force
     if ($CurrentItem.PSIsContainer) {
       if ($Path -imatch $Pattern) {
 	$CurrentItem
       }
       if ($Depth -eq -1) {
-	$ErrorActionPreference = "SilentlyContinue" 
-	Get-ChildItem $Path -recurse -force | Where-Object {$_.PSIsContainer -and ($_.FullName -imatch $Pattern)}
-	$ErrorActionPreference = "Stop"
+	Get-ChildItem $Path -Recurse -Force | Where-Object {$_.PSIsContainer -and ($_.FullName -imatch $Pattern)}
       } else {
 	if ($Depth -ne 0) {
-	  try {
-	    $NextDepth = $Depth - 1
-	    Find-Directories -Path $CurrentItem.FullName -Pattern $Pattern -Depth $NextDepth
-	  } catch {}
+	  $NextDepth = $Depth - 1
+	  Find-Directories -Path $CurrentItem.FullName -Pattern $Pattern -Depth $NextDepth
 	}
       }
     }
@@ -31,8 +27,7 @@ function Find-Directories {
 }
 
 function Find-Files {
-  [CmdletBinding(DefaultParameterSetName="Pattern")]
-  param(
+  [CmdletBinding(DefaultParameterSetName="Pattern")]param(
     [Parameter(ValueFromPipeline=$true)][PSObject]$CurrentItem,
     [String]$Path = $PWD,
     [String]$Pattern = ".*",
@@ -43,64 +38,55 @@ function Find-Files {
 
   PROCESS {
     if ($CurrentItem -eq $null) {
-      $CurrentItem = Get-Item -literalPath $Path
+      $CurrentItem = Get-Item -literalPath $Path -Force
     } else {
       $Path = $CurrentItem.FullName
     }
     if ($Depth -eq -1) {
       [System.GC]::Collect()
       if ($PsCmdlet.ParameterSetName -eq "Literal") {
-	$ErrorActionPreference = "SilentlyContinue"
-	Get-ChildItem $Path -recurse -force | Where-Object {$_.Name -eq $LiteralFilename}
-	$ErrorActionPreference = "Stop"
+	Get-ChildItem $Path -Recurse -Force | Where-Object {$_.Name -eq $LiteralFilename}
       } else {
-	$ErrorActionPreference = "SilentlyContinue"
-	Get-ChildItem $Path -recurse -force | Where-Object {$_.Name -imatch $Filename -and $_.FullName -imatch $Pattern}
-	$ErrorActionPreference = "Stop"
+	Get-ChildItem $Path -Recurse -Force | Where-Object {$_.Name -imatch $Filename -and $_.FullName -imatch $Pattern}
       }
     } else {
-      try {
-	if ($Pattern -eq ".*") {
-	  if ($PsCmdlet.ParameterSetName -eq "Pattern") {
-	    if ($Filename -eq ".*") {
-	      $CurrentItem
-	    } else {
-	      if (!$CurrentItem.PSIsContainer -and ($CurrentItem.Name -imatch $Filename)) {
-		$CurrentItem
-	      }
-	    }
+      if ($Pattern -eq ".*") {
+	if ($PsCmdlet.ParameterSetName -eq "Pattern") {
+	  if ($Filename -eq ".*") {
+	    $CurrentItem
 	  } else {
-	    $Name = $CurrentItem.Name
-	    if (!$CurrentItem.PSIsContainer -and ($Name -eq $LiteralFilename)) {
+	    if (!$CurrentItem.PSIsContainer -and ($CurrentItem.Name -imatch $Filename)) {
 	      $CurrentItem
 	    }
 	  }
 	} else {
-	  if ($Path -imatch $Pattern) {
+	  if (!$CurrentItem.PSIsContainer -and ($CurrentItem.Name -eq $LiteralFilename)) {
 	    $CurrentItem
 	  }
 	}
-	if ($CurrentItem.PSIsContainer -and ($Depth -ne 0)) {
-	  $NextDepth = $Depth - 1
-	  $ErrorActionPreference = "SilentlyContinue"
-	  Get-ChildItem $CurrentItem -force | %{
-	    if ($Pattern -eq ".*") {
-	      if ($PsCmdlet.ParameterSetName -eq "Pattern") {
-		if ($Filename -eq ".*") {
-		  Find-Files -Path $_.FullName -Depth $NextDepth
-		} else {
-		  Find-Files -Path $_.FullName -Filename $Filename -Depth $NextDepth
-		}
+      } else {
+	if ($Path -imatch $Pattern) {
+	  $CurrentItem
+	}
+      }
+      if ($CurrentItem.PSIsContainer -and ($Depth -ne 0)) {
+	$NextDepth = $Depth - 1
+	Get-ChildItem $CurrentItem -Force | %{
+	  if ($Pattern -eq ".*") {
+	    if ($PsCmdlet.ParameterSetName -eq "Pattern") {
+	      if ($Filename -eq ".*") {
+		Find-Files -Path $_.FullName -Depth $NextDepth
 	      } else {
-		Find-Files -Path $_.FullName -LiteralFilename $LiteralFilename -Depth $NextDepth
+		Find-Files -Path $_.FullName -Filename $Filename -Depth $NextDepth
 	      }
 	    } else {
-	      Find-Files -Path $_.FullName -Pattern $Pattern -Depth $NextDepth
+	      Find-Files -Path $_.FullName -LiteralFilename $LiteralFilename -Depth $NextDepth
 	    }
+	  } else {
+	    Find-Files -Path $_.FullName -Pattern $Pattern -Depth $NextDepth
 	  }
-	  $ErrorActionPreference = "Stop"
 	}
-      } catch {}
+      }
     }
   }
 }

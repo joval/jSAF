@@ -182,12 +182,12 @@ public class Runspace implements IRunspace {
 	return view;
     }
 
-    // Internal
+    // Private
 
     /**
      * Read lines until the next prompt is reached. If there are errors, they are buffered in err.
      */
-    protected String read(long millis) throws IOException, TimeoutException {
+    private String read(long millis) throws IOException, TimeoutException {
 	StringBuffer sb = null;
 	String line = null;
 	while((line = readLine(millis)) != null) {

@@ -58,7 +58,7 @@ public class RunspacePool implements IRunspacePool {
 		if (p.isRunning()) {
 		    p.destroy();
 		}
-		logger.debug(Message.STATUS_POWERSHELL_EXIT, runspace.getId());
+		logger.debug(Message.STATUS_POWERSHELL_EXIT, runspace.getId(), p.exitValue());
 	    } catch (Exception e) {
 		e.printStackTrace();
 	    }

@@ -408,8 +408,7 @@ public class SafeCLI {
 	    } catch (IOException e) {
 		if (e instanceof InterruptedIOException || e instanceof EOFException) {
 		    if (attempt > execRetries) {
-			session.getLogger().warn(Message.ERROR_PROCESS_RETRY, cmd, attempt);
-			throw e;
+			throw new Exception(Message.getMessage(Message.ERROR_PROCESS_RETRY, cmd, attempt), e);
 		    } else {
 			// the process has hung up, so kill it
 			p.destroy();

@@ -232,7 +232,9 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 
     protected WindowsFileInfo getWindowsFileInfo(String path) throws IOException {
 	try {
-	    String data = runspace.invoke("Get-Item -literalPath '" + path + "' | Print-FileInfo");
+	    StringBuffer sb = new StringBuffer("Get-Item -literalPath '");
+	    sb.append(path).append("' | Print-FileInfo | Transfer-Encode");
+	    String data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.UTF8);
 	    return (WindowsFileInfo)nextFileInfo(StringTools.toList(data.split("\r\n")).iterator());
 	} catch (IOException e) {
 	    throw e;

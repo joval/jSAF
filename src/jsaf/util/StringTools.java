@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import jsaf.Message;
 
@@ -244,12 +246,30 @@ public class StringTools {
     }
 
     /**
+     * Like java.util.regex.Pattern.compile, but converts Posix character classes.
+     *
+     * @since 1.0.1
+     */
+    public static Pattern pattern(String regex) throws PatternSyntaxException {
+	return Pattern.compile(regexPosix2Java(regex));
+    }
+
+    /**
+     * Like java.util.regex.Pattern.compile, but converts Posix character classes.
+     *
+     * @since 1.0.1
+     */
+    public static Pattern pattern(String regex, int flags) throws PatternSyntaxException {
+	return Pattern.compile(regexPosix2Java(regex), flags);
+    }
+
+    /**
      * Perform a substitution of POSIX character classes to Java character classes.
      *
      * @since 1.0
      */
-    public static String regexPosix2Java(String perlExpression) {
-	String javaExpression = perlExpression;
+    public static String regexPosix2Java(String pcre) {
+	String javaExpression = pcre;
 	javaExpression = javaExpression.replace("[:digit:]", "\\p{Digit}");
 	javaExpression = javaExpression.replace("[:alnum:]", "\\p{Alnum}");
 	javaExpression = javaExpression.replace("[:alpha:]", "\\p{Alpha}");
@@ -263,6 +283,28 @@ public class StringTools {
 	javaExpression = javaExpression.replace("[:lower:]", "\\p{Lower}");
 	javaExpression = javaExpression.replace("[:cntrl:]", "\\p{Cntrl}");
 	return javaExpression;
+    }
+
+    /**
+     * Perform a substitution of POSIX character classes to Unicode character classes.
+     *
+     * @since 1.0.1
+     */
+    public static String regexPosix2Powershell(String pcre) {
+	String psExpression = pcre;
+	psExpression = psExpression.replace("[:digit:]", "\\d");
+	psExpression = psExpression.replace("[:alnum:]", "\\p{L}\\p{Nd}");
+	psExpression = psExpression.replace("[:alpha:]", "\\p{L}");
+	psExpression = psExpression.replace("[:blank:]", "\\p{Zs}\\t");
+	psExpression = psExpression.replace("[:xdigit:]","a-fA-F0-9");
+	psExpression = psExpression.replace("[:punct:]", "\\p{P}");
+	psExpression = psExpression.replace("[:print:]", "\\P{C}");
+	psExpression = psExpression.replace("[:space:]", "\\s");
+	psExpression = psExpression.replace("[:graph:]", "\\P{Z}\\P{C}");
+	psExpression = psExpression.replace("[:upper:]", "\\p{Lu}");
+	psExpression = psExpression.replace("[:lower:]", "\\p{Ll}");
+	psExpression = psExpression.replace("[:cntrl:]", "\\p{Cc}");
+	return psExpression;
     }
 
     // Private

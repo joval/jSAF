@@ -128,14 +128,14 @@ public class RegistrySearcher implements ISearchable<IKey> {
 		sb.append(" -Key \"").append(from).append("\"");
 	    }
 	    if (keyPattern != null) {
-		sb.append(" -Pattern \"").append(keyPattern.pattern()).append("\"");
+		sb.append(" -Pattern \"").append(toString(keyPattern)).append("\"");
 	    }
 	    if (valName != null) {
 		sb.append(" -WithLiteralVal \"").append(valName).append("\"");
 	    } else if (valNameB64 != null) {
 		sb.append(" -WithEncodedVal ").append(valNameB64);
 	    } else if (valPattern != null) {
-		sb.append(" -WithValPattern \"").append(valPattern.pattern()).append("\"");
+		sb.append(" -WithValPattern \"").append(toString(valPattern)).append("\"");
 	    }
 	    sb.append(" -Depth ").append(Integer.toString(maxDepth));
 	    sb.append(" | %{$_.Name}");
@@ -174,7 +174,7 @@ public class RegistrySearcher implements ISearchable<IKey> {
 	    }
 	}
 
-	String path = p.pattern();
+	String path = toString(p);
 	if (!path.startsWith("^")) {
 	    return null;
 	}
@@ -237,5 +237,11 @@ public class RegistrySearcher implements ISearchable<IKey> {
 
 	    return Arrays.asList(parent).toArray(new String[1]);
 	}
+    }
+
+    // Internal
+
+    String toString(Pattern p) {
+	return StringTools.regexPosix2Powershell(p.pattern());
     }
 }

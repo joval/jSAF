@@ -158,18 +158,18 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	if (dirOnly) {
 	    command = new StringBuffer("Find-Directories -Path '").append(from).append("'");
 	    if (dirPattern != null) {
-		command.append(" -Pattern '").append(dirPattern.pattern()).append("'");
+		command.append(" -Pattern '").append(toString(dirPattern)).append("'");
 	    }
 	} else {
 	    command = new StringBuffer("Find-Files -Path '").append(from).append("'");
 	    if (pathPattern != null) {
-		command.append(" -Pattern '").append(pathPattern.pattern()).append("'");
+		command.append(" -Pattern '").append(toString(pathPattern)).append("'");
 	    }
 	    if (basename != null) {
 		command.append(" -LiteralFilename '").append(basename).append("'");
 	    }
 	    if (basenamePattern != null) {
-		command.append(" -Filename '").append(basenamePattern.pattern()).append("'");
+		command.append(" -Filename '").append(toString(basenamePattern)).append("'");
 	    }
 	}
 	command.append(" -Depth ").append(Integer.toString(maxDepth));
@@ -244,6 +244,10 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 
     boolean isSetFlag(int flag, int flags) {
 	return flag == (flag & flags);
+    }
+
+    String toString(Pattern p) {
+	return StringTools.regexPosix2Powershell(p.pattern());
     }
 
     /**

@@ -104,7 +104,7 @@ public class RunspacePool implements IRunspacePool {
 	    logger.debug(Message.STATUS_POWERSHELL_SPAWN, id);
 	    pool.put(id, runspace);
 	    runspace.invoke("$host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(512,2000)");
-	    runspace.loadModule(RunspacePool.class.getResourceAsStream("Transfer.psm1"));
+	    runspace.loadModule(RunspacePool.class.getResourceAsStream("Powershell.psm1"));
 	    return runspace;
 	} else {
 	    throw new IndexOutOfBoundsException(Integer.toString(pool.size() + 1));

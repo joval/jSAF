@@ -336,14 +336,13 @@ public class SafeCLI {
 	 * @since 1.0
 	 */
 	public List<String> getLines() throws IOException {
-	    Charset encoding = null;
 	    ByteArrayInputStream in = new ByteArrayInputStream(data);
 	    in.mark(data.length);
+	    Charset encoding = StringTools.ASCII;
 	    try {
 		encoding = StreamTool.detectEncoding(in);
 	    } catch (IOException e) {
 		in.reset();
-		encoding = StringTools.ASCII;
 	    }
 	    BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding));
 	    List<String> lines = new ArrayList<String>();

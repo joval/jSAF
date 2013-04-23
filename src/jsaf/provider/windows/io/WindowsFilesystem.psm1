@@ -140,7 +140,7 @@ namespace jOVAL.File {
     $Type = [jOVAL.File.Probe]
     $ErrorActionPreference = "Stop" 
     if($Type -eq $null){
-      Add-Type $Source
+      New-Type -TypeDefinition $Source
     }
   }
 

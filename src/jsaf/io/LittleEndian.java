@@ -28,8 +28,16 @@ public class LittleEndian {
      * @since 1.0
      */
     public static final String toHexString(byte[] b) {
+	return toHexString(b, 0, b.length);
+    }
+
+    /**
+     * @since 1.0.1
+     */
+    public static final String toHexString(byte[] b, int offset, int len) {
+	int end = Math.min(b.length, (offset + len));
 	StringBuffer sb = new StringBuffer();
-	for (int i=0; i < b.length; i++) {
+	for (int i=offset; i < end; i++) {
 	    sb.append(toHexString(b[i]));
 	}
 	return sb.toString();

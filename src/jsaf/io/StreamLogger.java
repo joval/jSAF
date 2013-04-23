@@ -106,5 +106,4 @@ public class StreamLogger extends InputStream {
     public boolean markSupported() {
 	return in.markSupported();
     }
-
 }

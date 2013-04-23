@@ -60,8 +60,9 @@ CLASSES=\
 	jsaf.intf.windows.wmi.ISWbemProperty	\
 	jsaf.intf.windows.wmi.ISWbemPropertySet	\
 	jsaf.intf.windows.wmi.IWmiProvider	\
-	jsaf.io.LittleEndian    \
-	jsaf.io.StreamTool      \
+	jsaf.io.LittleEndian	\
+	jsaf.io.PerishableReader	\
+	jsaf.io.StreamTool	\
 	jsaf.protocol.zip.ZipURLConnection	\
 	jsaf.protocol.zip.ZipURLStreamHandler	\
 	jsaf.provider.SessionException	\
@@ -70,10 +71,10 @@ CLASSES=\
 	jsaf.provider.windows.powershell.PowershellException	\
 	jsaf.provider.windows.registry.RegistryException	\
 	jsaf.provider.windows.wmi.WmiException	\
-	jsaf.util.AbstractEnvironment   \
+	jsaf.util.AbstractEnvironment	\
 	jsaf.util.Base64	\
 	jsaf.util.Checksum	\
-	jsaf.util.Environment   \
+	jsaf.util.Environment	\
 	jsaf.util.IniFile	\
 	jsaf.util.PropertyUtil	\
 	jsaf.util.SafeCLI	\

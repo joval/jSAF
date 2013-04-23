@@ -3,7 +3,6 @@ CLASSES=\
 	jsaf.io.fs.AbstractFilesystem	\
 	jsaf.io.fs.DefaultMetadata	\
 	jsaf.io.fs.IAccessor	\
-	jsaf.io.PerishableReader	\
 	jsaf.io.StreamLogger	\
 	jsaf.provider.AbstractBaseSession	\
 	jsaf.provider.AbstractSession	\

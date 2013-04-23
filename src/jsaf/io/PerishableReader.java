@@ -90,19 +90,34 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
     }
 
     @Override
-    public int available() throws IOException {
+    public synchronized int available() throws IOException {
 	return in.available();
     }
 
-    public boolean checkClosed() {
+    @Override
+    public boolean markSupported() {
+	return true;
+    }
+
+    @Override
+    public void mark(int readlimit) {
+	setCheckpoint(readlimit);
+    }
+
+    @Override
+    public void reset() throws IOException {
+	restoreCheckpoint();
+    }
+
+    public synchronized boolean checkClosed() {
 	return buffer.hasNext() || closed;
     }
 
-    public boolean checkEOF() {
+    public synchronized boolean checkEOF() {
 	return buffer.hasNext() || isEOF;
     }
 
-    public String readLine() throws IOException {
+    public synchronized String readLine() throws IOException {
 	String result = null;
 	StringBuffer line = new StringBuffer();
 	int ch = 0;
@@ -135,11 +150,11 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	return result;
     }
 
-    public void readFully(byte[] buff) throws IOException {
+    public synchronized void readFully(byte[] buff) throws IOException {
 	readFully(buff, 0, buff.length);
     }
 
-    public void readFully(byte[] buff, int offset, int len) throws IOException {
+    public synchronized void readFully(byte[] buff, int offset, int len) throws IOException {
 	int end = offset + len;
 	for (int i=offset; i < end; i++) {
 	    int ch = read();
@@ -153,7 +168,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	}
     }
 
-    public String readUntil(String delim) throws IOException {
+    public synchronized String readUntil(String delim) throws IOException {
 	StringBuffer sb = new StringBuffer();
 	boolean found = false;
 	do {
@@ -181,7 +196,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	return sb.toString();
     }
 
-    public byte[] readUntil(int delim) throws IOException {
+    public synchronized byte[] readUntil(int delim) throws IOException {
 	int ch=0, len=0;
 	byte[] buff = new byte[512];
 	while((ch = read()) != -1 && ch != delim) {
@@ -209,12 +224,12 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
     }
 
     @Override
-    public int read(byte[] buff) throws IOException {
+    public synchronized int read(byte[] buff) throws IOException {
 	return read(buff, 0, buff.length);
     }
 
     @Override
-    public int read(byte[] buff, int offset, int len) throws IOException {
+    public synchronized int read(byte[] buff, int offset, int len) throws IOException {
 	int bytesRead = 0;
 	while (buffer.hasNext() && offset < buff.length) {
 	    buff[offset++] = buffer.next();
@@ -225,12 +240,12 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	for (int i=offset; buffer.hasCapacity() && i < end; i++) {
 	    buffer.add((byte)(i & 0xFF));
 	}
-	reset();
+	resetTimer();
 	return bytesRead;
     }
 
     @Override
-    public int read() throws IOException {
+    public synchronized int read() throws IOException {
 	int i = -1;
 	if (buffer.hasNext()) {
 	    i = (int)buffer.next();
@@ -246,49 +261,54 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	    defuse();
 	    isEOF = true;
 	} else {
-	    reset();
+	    resetTimer();
 	}
 	return i;
     }
 
-    public void setCheckpoint(int readAheadLimit) throws IOException {
+    public synchronized void setCheckpoint(int readAheadLimit) {
 	buffer.init(readAheadLimit);
     }
 
-    public void restoreCheckpoint() throws IOException {
+    public synchronized void restoreCheckpoint() throws IOException {
+	if (buffer.isEmpty()) {
+	    throw new IOException("empty buffer");
+	}
 	buffer.reset();
     }
 
     // Implement IPerishable
 
-    public boolean checkExpired() {
+    public synchronized boolean checkExpired() {
 	return expired;
     }
 
-    public void setTimeout(long timeout) {
+    public synchronized void setTimeout(long timeout) {
 	if (timeout <= 0) {
 	    this.timeout = 3600000L; // 1hr
 	} else {
 	    this.timeout = timeout;
 	}
-	reset();
-    }
-
-    public synchronized void reset() {
-	defuse();
-	task = new InterruptTask(Thread.currentThread());
-	JSAFSystem.getTimer().schedule(task, timeout);
+	resetTimer();
     }
 
     /**
      * Kill the scheduled interrupt task and purge it from the timer.
      */
-    public void defuse() {
+    public synchronized void defuse() {
 	if (task != null) {
 	    task.cancel();
 	    task = null;
 	}
 	JSAFSystem.getTimer().purge();
+    }
+
+    // Protected
+
+    protected synchronized void resetTimer() {
+	defuse();
+	task = new InterruptTask(Thread.currentThread());
+	JSAFSystem.getTimer().schedule(task, timeout);
     }
 
     // Private
@@ -313,7 +333,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	    logger = Message.getLogger();
 	}
 	setTimeout(timeout);
-	reset();
+	resetTimer();
     }
 
     class InterruptTask extends TimerTask {
@@ -363,16 +383,27 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	    init(size);
 	}
 
+	@Override
+	public String toString() {
+	    if (buff == null) {
+		return "Buffer empty";
+	    }
+	    return "Buffer size: " + buff.length + " pos: " + pos + " len: " + len +
+		 " Ahead: \"" + new String(buff, pos, len - pos) + "\"" + " hasNext: " + hasNext();
+	}
+
 	void init(int size) {
-	    //
-	    // If the stream is already reading from inside the buffer, then don't lose the buffered data.
-	    //
 	    if (hasNext()) {
-		resetPos = pos;
+		//
+		// If the stream is already reading from inside the buffer, then don't lose the buffered data.
+		//
 		if (pos + size > len) {
 		    byte[] temp = buff;
 		    buff = new byte[size + pos];
-		    System.arraycopy(temp, pos, buff, 0, len - pos);
+		    len = len - pos;
+		    System.arraycopy(temp, pos, buff, 0, len);
+		    pos = 0;
+		    resetPos = 0;
 		}
 	    } else {
 		buff = new byte[size];
@@ -389,7 +420,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	public void clear() throws IllegalStateException {
 	    if (hasNext()) {
 		throw new IllegalStateException(Integer.toString(len - pos));
-	    } else {
+	    } else if (buff != null) {
 		buff = null;
 	    }
 	}
@@ -414,16 +445,36 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	    return buff != null && len < buff.length;
 	}
 
+	public void add(int ch) {
+	    add((byte)(ch & 0xFF));
+	}
+
 	public void add(byte b) {
-	    if (hasCapacity()) {
+	    if (hasNext()) {
+		//
+		// A delayed add: insert the byte before the active part of the buffer
+		//
+		if (!hasCapacity()) {
+		    init(buff.length + 1);
+		}
+		int ahead = len - pos;
+		for (int i=len; i > pos; i--) {
+		    buff[i] = buff[i-1];
+		}
+		len++;
+		buff[pos++] = b;
+	    } else if (hasCapacity()) {
 		buff[len++] = b;
 		pos = len;
+	    } else {
+		clear();
 	    }
 	}
 
-	public void add(byte[] bytes, int offset, int len) {
-	    for (int i=0; i < len; i++) {
-		add(bytes[offset + i]);
+	public void add(byte[] bytes, int offset, int length) {
+	    int end = Math.min(bytes.length, (offset + length));
+	    for (int i=offset; i < end; i++) {
+		add(bytes[i]);
 	    }
 	}
     }

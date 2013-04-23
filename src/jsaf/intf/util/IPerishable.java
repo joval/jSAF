@@ -24,4 +24,11 @@ public interface IPerishable {
      * @since 1.0
      */
     void setTimeout(long timeout);
+
+    /**
+     * Defuse the object's expiration timer.
+     *
+     * @since 1.0.1
+     */
+    void defuse();
 }

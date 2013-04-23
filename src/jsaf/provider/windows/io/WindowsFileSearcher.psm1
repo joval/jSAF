@@ -15,7 +15,9 @@ function Find-Directories {
 	$CurrentItem
       }
       if ($Depth -eq -1) {
+	$ErrorActionPreference = "SilentlyContinue"
 	Get-ChildItem $Path -Recurse -Force | Where-Object {$_.PSIsContainer -and ($_.FullName -imatch $Pattern)}
+	$ErrorActionPreference = "Stop"
       } else {
 	if ($Depth -ne 0) {
 	  $NextDepth = $Depth - 1
@@ -45,9 +47,13 @@ function Find-Files {
     if ($Depth -eq -1) {
       [System.GC]::Collect()
       if ($PsCmdlet.ParameterSetName -eq "Literal") {
+	$ErrorActionPreference = "SilentlyContinue"
 	Get-ChildItem $Path -Recurse -Force | Where-Object {$_.Name -eq $LiteralFilename}
+	$ErrorActionPreference = "Stop"
       } else {
+	$ErrorActionPreference = "SilentlyContinue"
 	Get-ChildItem $Path -Recurse -Force | Where-Object {$_.Name -imatch $Filename -and $_.FullName -imatch $Pattern}
+	$ErrorActionPreference = "Stop"
       }
     } else {
       if ($Pattern -eq ".*") {

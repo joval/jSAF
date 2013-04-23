@@ -24,8 +24,10 @@ function Find-RegKeys {
       Filter-KeyConditions $CurrentKey -WithLiteralVal $WithLiteralVal -WithValPattern $WithValPattern -WithEncodedVal $WithEncodedVal
     }
     if ($Depth -eq -1) {
-      Get-ChildItem $FullPath -recurse -force | Where-Object {$_.Name.Substring($_.Name.IndexOf("\") + 1) -imatch $Pattern} |
+      $ErrorActionPreference = "SilentlyContinue"
+      Get-ChildItem $FullPath -Recurse -Force | Where-Object {$_.Name.Substring($_.Name.IndexOf("\") + 1) -imatch $Pattern} |
         Filter-KeyConditions -WithLiteralVal $WithLiteralVal -WithValPattern $WithValPattern -WithEncodedVal $WithEncodedVal
+      $ErrorActionPreference = "Stop"
     } else {
       if ($Depth -gt 0) {
         $NextDepth = $Depth - 1

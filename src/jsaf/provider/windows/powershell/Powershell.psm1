@@ -18,22 +18,18 @@ function Transfer-Encode {
 # Add-Type sporadically fails to work, so this is our implementation
 function New-Type {
   param(
-    [string]$TypeDefinition=$(throw "Mandatory parameter -TypeDefinition missing."),
-    [string[]]$ReferencedAssemblies
+    [Parameter(Mandatory=$True,Position=1)][string]$TypeDefinition=$(throw "Mandatory parameter -TypeDefinition missing.")
   )
 
-  $provider = New-Object Microsoft.CSharp.CSharpCodeProvider
-  $dllName = [PsObject].Assembly.Location
-  $compilerParameters = New-Object System.CodeDom.Compiler.CompilerParameters
-  $assemblies = @("System.dll", $dllName)
-  $compilerParameters.ReferencedAssemblies.AddRange($assemblies)
-  if($ReferencedAssemblies) {
-     $compilerParameters.ReferencedAssemblies.AddRange($ReferencedAssemblies)
-  }
-  $compilerParameters.IncludeDebugInformation = $true
-  $compilerParameters.GenerateInMemory = $true
-  $compilerResults = $provider.CompileAssemblyFromSource($compilerParameters, $TypeDefinition)
-  if($compilerResults.Errors.Count -gt 0) {
-    $compilerResults.Errors | % { Write-Error ("{0}:`t{1}" -f $_.Line,$_.ErrorText) }
+  $Params = New-Object System.CodeDom.Compiler.CompilerParameters
+  $Params.ReferencedAssemblies.AddRange($(@("System.dll", $([PSObject].Assembly.Location))))
+  $Params.GenerateInMemory = $True
+  $Temp = $(Get-Item ENV:TEMP).Value
+  $Params.TempFiles = New-Object System.CodeDom.Compiler.TempFileCollection $Temp, $False
+
+  $Provider = New-Object Microsoft.CSharp.CSharpCodeProvider
+  $Results = $Provider.CompileAssemblyFromSource($Params, $TypeDefinition)
+  if ($Results.Errors.Count -gt 0) {
+    $Results.Errors | %{Write-Error ("{0}:`t{1}" -f $_.Line,$_.ErrorText)}
   }
 }

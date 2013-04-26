@@ -15,20 +15,15 @@ import jsaf.intf.system.IEnvironment;
  */
 public class Environment extends AbstractEnvironment {
     /**
-     * Create from Properties.
+     * Create from properties (case-sensitive).
      */
     public Environment(Properties props) {
-	this.props = props;
+	this(props, false);
     }
 
-    /**
-     * Create from an IEnvironment.
-     */
-    public Environment(IEnvironment env) {
-	super();
-	for (String variable : env) {
-	    props.setProperty(variable, env.getenv(variable));
-	}
+    public Environment(Properties props, boolean caseInsensitive) {
+	super(caseInsensitive);
+	this.props = props;
     }
 
     /**
@@ -47,6 +42,14 @@ public class Environment extends AbstractEnvironment {
      * Set a variable value. Use a value of null or an empty string to unset a value.
      */
     public void setenv(String variable, String value) {
+	if (caseInsensitive) {
+	    for (String key : this) {
+		if (key.equalsIgnoreCase(variable)) {
+		    variable = key;
+		    break;
+		}
+	    }
+	}
 	if (value == null || "".equals(value)) {
 	    props.remove(variable);
 	} else {

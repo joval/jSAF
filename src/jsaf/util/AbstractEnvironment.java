@@ -19,9 +19,15 @@ import jsaf.intf.system.IEnvironment;
  * @version %I% %G%
  */
 public abstract class AbstractEnvironment implements IEnvironment {
+    protected boolean caseInsensitive;
     protected Properties props;
 
     protected AbstractEnvironment() {
+	this(false);
+    }
+
+    protected AbstractEnvironment(boolean caseInsensitive) {
+	this.caseInsensitive = caseInsensitive;
 	props = new Properties();
     }
 
@@ -35,7 +41,7 @@ public abstract class AbstractEnvironment implements IEnvironment {
 	Iterator <String>names = props.stringPropertyNames().iterator();
 	while (names.hasNext()) {
 	    String name = names.next();
-	    String pattern = new StringBuffer("(?i)%").append(name).append('%').toString();
+	    String pattern = new StringBuffer(caseInsensitive ? "(?i)%" : "%").append(name).append("%").toString();
 	    data = data.replaceAll(pattern, Matcher.quoteReplacement(props.getProperty(name)));
 	}
 	if (data.equals(originalData)) {
@@ -45,11 +51,17 @@ public abstract class AbstractEnvironment implements IEnvironment {
 	}
     }
 
-    /**
-     * Get an environment variable!
-     */
     public String getenv(String var) {
-	return props.getProperty(var.toUpperCase());
+	if (caseInsensitive) {
+	    for (String key : this) {
+		if (key.equalsIgnoreCase(var)) {
+		    return props.getProperty(key);
+		}
+	    }
+	    return null;
+	} else {
+	    return props.getProperty(var);
+	}
     }
 
     public Iterator<String> iterator() {

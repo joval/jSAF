@@ -16,7 +16,6 @@ import org.slf4j.cal10n.LocLogger;
 
 import jsaf.intf.system.IEnvironment;
 import jsaf.intf.system.IProcess;
-import jsaf.intf.system.ISession;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.util.AbstractEnvironment;
 import jsaf.util.SafeCLI;
@@ -28,19 +27,19 @@ import jsaf.util.SafeCLI;
  * @version %I% %G%
  */
 public class Environment extends AbstractEnvironment {
-    public Environment(ISession session) throws Exception {
-	super();
+    public Environment(IWindowsSession session) throws Exception {
+	super(true);
 	String lastKey = null;
-	for (String line : SafeCLI.multiLine("set", session, ISession.Timeout.M)) {
+	for (String line : SafeCLI.multiLine("set", session, IWindowsSession.Timeout.M)) {
 	    int ptr = line.indexOf("=");
 	    if (ptr > 0) {
 		String key = line.substring(0,ptr);
 		lastKey = key;
 		String val = line.substring(ptr+1);
-		props.setProperty(key.toUpperCase(), val);
+		props.setProperty(key, val);
 	    } else if (lastKey != null) {
-		String val = new StringBuffer(props.getProperty(lastKey.toUpperCase())).append(line).toString();
-		props.setProperty(lastKey.toUpperCase(), val);
+		String val = new StringBuffer(props.getProperty(lastKey)).append(line).toString();
+		props.setProperty(lastKey, val);
 	    }
 	}
     }

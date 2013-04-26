@@ -16,11 +16,25 @@ import jsaf.util.SafeCLI;
  */
 public interface IUnixSession extends ISession {
     /**
-     * Property indicating the number of milliseconds to wait for a read before quiting.
+     * Property indicating the number of milliseconds to wait for a read before quiting a privilege escalation attempt.
      *
-     * @since 1.0
+     * @since 1.0.1
      */
-    String PROP_SUDO_READ_TIMEOUT = "read.timeout.sudo";
+    String PROP_SUDO_READ_TIMEOUT = "elevate.read.timeout";
+
+    /**
+     * Property indicating the maximum length for any command output.
+     *
+     * @since 1.0.1
+     */
+    String PROP_SUDO_READ_MAXLEN = "elevate.read.maxlen";
+
+    /**
+     * Root username.
+     *
+     * @since 1.0.1
+     */
+    String ROOT = "root";
 
     /**
      * Get the "Flavor" of the Unix session.

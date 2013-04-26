@@ -35,6 +35,13 @@ public interface IWindowsSession extends ISession {
     String ENV_AR32 = "PROCESSOR_ARCHITEW6432";
 
     /**
+     * Administrator username.
+     *
+     * @since 1.0.1
+     */
+    String ADMINISTRATOR = "Administrator";
+
+    /**
      * An enumeration of possible views.
      *
      * @since 1.0

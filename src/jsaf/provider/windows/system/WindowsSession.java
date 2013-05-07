@@ -38,6 +38,13 @@ import jsaf.provider.windows.wmi.WmiProvider;
  * @version %I% %G%
  */
 public class WindowsSession extends AbstractSession implements IWindowsSession {
+    static {
+	//
+	// Load the JACOB DLL
+	//
+	com.jacob.com.LibraryLoader.loadJacobLibrary();
+    }
+
     private WmiProvider wmi;
     private boolean is64bit = false;
     private Registry reg32, reg;
@@ -46,17 +53,6 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
     private RunspacePool runspaces = null;
     private List<String> baseCommand = Arrays.asList("cmd", "/c");
     private View accessorView = null;
-
-    //
-    // Load the JACOB DLL
-    //
-    static {
-	if ("32".equals(System.getProperty("sun.arch.data.model"))) {
-	    System.loadLibrary("jacob-1.15-M4-x86");
-	} else {
-	    System.loadLibrary("jacob-1.15-M4-x64");
-	}
-    }
 
     public WindowsSession(File wsdir) {
 	super();

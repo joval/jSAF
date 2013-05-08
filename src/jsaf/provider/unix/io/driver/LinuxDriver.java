@@ -39,10 +39,20 @@ import jsaf.util.StringTools;
  * @version %I% %G%
  */
 public class LinuxDriver extends AbstractDriver {
-    private static final String PRINTF = " -printf \"%M\\0%Z\\0%U\\0%G\\0%s\\0%A@\\0%C@\\0%T@\\0%p\\0%l\\n\"";
+    private boolean selinuxEnabled = false;
+    private String printf = " -printf \"%M\\0%U\\0%G\\0%s\\0%A@\\0%C@\\0%T@\\0%p\\0%l\\n\"";
 
     public LinuxDriver(IUnixSession session) {
 	super(session);
+	try {
+	    String sestatus = SafeCLI.exec("/usr/sbin/getenforce", session, IUnixSession.Timeout.S);
+	    if (sestatus.equalsIgnoreCase("Enforcing") || sestatus.equalsIgnoreCase("Permissive")) {
+		selinuxEnabled = true;
+		printf = " -printf \"%M\\0%Z\\0%U\\0%G\\0%s\\0%A@\\0%C@\\0%T@\\0%p\\0%l\\n\"";
+	    }
+	} catch (Exception e) {
+	    session.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	}
     }
 
     void getMounts() throws Exception {
@@ -136,13 +146,13 @@ public class LinuxDriver extends AbstractDriver {
 	    if (dirname != null && !dirname.pattern().equals(WILDCARD)) {
 		cmd.append(" -regextype posix-egrep -regex '").append(dirname.pattern()).append("'");
 	    }
-	    cmd.append(PRINTF);
+	    cmd.append(printf);
 	} else {
 	    if (path != null) {
 		if (!path.pattern().equals(WILDCARD)) {
 		    cmd.append(" -regextype posix-egrep -regex '").append(path.pattern()).append("'");
 		}
-		cmd.append(PRINTF);
+		cmd.append(printf);
 	    } else {
 		if (dirname != null) {
 		    cmd.append(" -type d");
@@ -151,7 +161,7 @@ public class LinuxDriver extends AbstractDriver {
 		}
 		cmd.append(" -type f");
 		if (basename != null) {
-		    cmd.append(PRINTF);
+		    cmd.append(printf);
 		    if (!basename.pattern().equals(WILDCARD)) {
 			cmd.append(" | awk --posix -F\\\\0 '{n=split($9,a,\"/\");if(match(a[n],\"");
 			cmd.append(basename.pattern());
@@ -159,10 +169,10 @@ public class LinuxDriver extends AbstractDriver {
 		    }
 		} else if (antiBasename != null) {
 		    cmd.append(" ! -name '").append(antiBasename).append("'");
-		    cmd.append(PRINTF);
+		    cmd.append(printf);
 		} else if (literalBasename != null) {
 		    cmd.append(" -name '").append(literalBasename).append("'");
-		    cmd.append(PRINTF);
+		    cmd.append(printf);
 		}
 	    }
 	}
@@ -170,7 +180,7 @@ public class LinuxDriver extends AbstractDriver {
     }
 
     public String getStatCommand(String path) {
-	return new StringBuffer("find '").append(path).append("'").append(PRINTF).append(" -prune").toString();
+	return new StringBuffer("find '").append(path).append("'").append(printf).append(" -prune").toString();
     }
 
     private static final String NULL = new String(new byte[] {0x00}, StringTools.ASCII);
@@ -187,14 +197,19 @@ public class LinuxDriver extends AbstractDriver {
 	    return null;
 	}
 	StringTokenizer tok = new StringTokenizer(line, NULL);
-	if (tok.countTokens() < 9) {
+	if (tok.countTokens() < (selinuxEnabled ? 9 : 8)) {
 	    return nextFileInfo(lines);
 	} else {
 	    String perms = tok.nextToken();
 	    char unixType = perms.charAt(0);
 	    perms = perms.substring(1);
 
-	    String selinux = tok.nextToken();
+	    Properties ext = null; // extended properties
+	    if (selinuxEnabled) {
+		ext = new Properties();
+		ext.setProperty(IUnixFileInfo.SELINUX_DATA, tok.nextToken());
+	    }
+
 	    int uid = -1;
 	    try {
 		uid = Integer.parseInt(tok.nextToken());
@@ -244,9 +259,6 @@ public class LinuxDriver extends AbstractDriver {
 	    if (tok.hasMoreTokens()) {
 		linkPath = tok.nextToken();
 	    }
-
-	    Properties ext = new Properties();
-	    ext.setProperty(IUnixFileInfo.SELINUX_DATA, selinux);
 
 	    return new UnixFileInfo(type, path, linkPath, ctime, mtime, atime, length, unixType, perms, uid, gid, null, ext);
 	}

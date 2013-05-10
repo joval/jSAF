@@ -33,6 +33,7 @@ CLASSES=\
 	jsaf.intf.util.IPerishable	\
 	jsaf.intf.util.IProperty	\
 	jsaf.intf.util.ISearchable	\
+	jsaf.intf.util.IConnectionSpecification	\
 	jsaf.intf.windows.identity.IACE	\
 	jsaf.intf.windows.identity.IDirectory	\
 	jsaf.intf.windows.identity.IGroup	\
@@ -75,6 +76,7 @@ CLASSES=\
 	jsaf.util.AbstractEnvironment	\
 	jsaf.util.Base64	\
 	jsaf.util.Checksum	\
+	jsaf.util.ConnectionSpecification	\
 	jsaf.util.Environment	\
 	jsaf.util.IniFile	\
 	jsaf.util.PropertyUtil	\

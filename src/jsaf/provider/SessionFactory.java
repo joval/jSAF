@@ -13,6 +13,7 @@ import jsaf.Message;
 import jsaf.intf.system.ISession;
 import jsaf.intf.system.IRemote;
 import jsaf.intf.util.ILoggable;
+import jsaf.intf.util.IConnectionSpecification;
 
 /**
  * Factory class for creating ISessions.
@@ -126,4 +127,12 @@ public abstract class SessionFactory implements ILoggable {
      * @since 1.0
      */
     public abstract ISession createSession(String target) throws IOException;
+
+    /**
+     * Creates a session for the specified target. Interpretation of the target string is performed by the
+     * underlying session factory implementation.
+     *
+     * @since 1.0.2
+     */
+    public abstract ISession createSession(IConnectionSpecification target) throws IOException;
 }

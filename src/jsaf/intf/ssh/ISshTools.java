@@ -3,6 +3,8 @@
 
 package jsaf.intf.ssh;
 
+import jsaf.intf.util.IConnectionSpecification;
+
 /**
  * An interface for a provider of certain SSH utility functions. This interface makes it possible for a jSAF provider
  * to offer indirect access to its SSH implementation, without making the implementation directly accessible to the
@@ -19,4 +21,9 @@ public interface ISshTools {
      * after being securely stored.
      */
     byte[] decryptPrivateKey(byte[] encrypted, byte[] passphrase) throws Exception;
+
+    /**
+     * Discover the public key of the specified target machine.
+     */
+    String getPublicKey(IConnectionSpecification target) throws Exception;
 }

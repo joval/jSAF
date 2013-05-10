@@ -25,4 +25,15 @@ public interface ICredentialStore {
      * @since 1.0
      */
     ICredential getCredential(ISession session) throws AccessControlException;
+
+    /**
+     * Return the appropriate credential for the given identifier.
+     *
+     * @return null if no credential is found
+     *
+     * @throws AccessControlException if access to the requested credential is not allowed.
+     *
+     * @since 1.0.2
+     */
+    ICredential getCredential(String identifier) throws AccessControlException;
 }

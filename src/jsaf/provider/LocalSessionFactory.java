@@ -9,6 +9,7 @@ import jsaf.intf.io.IFilesystem;
 import jsaf.intf.ssh.ISshTools;
 import jsaf.intf.system.IRemote;
 import jsaf.intf.system.ISession;
+import jsaf.intf.util.IConnectionSpecification;
 import jsaf.provider.unix.system.UnixSession;
 import jsaf.provider.windows.system.WindowsSession;
 
@@ -66,5 +67,9 @@ public class LocalSessionFactory extends SessionFactory {
 	    session.getProperties().setProperty(IFilesystem.PROP_CACHE_JDBM, null);
 	}
 	return session;
+    }
+
+    public ISession createSession(IConnectionSpecification target) {
+	return createSession(target.getHostname());
     }
 }

@@ -76,8 +76,12 @@ public class SimpleCredentialStore implements ICredentialStore {
 
     // Implement ICredentialStore
 
-    public ICredential getCredential(ISession session) throws AccessControlException {
-	IProperty prop = table.get(session.getHostname());
+    public ICredential getCredential(ISession session) {
+	return getCredential(session.getHostname());
+    }
+
+    public ICredential getCredential(String identifier) {
+	IProperty prop = table.get(identifier);
 	if (prop == null) {
 	    return null;
 	}
@@ -89,16 +93,10 @@ public class SimpleCredentialStore implements ICredentialStore {
 	String privateKey = prop.getProperty(PROP_PRIVATE_KEY);
 
 	ICredential cred = null;
-	if (session.getHostname().equalsIgnoreCase(prop.getProperty(PROP_HOSTNAME))) {
-	    switch (session.getType()) {
-	      case WINDOWS:
-		if (domain == null) {
-		    domain = prop.getProperty(PROP_HOSTNAME).toUpperCase();
-		}
+	if (identifier.equalsIgnoreCase(prop.getProperty(PROP_HOSTNAME))) {
+	    if (domain != null) {
 		cred = new WindowsCredential(domain, username, password);
-		break;
-
-	      default:
+	    } else {
 		File pkf = null;
 		if (privateKey != null && (pkf = new File(privateKey)).exists()) {
 		    cred = new SshCredential(username, pkf, passphrase, rootPassword);
@@ -109,7 +107,6 @@ public class SimpleCredentialStore implements ICredentialStore {
 		} else {
 		    Message.getLogger().warn(Message.ERROR_SESSION_CREDENTIAL_PASSWORD, username);
 		}
-		break;
 	    }
 	}
 	return cred;

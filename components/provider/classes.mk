@@ -7,7 +7,7 @@ CLASSES=\
 	jsaf.provider.AbstractBaseSession	\
 	jsaf.provider.AbstractSession	\
 	jsaf.provider.Configurator	\
-	jsaf.provider.SessionFactoryImpl	\
+	jsaf.provider.LocalSessionFactory	\
 	jsaf.provider.unix.io.driver.AbstractDriver	\
 	jsaf.provider.unix.io.driver.AIXDriver	\
 	jsaf.provider.unix.io.driver.LinuxDriver	\

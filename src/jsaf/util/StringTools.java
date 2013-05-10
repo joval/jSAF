@@ -149,7 +149,8 @@ public class StringTools {
      * @since 1.0
      */
     public static boolean isLetter(int c) {
-	return (c >= 65 && c <= 90) || (c >= 95 && c <= 122);
+//	return (c >= 65 && c <= 90) || (c >= 97 && c <= 122);
+return (c >= 65 && c <= 90) || (c >= 95 && c <= 122);
     }
 
     /**

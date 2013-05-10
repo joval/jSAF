@@ -17,6 +17,7 @@ CLASSES=\
 	jsaf.intf.juniper.system.IJunosSession	\
 	jsaf.intf.juniper.system.ISupportInformation	\
 	jsaf.intf.netconf.INetconf	\
+	jsaf.intf.ssh.ISshTools	\
 	jsaf.intf.ssh.identity.ISshCredential	\
 	jsaf.intf.ssh.system.IShell	\
 	jsaf.intf.system.IEnvironment	\

@@ -6,6 +6,7 @@ package jsaf.provider;
 import java.io.File;
 
 import jsaf.intf.io.IFilesystem;
+import jsaf.intf.ssh.ISshTools;
 import jsaf.intf.system.IRemote;
 import jsaf.intf.system.ISession;
 import jsaf.provider.unix.system.UnixSession;
@@ -17,10 +18,10 @@ import jsaf.provider.windows.system.WindowsSession;
  * @author David A. Solin
  * @version %I% %G%
  */
-public class SessionFactoryImpl extends SessionFactory {
+public class LocalSessionFactory extends SessionFactory {
     private File workspace;
 
-    public SessionFactoryImpl (File workspace) {
+    public LocalSessionFactory (File workspace) {
 	this.workspace = workspace;
     }
 
@@ -31,6 +32,13 @@ public class SessionFactoryImpl extends SessionFactory {
      */
     public IRemote getRemote() {
 	throw new UnsupportedOperationException("getRemote");
+    }
+
+    /**
+     * No SSH implementation is included with the local provider.
+     */
+    public ISshTools getSshTools() {
+	throw new UnsupportedOperationException("getSshTools");
     }
 
     public ISession createSession() {

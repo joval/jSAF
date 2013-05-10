@@ -27,7 +27,7 @@ public abstract class SessionFactory implements ILoggable {
      *
      * @since 1.0
      */
-    public static final String DEFAULT_FACTORY = "jsaf.provider.SessionFactoryImpl";
+    public static final String DEFAULT_FACTORY = "jsaf.provider.LocalSessionFactory";
 
     /**
      * Obtain a new instance of a SessionFactory, with no workspace directory. 

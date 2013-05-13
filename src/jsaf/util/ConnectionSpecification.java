@@ -28,8 +28,7 @@ public class ConnectionSpecification implements IConnectionSpecification {
 
     protected int port = -1;
     protected Type type;
-    protected String id;
-    protected String hostname;
+    protected String id, hostname, fingerprint;
     protected IConnectionSpecification gateway;
 
     public ConnectionSpecification(String hostname) {
@@ -52,6 +51,7 @@ public class ConnectionSpecification implements IConnectionSpecification {
 	if (proxy.type() != Proxy.Type.HTTP) {
 	    throw new IllegalArgumentException(proxy.toString());
 	}
+	type = Type.PROXY;
 	InetSocketAddress addr = (InetSocketAddress)proxy.address();
 	hostname = addr.getHostName();
 	port = addr.getPort();
@@ -70,6 +70,15 @@ public class ConnectionSpecification implements IConnectionSpecification {
 
     public String getIdentifier() {
 	return id;
+    }
+
+    public String getFingerprint() {
+	switch(type) {
+	  case SSH:
+	    return fingerprint;
+	  default:
+	    throw new IllegalStateException(type.toString());
+	}
     }
 
     public String getHostname() {

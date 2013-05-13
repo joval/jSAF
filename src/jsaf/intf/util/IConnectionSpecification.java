@@ -55,6 +55,15 @@ public interface IConnectionSpecification {
     int getPort();
 
     /**
+     * For SSH nodes, returns the expected host public key fingerprint.
+     *
+     * If any fingerprint is permissible, returns "*".
+     *
+     * @throws IllegalStateException if the node is not Type.SSH.
+     */
+    String getFingerprint();
+
+    /**
      * Return the credential information that should be used to connect to the target.
      */
     ICredential getCredential();

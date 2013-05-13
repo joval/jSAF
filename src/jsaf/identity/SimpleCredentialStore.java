@@ -205,7 +205,12 @@ public class SimpleCredentialStore implements ICredentialStore {
 	}
 
 	public byte[] getPrivateKey() {
-	    return privateKey;
+	    if (privateKey == null) {
+		return null;
+	    }
+	    byte[] copy = new byte[privateKey.length];
+	    System.arraycopy(privateKey, 0, copy, 0, privateKey.length);
+	    return copy;
 	}
     }
 

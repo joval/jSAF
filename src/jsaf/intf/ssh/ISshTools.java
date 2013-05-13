@@ -16,11 +16,11 @@ import jsaf.intf.util.IConnectionSpecification;
  */
 public interface ISshTools {
     /**
-     * Decrypts the provided encrypted bytes using the specified passphrase.  Both the encrypted bytes and passphrase
-     * bytes will be zeroed-out as part of this call.  The returned byte buffer should be zeroed out as soon as possible
-     * after being securely stored.
+     * Decrypts/decodes the provided encrypted bytes using the specified passphrase (or null if not protected by one).
+     * Both the encrypted bytes and passphrase (if any) will be zeroed-out as part of this call.  The returned byte buffer
+     * should be zeroed out as soon as possible after being securely stored.
      */
-    byte[] decryptPrivateKey(byte[] encrypted, byte[] passphrase) throws Exception;
+    byte[] getPrivateKey(byte[] encrypted, byte[] passphrase) throws Exception;
 
     /**
      * Discover the public key of the specified target machine.

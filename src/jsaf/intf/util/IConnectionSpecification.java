@@ -18,7 +18,8 @@ public interface IConnectionSpecification {
      * An enumeration of connection node types.
      */
     enum Type {
-	PROXY(8080),
+	SOCKS_PROXY(1080),
+	HTTP_PROXY(8080),
 	SSH(22),
 	WINDOWS(5985),
 	UNKNOWN(-1);

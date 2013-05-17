@@ -48,14 +48,20 @@ public class ConnectionSpecification implements IConnectionSpecification {
     }
 
     public ConnectionSpecification(Proxy proxy) throws IllegalArgumentException {
-	if (proxy.type() != Proxy.Type.HTTP) {
+	switch(proxy.type()) {
+	  case HTTP:
+	    type = Type.SOCKS_PROXY;
+	    break;
+	  case SOCKS:
+	    type = Type.SOCKS_PROXY;
+	    break;
+	  default:
 	    throw new IllegalArgumentException(proxy.toString());
 	}
-	type = Type.PROXY;
 	InetSocketAddress addr = (InetSocketAddress)proxy.address();
 	hostname = addr.getHostName();
 	port = addr.getPort();
-	id = "proxy-" + hostname;
+	id = "proxy" + port + "-" + hostname;
     }
 
     // Implement IConnectionSpecification

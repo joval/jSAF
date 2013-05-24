@@ -3,11 +3,11 @@
 
 package jsaf.provider.windows.identity;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
-import java.util.Vector;
 import java.util.regex.Matcher;
 
 import org.slf4j.cal10n.LocLogger;
@@ -70,6 +70,58 @@ class LocalDirectory implements ILoggable {
 	groupsByNetbiosName = new Hashtable<String, IGroup>();
 	groupsBySid = new Hashtable<String, IGroup>();
 	wmi = parent.getSession().getWmiProvider();
+    }
+
+    boolean userEnabled(String sid) throws NoSuchElementException, WmiException {
+	StringBuffer conditions = new StringBuffer(" WHERE ");
+	conditions.append(SID_CONDITION.replaceAll("(?i)\\$sid", Matcher.quoteReplacement(sid)));
+	ISWbemObjectSet os = wmi.execQuery(IWmiProvider.CIMv2, USER_WQL + conditions.toString());
+	if (os.getSize() == 0) {
+	    os = wmi.execQuery(IWmiProvider.CIMv2, SYSUSER_WQL + conditions.toString());
+	}
+	if (os.getSize() == 0) {
+	    throw new NoSuchElementException(sid);
+	}
+	ISWbemPropertySet columns = os.iterator().next().getProperties();
+	boolean enabled = true;
+	if (columns.getItem("Disabled") != null) {
+	    enabled = !columns.getItem("Disabled").getValueAsBoolean().booleanValue();
+	}
+	return enabled;
+    }
+
+    Collection<String> resolveUserGroupNames(String sid) throws NoSuchElementException, WmiException {
+	StringBuffer conditions = new StringBuffer(" WHERE ");
+	conditions.append(SID_CONDITION.replaceAll("(?i)\\$sid", Matcher.quoteReplacement(sid)));
+	ISWbemObjectSet os = wmi.execQuery(IWmiProvider.CIMv2, USER_WQL + conditions.toString());
+	if (os.getSize() == 0) {
+	    os = wmi.execQuery(IWmiProvider.CIMv2, SYSUSER_WQL + conditions.toString());
+	}
+	if (os.getSize() == 0) {
+	    throw new NoSuchElementException(sid);
+	}
+	ISWbemPropertySet columns = os.iterator().next().getProperties();
+	String domain = columns.getItem("Domain").getValueAsString();
+	String name = columns.getItem("Name").getValueAsString();
+
+	conditions = new StringBuffer();
+	conditions.append(USER_DOMAIN_CONDITION.replaceAll("(?i)\\$domain", Matcher.quoteReplacement(domain)));
+	conditions.append(",");
+	conditions.append(NAME_CONDITION.replaceAll("(?i)\\$name", Matcher.quoteReplacement(name)));
+	String wql = USER_GROUP_WQL.replaceAll("(?i)\\$conditions", Matcher.quoteReplacement(conditions.toString()));
+	Collection<String> groupNetbiosNames = new ArrayList<String>();
+	for (ISWbemObject row : wmi.execQuery(IWmiProvider.CIMv2, wql)) {
+	    columns = row.getProperties();
+	    String groupComponent = columns.getItem("GroupComponent").getValueAsString();
+	    int begin = groupComponent.indexOf("Domain=\"") + 8;
+	    int end = groupComponent.indexOf("\"", begin);
+	    String groupDomain = groupComponent.substring(begin, end);
+	    begin = groupComponent.indexOf("Name=\"") + 6;
+	    end = groupComponent.indexOf("\"", begin+1);
+	    String groupName = groupComponent.substring(begin, end);
+	    groupNetbiosNames.add(groupDomain + "\\" + groupName);
+	}
+	return groupNetbiosNames;
     }
 
     IUser queryUserBySid(String sid) throws NoSuchElementException, WmiException {
@@ -266,7 +318,7 @@ class LocalDirectory implements ILoggable {
      * Returns a Collection of all local users and groups.
      */
     Collection<IPrincipal> queryAllPrincipals() throws WmiException {
-	Collection<IPrincipal> result = new Vector<IPrincipal>();
+	Collection<IPrincipal> result = new ArrayList<IPrincipal>();
 	result.addAll(queryAllUsers());
 	result.addAll(queryAllGroups());
 	return result;
@@ -315,6 +367,9 @@ class LocalDirectory implements ILoggable {
 
     // Private
 
+    /**
+     * Create a "thin" user object. (Group memberships will be retrieved on-demand.)
+     */
     private IUser preloadUser(ISWbemPropertySet columns) throws WmiException {
 	String domain = columns.getItem("Domain").getValueAsString();
 	String name = columns.getItem("Name").getValueAsString();
@@ -327,7 +382,8 @@ class LocalDirectory implements ILoggable {
 	if (usersBySid.containsKey(sid)) {
 	    return usersBySid.get(sid);
 	}
-	IUser user = makeUser(domain, name, sid, enabled);
+	User user = new User(parent.getSession(), netbiosName, sid);
+	user.setEnabled(enabled);
 	usersByNetbiosName.put(netbiosName.toUpperCase(), user);
 	usersBySid.put(sid, user);
 	return user;
@@ -346,28 +402,6 @@ class LocalDirectory implements ILoggable {
 	}
     }
 
-    private User makeUser(String domain, String name, String sid, boolean enabled) throws WmiException {
-	StringBuffer conditions = new StringBuffer();
-	conditions.append(USER_DOMAIN_CONDITION.replaceAll("(?i)\\$domain", Matcher.quoteReplacement(domain)));
-	conditions.append(",");
-	conditions.append(NAME_CONDITION.replaceAll("(?i)\\$name", Matcher.quoteReplacement(name)));
-	String wql = USER_GROUP_WQL.replaceAll("(?i)\\$conditions", Matcher.quoteReplacement(conditions.toString()));
-
-	Collection<String> groupNetbiosNames = new Vector<String>();
-	for (ISWbemObject row : wmi.execQuery(IWmiProvider.CIMv2, wql)) {
-	    ISWbemPropertySet columns = row.getProperties();
-	    String groupComponent = columns.getItem("GroupComponent").getValueAsString();
-	    int begin = groupComponent.indexOf("Domain=\"") + 8;
-	    int end = groupComponent.indexOf("\"", begin);
-	    String groupDomain = groupComponent.substring(begin, end);
-	    begin = groupComponent.indexOf("Name=\"") + 6;
-	    end = groupComponent.indexOf("\"", begin+1);
-	    String groupName = groupComponent.substring(begin, end);
-	    groupNetbiosNames.add(groupDomain + "\\" + groupName);
-	}
-	return new User(domain, name, sid, groupNetbiosNames, enabled);
-    }
-
     private Group makeGroup(String domain, String name, String sid) throws WmiException {
 	StringBuffer conditions = new StringBuffer();
 	conditions.append(GROUP_DOMAIN_CONDITION.replaceAll("(?i)\\$domain", Matcher.quoteReplacement(domain)));
@@ -375,7 +409,7 @@ class LocalDirectory implements ILoggable {
 	conditions.append(NAME_CONDITION.replaceAll("(?i)\\$name", Matcher.quoteReplacement(name)));
 	String wql = GROUP_USER_WQL.replaceAll("(?i)\\$conditions", Matcher.quoteReplacement(conditions.toString()));
 
-	Collection<String> groupNetbiosNames = new Vector<String>(), userNetbiosNames = new Vector<String>();
+	Collection<String> groupNetbiosNames = new ArrayList<String>(), userNetbiosNames = new ArrayList<String>();
 	for (ISWbemObject row : wmi.execQuery(IWmiProvider.CIMv2, wql)) {
 	    ISWbemPropertySet columns = row.getProperties();
 	    String partComponent = columns.getItem("PartComponent").getValueAsString();

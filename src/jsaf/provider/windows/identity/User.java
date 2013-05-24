@@ -19,14 +19,14 @@ public class User extends Principal implements IUser {
     private Boolean enabled = null;
     private Collection<String> groupNetbiosNames = null;
 
-    private IDirectory directory = null;
+    private Directory directory = null;
 
     /**
      * Create a user whose group memberships and enabled status will be determined if and when queried.
      */
     public User(IWindowsSession session, String accountName, String sid) {
 	super(session, accountName, sid);
-	directory = session.getDirectory();
+	directory = (Directory)session.getDirectory();
     }
 
     User(String domain, String name, String sid, Collection<String> groupNetbiosNames, boolean enabled) {
@@ -35,18 +35,34 @@ public class User extends Principal implements IUser {
 	this.enabled = enabled ? Boolean.TRUE : Boolean.FALSE;
     }
 
+    void setEnabled(boolean enabled) {
+	if (enabled) {
+	    this.enabled = Boolean.TRUE;
+	} else {
+	    this.enabled = Boolean.FALSE;
+	}
+    }
+
     // Implement IUser
 
     public Collection<String> getGroupNetbiosNames() {
 	if (groupNetbiosNames == null) {
-	    reinit();
+	    try {
+		groupNetbiosNames = directory.resolveUserGroupNames(sid);
+	    } catch (Exception e) {
+		throw new RuntimeException(e);
+	    }
 	}
 	return groupNetbiosNames;
     }
 
     public boolean isEnabled() {
 	if (enabled == null) {
-	    reinit();
+	    try {
+		enabled = directory.userEnabled(sid);
+	    } catch (Exception e) {
+		throw new RuntimeException(e);
+	    }
 	}
 	return enabled.booleanValue();
     }
@@ -55,17 +71,5 @@ public class User extends Principal implements IUser {
 
     public Type getType() {
 	return Type.USER;
-    }
-
-    // Private
-
-    private void reinit() {
-	try {
-	    IUser user = directory.queryUserBySid(sid);
-	    groupNetbiosNames = user.getGroupNetbiosNames();
-	    enabled = user.isEnabled() ? Boolean.TRUE : Boolean.FALSE;
-	} catch (Exception e) {
-	    throw new RuntimeException(e);
-	}
     }
 }

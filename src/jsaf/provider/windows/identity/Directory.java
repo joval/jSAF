@@ -101,6 +101,37 @@ public class Directory implements IDirectory {
 	return session;
     }
 
+    /**
+     * Returns whether the user is enabled. Used by "thin" local user objects.
+     */
+    boolean userEnabled(String sid) throws NoSuchElementException, WmiException {
+	if (service.isServiceSid(sid)) {
+	    return true;
+	} else {
+	    try {
+		return local.userEnabled(sid);
+	    } catch (NoSuchElementException e) {
+		return ad.queryUserBySid(sid).isEnabled();
+	    }
+	}
+    }
+
+    /**
+     * Returns the collection of NETBIOS names of groups of which the user is a member. Used by "thin" local
+     * user objects.
+     */
+    Collection<String> resolveUserGroupNames(String sid) throws NoSuchElementException, WmiException {
+	if (service.isServiceSid(sid)) {
+	    return new ArrayList<String>();
+	} else {
+	    try {
+		return local.resolveUserGroupNames(sid);
+	    } catch (NoSuchElementException e) {
+		return ad.queryUserBySid(sid).getGroupNetbiosNames();
+	    }
+	}
+    }
+
     // Implement ILoggable
 
     public LocLogger getLogger() {

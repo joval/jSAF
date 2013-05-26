@@ -6,6 +6,7 @@ package jsaf.provider;
 import java.io.File;
 
 import jsaf.intf.io.IFilesystem;
+import jsaf.intf.remote.IConnectionSpecificationFactory;
 import jsaf.intf.ssh.ISshTools;
 import jsaf.intf.system.IRemote;
 import jsaf.intf.system.ISession;
@@ -31,8 +32,8 @@ public class LocalSessionFactory extends SessionFactory {
     /**
      * This is a SessionFactory implementation for a local provider, which does not support remote sessions.
      */
-    public IRemote getRemote() {
-	throw new UnsupportedOperationException("getRemote");
+    public void setConnectionSpecificationFactory(IConnectionSpecificationFactory cf) {
+	throw new UnsupportedOperationException("setConnectionSpecificationFactory");
     }
 
     /**

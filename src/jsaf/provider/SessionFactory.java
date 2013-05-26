@@ -107,18 +107,19 @@ public abstract class SessionFactory implements ILoggable {
     // Abstract
 
     /**
-     * Get the factory's remote session management features.
-     *
-     * @since 1.0
-     */
-    public abstract IRemote getRemote();
-
-    /**
      * Creates a session for the default target.
      *
      * @since 1.0
      */
     public abstract ISession createSession() throws IOException;
+
+    /**
+     * Get the factory's remote session management features.
+     *
+     * @since 1.0
+     * @deprecated
+     */
+    public abstract IRemote getRemote();
 
     /**
      * Creates a session for the specified target. Interpretation of the target string is performed by the
@@ -129,8 +130,7 @@ public abstract class SessionFactory implements ILoggable {
     public abstract ISession createSession(String target) throws IOException;
 
     /**
-     * Creates a session for the specified target. Interpretation of the target string is performed by the
-     * underlying session factory implementation.
+     * Creates a session for the specified target.
      *
      * @since 1.0.2
      */

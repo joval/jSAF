@@ -14,6 +14,7 @@ import jsaf.intf.identity.ICredentialStore;
  * @author David A. Solin
  * @version %I% %G%
  * @since 1.0
+ * @deprecated
  */
 public interface IRemote {
     /**

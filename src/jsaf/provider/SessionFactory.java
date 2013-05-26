@@ -10,10 +10,10 @@ import java.lang.reflect.Constructor;
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
+import jsaf.intf.remote.IConnectionSpecificationFactory;
 import jsaf.intf.system.ISession;
 import jsaf.intf.system.IRemote;
 import jsaf.intf.util.ILoggable;
-import jsaf.intf.util.IConnectionSpecification;
 
 /**
  * Factory class for creating ISessions.
@@ -107,14 +107,12 @@ public abstract class SessionFactory implements ILoggable {
     // Abstract
 
     /**
-     * Get the factory's remote session management features.
+     * Set the IConnectionFactory that should be used by the SessionFactory instance, which can be used by the
+     * SessionFactory instance to associate between target names and IConnectionSpecificaiton information.
      *
-     * @since 1.0
-     * @deprecated
+     * @since 1.0.2
      */
-    public IRemote getRemote() {
-	throw new UnsupportedOperationException();
-    }
+    public abstract void setConnectionSpecificationFactory(IConnectionSpecificationFactory cf);
 
     /**
      * Creates a session for the default target.
@@ -131,10 +129,15 @@ public abstract class SessionFactory implements ILoggable {
      */
     public abstract ISession createSession(String target) throws IOException;
 
+    // Deprecated
+
     /**
-     * Creates a session for the specified target.
+     * DEPRECATED: Get the factory's remote session management features.
      *
-     * @since 1.0.2
+     * @since 1.0
+     * @deprecated
      */
-    public abstract ISession createSession(IConnectionSpecification target) throws IOException;
+    public IRemote getRemote() {
+	throw new UnsupportedOperationException();
+    }
 }

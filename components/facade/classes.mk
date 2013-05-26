@@ -17,6 +17,8 @@ CLASSES=\
 	jsaf.intf.juniper.system.IJunosSession	\
 	jsaf.intf.juniper.system.ISupportInformation	\
 	jsaf.intf.netconf.INetconf	\
+	jsaf.intf.remote.IConnectionSpecification	\
+	jsaf.intf.remote.IConnectionSpecificationFactory	\
 	jsaf.intf.ssh.ISshTools	\
 	jsaf.intf.ssh.identity.ISshCredential	\
 	jsaf.intf.ssh.system.IShell	\
@@ -33,7 +35,6 @@ CLASSES=\
 	jsaf.intf.util.IPerishable	\
 	jsaf.intf.util.IProperty	\
 	jsaf.intf.util.ISearchable	\
-	jsaf.intf.util.IConnectionSpecification	\
 	jsaf.intf.windows.identity.IACE	\
 	jsaf.intf.windows.identity.IDirectory	\
 	jsaf.intf.windows.identity.IGroup	\

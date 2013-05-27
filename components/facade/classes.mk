@@ -1,7 +1,6 @@
 CLASSES=\
 	jsaf.JSAFSystem	\
 	jsaf.Message	\
-	jsaf.identity.SimpleCredentialStore	\
 	jsaf.intf.apple.system.IiOSSession	\
 	jsaf.intf.cisco.system.IIosSession	\
 	jsaf.intf.cisco.system.ITechSupport	\
@@ -77,7 +76,6 @@ CLASSES=\
 	jsaf.util.AbstractEnvironment	\
 	jsaf.util.Base64	\
 	jsaf.util.Checksum	\
-	jsaf.util.ConnectionSpecification	\
 	jsaf.util.Environment	\
 	jsaf.util.IniFile	\
 	jsaf.util.PropertyUtil	\

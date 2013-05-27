@@ -6,11 +6,11 @@ package jsaf.provider;
 import java.io.File;
 
 import jsaf.intf.io.IFilesystem;
+import jsaf.intf.remote.IConnectionSpecification;
 import jsaf.intf.remote.IConnectionSpecificationFactory;
 import jsaf.intf.ssh.ISshTools;
 import jsaf.intf.system.IRemote;
 import jsaf.intf.system.ISession;
-import jsaf.intf.util.IConnectionSpecification;
 import jsaf.provider.unix.system.UnixSession;
 import jsaf.provider.windows.system.WindowsSession;
 

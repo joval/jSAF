@@ -3,7 +3,7 @@
 
 package jsaf.intf.ssh;
 
-import jsaf.intf.util.IConnectionSpecification;
+import jsaf.intf.remote.IConnectionSpecification;
 
 /**
  * An interface for a provider of certain SSH utility functions. This interface makes it possible for a jSAF provider

@@ -23,6 +23,7 @@ public interface ICredentialStore {
      * @throws AccessControlException if access to the requested credential is not allowed.
      *
      * @since 1.0
+     * @deprecated
      */
     ICredential getCredential(ISession session) throws AccessControlException;
 

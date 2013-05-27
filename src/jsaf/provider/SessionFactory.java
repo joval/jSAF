@@ -10,6 +10,7 @@ import java.lang.reflect.Constructor;
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
+import jsaf.intf.remote.IConnectionSpecification;
 import jsaf.intf.remote.IConnectionSpecificationFactory;
 import jsaf.intf.system.ISession;
 import jsaf.intf.system.IRemote;
@@ -107,8 +108,8 @@ public abstract class SessionFactory implements ILoggable {
     // Abstract
 
     /**
-     * Set the IConnectionFactory that should be used by the SessionFactory instance, which can be used by the
-     * SessionFactory instance to associate between target names and IConnectionSpecificaiton information.
+     * Set the IConnectionFactory that should be used by the SessionFactory instance to associate between target names
+     * and IConnectionSpecificaiton information.
      *
      * @since 1.0.2
      */
@@ -128,6 +129,14 @@ public abstract class SessionFactory implements ILoggable {
      * @since 1.0
      */
     public abstract ISession createSession(String target) throws IOException;
+
+    /**
+     * Creates a session for the specified target. Interpretation of the target string is performed by the
+     * underlying session factory implementation.
+     *
+     * @since 1.0.2
+     */
+    public abstract ISession createSession(IConnectionSpecification spec) throws IOException;
 
     // Deprecated
 

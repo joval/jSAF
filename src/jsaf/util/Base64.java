@@ -16,8 +16,6 @@
  */
 package jsaf.util;
 
-import jsaf.Message;
-
 public class Base64 {
     
 /* ********  P U B L I C   F I E L D S  ******** */   

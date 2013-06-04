@@ -43,6 +43,7 @@ import jsaf.intf.io.IFileEx;
 import jsaf.intf.io.IFileMetadata;
 import jsaf.intf.io.IFilesystem;
 import jsaf.intf.io.IRandomAccess;
+import jsaf.intf.unix.system.IUnixSession;
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.util.IProperty;
 import jsaf.intf.util.ISearchable;
@@ -111,12 +112,22 @@ public abstract class AbstractFilesystem implements IFilesystem {
      * For use by the ISearchable.
      *
      * @param file indicates if the pattern represents a file (or if false, a directory).
+     *
+     * @return null if a guess cannot be made (e.g., not a rooted pattern), an empty array if the pattern
+     *         cannot possibly yield any search results, or an array of potential matching parent directories
+     *         beneath which a file matching the pattern could reside.
      */
     public String[] guessParent(Pattern p, boolean file) {
 	String path = p.pattern();
 	if (!path.startsWith("^")) {
 	    return null;
+	} else if (session instanceof IUnixSession) {
+	    if (!path.startsWith("^/")) {
+		// All valid Unix paths must start with forward slash
+		return new String[0];
+	    }
 	}
+
 	path = path.substring(1);
 
 	int ptr = path.indexOf(ESCAPED_DELIM);

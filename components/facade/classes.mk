@@ -76,6 +76,7 @@ CLASSES=\
 	jsaf.util.AbstractEnvironment	\
 	jsaf.util.Base64	\
 	jsaf.util.Checksum	\
+	jsaf.util.ConnectionSpecification	\
 	jsaf.util.Environment	\
 	jsaf.util.IniFile	\
 	jsaf.util.PropertyUtil	\

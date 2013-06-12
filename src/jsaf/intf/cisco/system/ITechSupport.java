@@ -22,7 +22,26 @@ public interface ITechSupport {
      */
     String DASHES = "------------------";
 
+    /**
+     * IOS command string "show running-config"
+     *
+     * @since 1.0
+     */
     String GLOBAL = "show running-config";
+
+    /**
+     * IOS command string "show version"
+     *
+     * @since 1.0.2
+     */
+    String VERSION = "show version";
+
+    /**
+     * IOS command string "show interfaces"
+     *
+     * @since 1.0.2
+     */
+    String INTERFACES = "show interfaces";
 
     /**
      * A list of subcommands for which information is available.

@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -93,6 +95,43 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 	    return new UnixFile((UnixFileInfo)info);
 	} else {
 	    return super.createFileFromInfo(info);
+	}
+    }
+
+    @Override
+    public IFile[] getFiles(String[] paths) throws IOException {
+	try {
+	    HashSet<String> uniquePaths = new HashSet<String>();
+	    for (String path : paths) {
+		uniquePaths.add(path);
+	    }
+	    StringBuffer sb = new StringBuffer();
+	    for (String path : uniquePaths) {
+		SafeCLI.checkArgument(path, session);
+		if (sb.length() > 0) {
+		    sb.append("\\n");
+		}
+		sb.append(path);
+	    }
+	    StringBuffer cmd = new StringBuffer("printf \"").append(sb.toString()).append("\\n\"");
+	    cmd.append(" | xargs -I{} ").append(getDriver().getStatCommand("{}"));
+	    Map<String, IFile> fileMap = new HashMap<String, IFile>();
+	    Iterator<String> iter = SafeCLI.manyLines(cmd.toString(), null, (IUnixSession)session);
+	    IUnixFileInfo info = null;
+	    while ((info = getDriver().nextFileInfo(iter)) != null) {
+		IFile f = createFileFromInfo((IFileMetadata)info);
+		fileMap.put(f.getPath().toLowerCase(), f);
+	    }
+	    IFile[] files = new IFile[paths.length];
+	    for (int i=0; i < paths.length; i++) {
+		files[i] = fileMap.get(paths[i].toLowerCase());
+	    }
+	    return files;
+	} catch (IOException e) {
+	    throw e;
+	} catch (Exception e) {
+	    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    throw new IOException(e.getMessage());
 	}
     }
 
@@ -194,12 +233,12 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 	}
 
 	@Override
-        protected IAccessor getAccessor() throws IOException {
-            if (accessor == null) {
-                accessor = new UnixAccessor(new File(path));
-            }
-            return accessor;
-        }
+	protected IAccessor getAccessor() throws IOException {
+	    if (accessor == null) {
+		accessor = new UnixAccessor(new File(path));
+	    }
+	    return accessor;
+	}
 
 	/**
 	 * If this file is a link to a directory, we want this to return true.

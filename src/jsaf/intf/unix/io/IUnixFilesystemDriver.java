@@ -60,6 +60,8 @@ public interface IUnixFilesystemDriver extends ILoggable {
     /**
      * Returns a command whose output can be fed into the nextFileInfo method, to return file information for the path.
      *
+     * @param path an unquoted path string (it will be quoted within the resulting command)
+     *
      * @since 1.0.1
      */
     public String getStatCommand(String path);

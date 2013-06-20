@@ -23,6 +23,7 @@ import jsaf.intf.system.IProcess;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.intf.windows.powershell.IRunspace;
 import jsaf.io.StreamLogger;
+import jsaf.io.StreamTool;
 import jsaf.util.Checksum;
 import jsaf.util.StringTools;
 
@@ -155,6 +156,7 @@ public class Runspace implements IRunspace {
 	if (!p.isRunning()) {
 	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, p.exitValue()));
 	}
+
 	logger.debug(Message.STATUS_POWERSHELL_INVOKE, id, command);
 	byte[] bytes = command.trim().getBytes();
 	stdin.write(bytes);
@@ -223,8 +225,9 @@ public class Runspace implements IRunspace {
 		    err = new StringBuffer();
 		}
 		byte[] buff = new byte[avail];
-		stderr.read(buff);
+		StreamTool.readFully(stderr, buff);
 		err.append(new String(buff, encoding));
+		i = 0; // reset the I/O timeout counter
 	    }
 	    if ((avail = stdout.available()) > 0) {
 		boolean cr = false;

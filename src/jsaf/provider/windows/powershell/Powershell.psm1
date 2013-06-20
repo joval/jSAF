@@ -28,8 +28,21 @@ function New-Type {
   $Params.TempFiles = New-Object System.CodeDom.Compiler.TempFileCollection $Temp, $False
 
   $Provider = New-Object Microsoft.CSharp.CSharpCodeProvider
-  $Results = $Provider.CompileAssemblyFromSource($Params, $TypeDefinition)
-  if ($Results.Errors.Count -gt 0) {
-    $Results.Errors | %{Write-Error ("{0}:`t{1}" -f $_.Line,$_.ErrorText)}
+  Try {
+    $CompilerResults = $Provider.CompileAssemblyFromSource($Params, $TypeDefinition)
+    if ($CompilerResults.Errors.Count -gt 0) {
+      $CodeLines = $TypeDefinition -Split '[\n]';
+      $ErrorMessage = "Compilation Errors:"
+      foreach ($CompileError in $CompilerResults.Errors) {
+        $ErrorMessage = [String]::Concat($ErrorMessage, "`n", $CompileError.ToString())
+      }
+      Write-Error $ErrorMessage
+    }
+  } Catch [System.Exception] {
+    if ($_.GetType().ToString() -eq "System.Management.Automation.ErrorRecord") {
+      Write-Error $_.Exception.ToString()
+    } else {
+      Write-Error $_.ToString()
+    }
   }
 }

@@ -18,6 +18,7 @@ public interface ISshCredential extends ICredential {
     /**
      * Get the credential for a user with "elevated" privileges (i.e., the root account).
      *
+     * @deprecated Use getPrivilegeEscalation.
      * @since 1.0
      */
     ICredential getRootCredential();
@@ -35,4 +36,54 @@ public interface ISshCredential extends ICredential {
      * @since 1.0.1
      */
     byte[] getPrivateKey();
+
+    /**
+     * Get the PrivilegeEscalation interface associated with this SSH credential.
+     *
+     * @since 1.0.2
+     */
+    PrivilegeEscalation getPrivilegeEscalation();
+
+    /**
+     * An interface defining different privilege escalation types for SSH sessions.
+     *
+     * @since 1.0.2
+     */
+    public interface PrivilegeEscalation {
+	public enum Type {
+	    /**
+	     * Type indicating that there is no escalation available for this credential.
+	     */
+	    NONE,
+
+	    /**
+	     * Type indicating that escalation of privilege is performed using a substitute identity, such as the
+	     * root account.
+	     */
+	    SU,
+
+	    /**
+	     * Type indicating that escalation of privilege is performed using sudo, i.e., the current account in a
+	     * privileged mode.
+	     */
+	    SUDO,
+
+	    /**
+	     * Type indicating that escalation of privilege is performed using the IOS "enable" command.
+	     */
+	    IOS_ENABLE;
+	}
+
+	/**
+	 * Get the escalation type.
+	 */
+	Type getType();
+
+	/**
+	 * Retrieve the credential associated with the escalation type.
+	 *
+	 * @return null for Type.NONE and Type.SUDO, ICredential for Type.ROOT and Type.IOS_ENABLE.
+	 */
+	ICredential getCredential();
+    }
 }

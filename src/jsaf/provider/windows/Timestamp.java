@@ -36,7 +36,7 @@ public class Timestamp {
     public static BigInteger toWindowsTimestamp(String wmistr) throws NumberFormatException, ParseException {
 	StringBuffer sb = new StringBuffer(wmistr.substring(0,14));
 	sb.append(wmistr.substring(21,22));
-	int utcMinOffset = Integer.parseInt(wmistr.substring(22));
+	int utcMinOffset = Integer.parseInt(wmistr.substring(22).trim());
 	int utcHrs = utcMinOffset/60;
 	int utcMins = utcMinOffset % 60;
 	String s = String.format("%02d%02d", utcHrs, utcMins);

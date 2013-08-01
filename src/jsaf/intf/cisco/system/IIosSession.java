@@ -3,6 +3,10 @@
 
 package jsaf.intf.cisco.system;
 
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+import java.util.regex.Matcher;
+
 import jsaf.intf.netconf.INetconf;
 import jsaf.intf.ssh.system.IShell;
 
@@ -14,6 +18,56 @@ import jsaf.intf.ssh.system.IShell;
  * @since 1.0
  */
 public interface IIosSession extends INetconf {
+    /**
+     * Basic IOS command modes.
+     * See http://www.cisco.com/en/US/docs/ios/12_2/configfun/configuration/guide/fcf019.html#wp1000901
+     *
+     * @since 1.0.2
+     */
+    enum CommandMode {
+	/**
+	 * TCL shell mode.
+	 */
+	TCLSH("\\(tcl\\)#$"),
+
+	/**
+	 * Non-privileged exec mode.
+	 */
+	USER_EXEC(">$"),
+
+	/**
+	 * Privileged exec mode.
+	 */
+	PRIVILEGED_EXEC("(?!\\(tcl\\))#$"),
+
+	/**
+	 * Configuration mode.
+	 */
+	CONFIGURE("\\(config.*\\)#$");
+
+	private Pattern pattern;
+
+	private CommandMode(String pattern) {
+	    try {
+		this.pattern = Pattern.compile(pattern);
+	    } catch (PatternSyntaxException e) {
+		throw new RuntimeException(e);
+	    }
+	}
+
+	/**
+	 * Determine the command mode from the shell prompt.
+	 */
+	public static CommandMode fromPrompt(String prompt) throws IllegalArgumentException {
+	    for (CommandMode mode : values()) {
+		if (mode.pattern.matcher(prompt).find()) {
+		    return mode;
+		}
+	    }
+	    throw new IllegalArgumentException(prompt);
+	}
+    }
+
     /**
      * Retrieve "show tech-support" data from the device.
      *

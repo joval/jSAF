@@ -21,6 +21,7 @@ CLASSES=\
 	jsaf.intf.ssh.ISshTools	\
 	jsaf.intf.ssh.identity.ISshCredential	\
 	jsaf.intf.ssh.system.IShell	\
+	jsaf.intf.ssh.system.ISshProcess	\
 	jsaf.intf.system.IEnvironment	\
 	jsaf.intf.system.IProcess	\
 	jsaf.intf.system.IRemote	\

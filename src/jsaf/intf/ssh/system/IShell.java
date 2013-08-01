@@ -5,7 +5,6 @@ package jsaf.intf.ssh.system;
 
 import java.io.IOException;
 
-import jsaf.intf.system.IProcess;
 import jsaf.provider.SessionException;
 
 /**
@@ -15,7 +14,7 @@ import jsaf.provider.SessionException;
  * @version %I% %G%
  * @since 1.0
  */
-public interface IShell extends IProcess {
+public interface IShell extends ISshProcess {
     /**
      * Waiting at a prompt?
      *

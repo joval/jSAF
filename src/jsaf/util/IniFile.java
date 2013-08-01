@@ -33,6 +33,7 @@ import jsaf.intf.util.IProperty;
  */
 public class IniFile {
     private static final String SEMICOLON	= ";";
+    private static final String HASH		= "#";
     private static final String ESC		= "\\";
     private static final String COLON		= ":";
     private static final String EQUAL		= "=";
@@ -112,7 +113,7 @@ public class IniFile {
 			section = new PropertyUtil();
 			sections.put(name, section);
 		    }
-		} else if (line.startsWith(SEMICOLON)) {
+		} else if (line.startsWith(SEMICOLON) || line.startsWith(HASH)) {
 		    // skip comment
 		} else if ((ptr = delimIndex(line)) > 0) {
 		    if (section != null) {

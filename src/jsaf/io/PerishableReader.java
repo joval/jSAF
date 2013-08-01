@@ -3,12 +3,15 @@
 
 package jsaf.io;
 
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.Collections;
 import java.util.HashSet;
@@ -118,13 +121,17 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
     }
 
     public synchronized String readLine() throws IOException {
+	return readLine(StringTools.ASCII);
+    }
+
+    public synchronized String readLine(Charset charset) throws IOException {
+	ByteArrayOutputStream buff = new ByteArrayOutputStream();
 	String result = null;
-	StringBuffer line = new StringBuffer();
 	int ch = 0;
 	while(result == null && (ch = read()) != -1) {
 	    switch(ch) {
 	      case '\n':
-		result = line.toString();
+		result = new String(buff.toByteArray(), charset);
 		break;
 
 	      case '\r':
@@ -132,19 +139,19 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 		if (read() != '\n') {
 		    restoreCheckpoint();
 		}
-		result = line.toString();
+		result = new String(buff.toByteArray(), charset);
 		break;
 
 	      default:
-		line.append((char)(ch & 0xFF));
+		buff.write((byte)ch);
 		break;
 	    }
 	}
 	if (result == null) {
 	    defuse();
 	    isEOF = true;
-	    if (line.length() > 0) {
-		result = line.toString();
+	    if (buff.size() > 0) {
+		result = new String(buff.toByteArray(), charset);
 	    }
 	}
 	return result;
@@ -168,32 +175,37 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	}
     }
 
-    public synchronized String readUntil(String delim) throws IOException {
-	StringBuffer sb = new StringBuffer();
+    public synchronized byte[] readUntil(byte[] delim) throws IOException {
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
 	boolean found = false;
 	do {
-	    byte[] buff = readUntil((byte)delim.charAt(0));
+	    byte[] buff = readUntil(delim[0]);
 	    if (buff == null) {
 		return null;
 	    }
-	    sb.append(new String(buff));
-	    setCheckpoint(delim.length());
-	    byte[] b2 = new byte[delim.length()];
-	    b2[0] = (byte)delim.charAt(0);
+	    out.write(buff);
+	    setCheckpoint(delim.length);
+	    byte[] b2 = new byte[delim.length];
+	    b2[0] = delim[0];
 	    try {
 		readFully(b2, 1, b2.length - 1);
-		if (new String(b2).equals(delim)) {
+		if (Arrays.equals(b2, delim)) {
 		    found = true;
 		} else {
-		    sb.append((char)b2[0]);
+		    out.write(b2[0]);
 		    restoreCheckpoint();
 		}
 	    } catch (EOFException e) {
 		restoreCheckpoint();
-		return readLine();
+		int len = 0;
+		buff = new byte[512];
+		while((len = read(buff)) > 0) {
+		    out.write(buff, 0, len);
+		}
+		break;
 	    }
 	} while(!found);
-	return sb.toString();
+	return out.toByteArray();
     }
 
     public synchronized byte[] readUntil(int delim) throws IOException {

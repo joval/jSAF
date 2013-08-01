@@ -550,13 +550,14 @@ public class SafeCLI {
 
     static class ReaderIterator implements Iterator<String> {
 	File file;
-	IReader reader;
+	BufferedReader reader;
 	String next = null;
 
 	ReaderIterator(File file) throws IOException {
 	    this.file = file;
 	    try {
-		reader = new jsaf.io.BufferedReader(new GZIPInputStream(new FileInputStream(file)));
+		InputStream in = new GZIPInputStream(new FileInputStream(file));
+		reader = new BufferedReader(new InputStreamReader(in, StringTools.UTF8));
 	    } catch (IOException e) {
 		close();
 		throw e;

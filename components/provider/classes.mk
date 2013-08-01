@@ -1,5 +1,4 @@
 CLASSES=\
-	jsaf.io.BufferedReader	\
 	jsaf.io.fs.AbstractFilesystem	\
 	jsaf.io.fs.DefaultMetadata	\
 	jsaf.io.fs.IAccessor	\

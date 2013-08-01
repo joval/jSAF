@@ -5,6 +5,7 @@ package jsaf.intf.io;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import jsaf.intf.util.ILoggable;
 
@@ -37,6 +38,14 @@ public interface IReader extends ILoggable {
      * @since 1.0
      */
     String readLine() throws IOException;
+
+    /**
+     * Read a line of text, or read up until the end of the underlying stream, using the specified character set.
+     * Returns null if the stream is closed or the end of the input has previously been reached.
+     *
+     * @since 1.0.2
+     */
+    String readLine(Charset charset) throws IOException;
 
     /**
      * Read buff.length bytes.

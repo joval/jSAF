@@ -69,21 +69,21 @@ namespace jOVAL.File {
 	public extern static int GetLastError();
 
 	[DllImport("kernel32.dll", SetLastError=true, CharSet=CharSet.Auto)]
-	public extern static SafeFileHandle CreateFile(string lpFileName, EFileAccess dwDesiredAccess, EFileShare dwShareMode, IntPtr lpSecurityAttributes, ECreationDisposition dwCreationDisposition, EFileAttributes dwFlagsAndAttributes, IntPtr hTemplateFile);
+	public extern static SafeFileHandle CreateFile(String lpFileName, EFileAccess dwDesiredAccess, EFileShare dwShareMode, IntPtr lpSecurityAttributes, ECreationDisposition dwCreationDisposition, EFileAttributes dwFlagsAndAttributes, IntPtr hTemplateFile);
 
 	[DllImport("kernel32.dll")]
 	public extern static FileType GetFileType(SafeFileHandle hFile);
 
 	[DllImport("kernel32.dll", SetLastError=true, CharSet=CharSet.Auto)]
-	static extern uint GetLongPathName(string ShortPath, StringBuilder sb, int buffer);
+	static extern uint GetLongPathName(String ShortPath, StringBuilder sb, int buffer);
 
 	[DllImport("kernel32.dll")]
-	static extern uint GetShortPathName(string longpath, StringBuilder sb, int buffer); 
+	static extern uint GetShortPathName(String longpath, StringBuilder sb, int buffer); 
 
 	[DllImport("Imagehlp.dll", EntryPoint="MapFileAndCheckSum", ExactSpelling=false,  CharSet=CharSet.Auto, SetLastError=true)]
-	static extern uint MapFileAndCheckSum(string Filename, out uint HeaderSum, out uint CheckSum);
+	static extern uint MapFileAndCheckSum(String Filename, out uint HeaderSum, out uint CheckSum);
 
-	public static int GetFileType(string Path) {
+	public static int GetFileType(String Path) {
 	    IntPtr hSecurityAttributes = IntPtr.Zero;
 	    IntPtr hTemplate = IntPtr.Zero;
 	    SafeFileHandle hFile = CreateFile(Path, EFileAccess.FILE_GENERIC_READ, EFileShare.Read, hSecurityAttributes, ECreationDisposition.OpenExisting, EFileAttributes.Normal, hTemplate);
@@ -95,16 +95,16 @@ namespace jOVAL.File {
 	    return (int)type;
 	}
 
-	public static string GetChecksum(string Path) {
+	public static uint GetChecksum(String Path) {
 	    uint HeaderSum, CheckSum = 0;
 	    uint result = MapFileAndCheckSum(Path, out HeaderSum, out CheckSum);
 	    if (result != 0) {
 		throw new System.ComponentModel.Win32Exception((int)result);
 	    }
-	    return CheckSum.ToString();
+	    return CheckSum;
 	}
 
-	public static string GetWindowsPhysicalPath(string path) {
+	public static String GetWindowsPhysicalPath(String path) {
 	    StringBuilder builder = new StringBuilder(255);
 
 	    // names with long extension can cause the short name to be actually larger than
@@ -151,76 +151,68 @@ namespace jOVAL.File {
 	if (Test-Path $inputObject) {
 	  Get-Item $inputObject | Print-FileInfo
 	} else {
-          Write-Output "{"
-          Write-Output "Path: $($inputObject)"
-          Write-Output "}"
+          "{"
+          "Path: {0}" -f $inputObject
+          "}"
 	}
       } else {
 	$OwnerSid = $inputObject.GetAccessControl().GetOwner([System.Security.Principal.SecurityIdentifier]).ToString()
 	$OwnerAccount = $inputObject.GetAccessControl().GetOwner([System.Security.Principal.NTAccount]).ToString()
         if ($type -eq "System.IO.DirectoryInfo") {
-          Write-Output "{"
-          Write-Output "Type: Directory"
+          "{"
+          "Type: Directory"
           $path = [jOVAL.File.Probe]::GetWindowsPhysicalPath($inputObject.FullName)
-          Write-Output "Path: $path"
-	  Write-Output "Owner.SID: $($OwnerSid)"
-	  Write-Output "Owner.Account: $($OwnerAccount)"
-          $ctime = $inputObject.CreationTimeUtc.toFileTimeUtc()
-          $mtime = $inputObject.LastWriteTimeUtc.toFileTimeUtc()
-          $atime = $inputObject.LastAccessTimeUtc.toFileTimeUtc()
-          Write-Output "Ctime: $ctime"
-          Write-Output "Mtime: $mtime"
-          Write-Output "Atime: $atime"
-          Write-Output "}"
+          "Path: $path"
+	  "Owner.SID: " -f $OwnerSid
+	  "Owner.Account: $($OwnerAccount)"
+          "Ctime: {0:D}" -f $inputObject.CreationTimeUtc.toFileTimeUtc()
+          "Mtime: {0:D}" -f $inputObject.LastWriteTimeUtc.toFileTimeUtc()
+          "Atime: {0:D}" -f $inputObject.LastAccessTimeUtc.toFileTimeUtc()
+          "}"
         } else {
           if ($type -eq "System.IO.FileInfo") {
-            Write-Output "{"
-            Write-Output "Type: File"
+            "{"
+            "Type: File"
             $path = [jOVAL.File.Probe]::GetWindowsPhysicalPath($inputObject.FullName)
-            $winType = [jOVAL.File.Probe]::GetFileType($path)
-            Write-Output "WinType: $winType"
-            Write-Output "Path: $path"
-	    Write-Output "Owner.SID: $($OwnerSid)"
-	    Write-Output "Owner.Account: $($OwnerAccount)"
-            $ctime = $inputObject.CreationTimeUtc.toFileTimeUtc()
-            $mtime = $inputObject.LastWriteTimeUtc.toFileTimeUtc()
-            $atime = $inputObject.LastAccessTimeUtc.toFileTimeUtc()
-            Write-Output "Ctime: $ctime"
-            Write-Output "Mtime: $mtime"
-            Write-Output "Atime: $atime"
+            "WinType: {0:D}" -f [jOVAL.File.Probe]::GetFileType($path)
+            "Path: {0}" -f $path
+	    "Owner.SID: {0}" -f $OwnerSid
+	    "Owner.Account: {0}" -f $OwnerAccount
+            "Ctime: {0:D}" -f $inputObject.CreationTimeUtc.toFileTimeUtc()
+            "Mtime: {0:D}" -f $inputObject.LastWriteTimeUtc.toFileTimeUtc()
+            "Atime: {0:D}" -f $inputObject.LastAccessTimeUtc.toFileTimeUtc()
             $length = $inputObject.Length
-            Write-Output "Length: $length"
+            "Length: {0:D}" -f $length
             if ($length -gt 0) {
-              $CheckSum = [jOVAL.File.Probe]::getChecksum($Path)
-              Write-Output "pe.MSChecksum: $($CheckSum)"
+              "pe.MSChecksum: {0:D}" -f [jOVAL.File.Probe]::GetChecksum($Path)
             }
             $Info = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($path)
             if ($Info.FileVersion -ne $null) {
-              Write-Output "pe.FileVersion: $($Info.FileVersion)"
-              Write-Output "pe.FileMajorPart: $($Info.FileMajorPart)"
-              Write-Output "pe.FileMinorPart: $($Info.FileMinorPart)"
-              Write-Output "pe.FileBuildPart: $($Info.FileBuildPart)"
-              Write-Output "pe.FilePrivatePart: $($Info.FilePrivatePart)"
+              "pe.FileVersion: {0}" -f $Info.FileVersion
+              "pe.FileMajorPart: {0:D}" -f $Info.FileMajorPart
+              "pe.FileMinorPart: {0:D}" -f $Info.FileMinorPart
+              "pe.FileBuildPart: {0:D}" -f $Info.FileBuildPart
+              "pe.FilePrivatePart: {0:D}" -f $Info.FilePrivatePart
             }
             if ($Info.ProductName -ne $null) {
-              Write-Output "pe.ProductName: $($Info.ProductName)"
+              "pe.ProductName: {0}" -f $Info.ProductName
             }
             if ($Info.ProductVersion -ne $null) {
-              Write-Output "pe.ProductVersion: $($Info.ProductVersion)"
+              "pe.ProductVersion: {0}" -f $Info.ProductVersion
             }
             if ($Info.CompanyName -ne $null) {
-              Write-Output "pe.CompanyName: $($Info.CompanyName)"
+              "pe.CompanyName: {0}" -f $Info.CompanyName
             }
             if ($Info.Language -ne $null) {
-              Write-Output "pe.Language: $($Info.Language)"
+              "pe.Language: {0}" -f $Info.Language
             }
             if ($Info.OriginalFilename -ne $null) {
-              Write-Output "pe.OriginalFilename: $($Info.OriginalFilename)"
+              "pe.OriginalFilename: {0}" -f $Info.OriginalFilename
             }
             if ($Info.InternalName -ne $null) {
-              Write-Output "pe.InternalName: $($Info.InternalName)"
+              "pe.InternalName: {0}" -f $Info.InternalName
             }
-            Write-Output "}"
+            "}"
           }
         }
       }

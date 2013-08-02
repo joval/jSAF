@@ -4,6 +4,6 @@
 function Get-ServiceSids {
   foreach ($Service in Get-WmiObject Win32_Service) {
     sc.exe showsid $Service.Name
-    Write-Output "ACCOUNT: $($Service.StartName)"
+    "ACCOUNT: {0}" -f $Service.StartName
   }
 }

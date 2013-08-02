@@ -11,8 +11,7 @@ function Transfer-Encode {
   $Out.Close()
   $GZip.Close()
   $Buffer.Close()
-  $Data = [System.Convert]::ToBase64String($Buffer.ToArray())
-  Write-Output $Data
+  Write-Output([System.Convert]::ToBase64String($Buffer.ToArray()))
 }
 
 # Add-Type sporadically fails to work, so this is our implementation

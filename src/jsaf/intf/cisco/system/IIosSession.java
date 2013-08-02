@@ -19,6 +19,11 @@ import jsaf.intf.ssh.system.IShell;
  */
 public interface IIosSession extends INetconf {
     /**
+     * The IOS command to enable privilege level 15 (the highest privilege level).
+     */
+    String ENABLE_COMMAND = "enable 15";
+
+    /**
      * Basic IOS command modes.
      * See http://www.cisco.com/en/US/docs/ios/12_2/configfun/configuration/guide/fcf019.html#wp1000901
      *

@@ -42,6 +42,23 @@ public interface IRunspace {
     void loadModule(InputStream in, long timeout) throws IOException, PowershellException;
 
     /**
+     * Load an assembly (DLL) into the runspace from a stream.
+     *
+     * @throws IOException if there is a problem reading from the input, or writing to the Runspace
+     * @throws PowershellException if there is an error loading the assembly
+     *
+     * @since 1.0.2
+     */
+    void loadAssembly(InputStream in) throws IOException, PowershellException;
+
+    /**
+     * Load an assembly with the specified read timeout (in millis).
+     *
+     * @since 1.0.2
+     */
+    void loadAssembly(InputStream in, long timeout) throws IOException, PowershellException;
+
+    /**
      * Invoke a command or module.
      *
      * @return Text output from the command

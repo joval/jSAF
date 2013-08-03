@@ -80,6 +80,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	if (runspace == null) {
 	    runspace = session.getRunspacePool().spawn(apparentView);
 	}
+	runspace.loadAssembly(WindowsFilesystem.class.getResourceAsStream("WindowsFilesystem.dll"));
 	runspace.loadModule(WindowsFilesystem.class.getResourceAsStream("WindowsFilesystem.psm1"));
 	String sysRoot	= session.getEnvironment().getenv("SystemRoot");
 	system32	= sysRoot + DELIM_STR + "System32"  + DELIM_STR;

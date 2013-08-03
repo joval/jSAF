@@ -24,6 +24,7 @@ import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.intf.windows.powershell.IRunspace;
 import jsaf.io.StreamLogger;
 import jsaf.io.StreamTool;
+import jsaf.util.Base64;
 import jsaf.util.Checksum;
 import jsaf.util.StringTools;
 
@@ -44,7 +45,7 @@ public class Runspace implements IRunspace {
     private IProcess p;
     private InputStream stdout, stderr;	// Output from the powershell process
     private OutputStream stdin;		// Input to the powershell process
-    private HashSet<String> modules;
+    private HashSet<String> modules, assemblies;
     private Charset encoding = null;
     private boolean buffered;
 
@@ -61,6 +62,7 @@ public class Runspace implements IRunspace {
 	this.encoding = encoding;
 	this.buffered = buffered;
 	modules = new HashSet<String>();
+	assemblies = new HashSet<String>();
 	if (view == IWindowsSession.View._32BIT && session.getNativeView() == IWindowsSession.View._64BIT) {
 	    String cmd = new StringBuffer("%SystemRoot%\\SysWOW64\\cmd.exe /c ").append(INIT_COMMAND).toString();
 	    p = session.createProcess(cmd, null, null);
@@ -133,6 +135,43 @@ public class Runspace implements IRunspace {
 	    }
 	} catch (TimeoutException e) {
 	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
+	} finally {
+	    if (in != null) {
+		try {
+		    in.close();
+		} catch (IOException e) {
+		}
+	    }
+	}
+	if (err != null) {
+	    String error = err.toString();
+	    err = null;
+	    throw new PowershellException(error);
+	}
+    }
+
+    public void loadAssembly(InputStream in) throws IOException, PowershellException {
+	loadAssembly(in, timeout);
+    }
+
+    public synchronized void loadAssembly(InputStream in, long millis) throws IOException, PowershellException {
+	if (!p.isRunning()) {
+	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, p.exitValue()));
+	}
+	try {
+	    ByteArrayOutputStream buff = new ByteArrayOutputStream();
+	    StreamLogger input = new StreamLogger(null, in, buff);
+	    String cs = Checksum.getChecksum(input, Checksum.Algorithm.MD5);
+	    input.close();
+	    in = null;
+	    if (assemblies.contains(cs)) {
+		logger.debug(Message.STATUS_POWERSHELL_ASSEMBLY_SKIP, cs);
+	    } else {
+		logger.debug(Message.STATUS_POWERSHELL_ASSEMBLY_LOAD, cs);
+		String data = Base64.encodeBytes(buff.toByteArray(), Base64.GZIP);
+		invoke("Load-Assembly -Data \"" + data + "\"");
+		assemblies.add(cs);
+	    }
 	} finally {
 	    if (in != null) {
 		try {

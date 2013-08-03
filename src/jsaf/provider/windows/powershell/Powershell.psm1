@@ -14,34 +14,19 @@ function Transfer-Encode {
   Write-Output([System.Convert]::ToBase64String($Buffer.ToArray()))
 }
 
-# Add-Type sporadically fails to work, so this is our implementation
-function New-Type {
+function Load-Assembly {
   param(
-    [Parameter(Mandatory=$True,Position=1)][string]$TypeDefinition=$(throw "Mandatory parameter -TypeDefinition missing.")
+    [String]$Data = $(throw "Mandatory parameter -Data missing.")
   )
 
-  $Params = New-Object System.CodeDom.Compiler.CompilerParameters
-  $Params.ReferencedAssemblies.AddRange($(@("System.dll", $([PSObject].Assembly.Location))))
-  $Params.GenerateInMemory = $True
-  $Temp = $(Get-Item ENV:TEMP).Value
-  $Params.TempFiles = New-Object System.CodeDom.Compiler.TempFileCollection $Temp, $False
+  $MemStream = New-Object System.IO.MemoryStream (,[System.Convert]::FromBase64String($Data))
+  $ZipStream = New-Object System.IO.Compression.GzipStream $MemStream, ([IO.Compression.CompressionMode]::Decompress)
+  $Buffer = New-Object System.IO.MemoryStream
 
-  $Provider = New-Object Microsoft.CSharp.CSharpCodeProvider
-  Try {
-    $CompilerResults = $Provider.CompileAssemblyFromSource($Params, $TypeDefinition)
-    if ($CompilerResults.Errors.Count -gt 0) {
-      $CodeLines = $TypeDefinition -Split '[\n]';
-      $ErrorMessage = "Compilation Errors:"
-      foreach ($CompileError in $CompilerResults.Errors) {
-        $ErrorMessage = [String]::Concat($ErrorMessage, "`n", $CompileError.ToString())
-      }
-      Write-Error $ErrorMessage
-    }
-  } Catch [System.Exception] {
-    if ($_.GetType().ToString() -eq "System.Management.Automation.ErrorRecord") {
-      Write-Error $_.Exception.ToString()
-    } else {
-      Write-Error $_.ToString()
-    }
+  $buff = New-Object byte[] 4096
+  while (($len = $ZipStream.Read($buff, 0, 4096)) -gt 0) {
+    $Buffer.Write($buff, 0, $len)
   }
+  $Buffer.Close()
+  [System.Reflection.Assembly]::Load($Buffer.ToArray())
 }

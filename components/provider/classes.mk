@@ -31,7 +31,6 @@ CLASSES=\
 	jsaf.provider.windows.io.WindowsFileSearcher	\
 	jsaf.provider.windows.io.WindowsFileSerializer	\
 	jsaf.provider.windows.io.WindowsFilesystem	\
-	jsaf.provider.windows.powershell.PowershellException	\
 	jsaf.provider.windows.powershell.Runspace	\
 	jsaf.provider.windows.powershell.RunspacePool	\
 	jsaf.provider.windows.registry.BinaryValue	\

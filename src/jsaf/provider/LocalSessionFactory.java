@@ -28,48 +28,33 @@ public class LocalSessionFactory extends SessionFactory {
 
     // Implement abstract methods of SessionFactory
 
-    /**
-     * This is a SessionFactory implementation for a local provider, which does not support remote sessions.
-     */
-    public void setConnectionSpecificationFactory(IConnectionSpecificationFactory cf) {
-	throw new UnsupportedOperationException("setConnectionSpecificationFactory");
-    }
-
-    /**
-     * No SSH implementation is included with the local provider.
-     */
-    public ISshTools getSshTools() {
-	throw new UnsupportedOperationException("getSshTools");
-    }
-
     public ISession createSession() {
-	return createSession(ISession.LOCALHOST);
+	return createSession(IConnectionSpecification.LOCALHOST);
     }
 
-    public ISession createSession(String target) {
-	if (!ISession.LOCALHOST.equals(target)) {
-	    throw new IllegalArgumentException(target);
+    public ISession createSession(IConnectionSpecification target) {
+	if (IConnectionSpecification.LOCALHOST != target) {
+	    throw new IllegalArgumentException(target.getHostname());
 	}
 	File wsdir = null;
 	if (workspace != null) {
-	    wsdir = new File(workspace, target);
+	    wsdir = new File(workspace, ISession.LOCALHOST);
 	    if (!wsdir.exists()) {
 		wsdir.mkdirs();
 	    }
 	}
 	ISession session = null;
-	if (System.getProperty("os.name").startsWith("Windows")) {
+	switch(target.getType()) {
+	  case WINDOWS:
 	    session = new WindowsSession(wsdir);
-	} else {
+	    break;
+	  default:
 	    session = new UnixSession(wsdir);
+	    break;
 	}
 	if (workspace == null) {
 	    session.getProperties().setProperty(IFilesystem.PROP_CACHE_JDBM, null);
 	}
 	return session;
-    }
-
-    public ISession createSession(IConnectionSpecification target) {
-	return createSession(target.getHostname());
     }
 }

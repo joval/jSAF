@@ -107,27 +107,11 @@ public abstract class SessionFactory implements ILoggable {
     // Abstract
 
     /**
-     * Set the IConnectionFactory that should be used by the SessionFactory instance to associate between target names
-     * and IConnectionSpecificaiton information.
-     *
-     * @since 1.1
-     */
-    public abstract void setConnectionSpecificationFactory(IConnectionSpecificationFactory cf);
-
-    /**
      * Creates a session for the default target.
      *
      * @since 1.0
      */
     public abstract ISession createSession() throws IOException;
-
-    /**
-     * Creates a session for the specified target. Interpretation of the target string is performed by the
-     * underlying session factory implementation.
-     *
-     * @since 1.0
-     */
-    public abstract ISession createSession(String target) throws IOException;
 
     /**
      * Creates a session for the specified target. Interpretation of the target string is performed by the

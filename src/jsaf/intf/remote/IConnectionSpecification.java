@@ -4,6 +4,7 @@
 package jsaf.intf.remote;
 
 import jsaf.intf.identity.ICredential;
+import jsaf.intf.system.ISession;
 
 /**
  * An interface that encapsulates all the routing and credential information required to connect to a target host.
@@ -76,4 +77,41 @@ public interface IConnectionSpecification {
      * @return null if the host can be reached directly
      */
     IConnectionSpecification getGateway();
+
+    /**
+     * A convenience IConnectionSpecification for the local machine.
+     */
+    IConnectionSpecification LOCALHOST = new IConnectionSpecification() {
+        public Type getType() {
+            if (System.getProperty("os.name").startsWith("Windows")) {
+                return Type.WINDOWS;
+            } else {
+                return Type.UNKNOWN;
+            }
+        }
+
+        public String getIdentifier() {
+            return ISession.LOCALHOST;
+        }
+
+        public String getHostname() {
+            return ISession.LOCALHOST;
+        }
+
+        public int getPort() {
+            return 0;
+        }
+
+        public String getFingerprint() {
+            return null;
+        }
+
+        public ICredential getCredential() {
+            return null;
+        }
+
+        public IConnectionSpecification getGateway() {
+            return null;
+        }
+    };
 }

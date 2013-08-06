@@ -27,7 +27,7 @@ public interface IIosSession extends INetconf {
      * Basic IOS command modes.
      * See http://www.cisco.com/en/US/docs/ios/12_2/configfun/configuration/guide/fcf019.html#wp1000901
      *
-     * @since 1.0.2
+     * @since 1.1
      */
     enum CommandMode {
 	/**

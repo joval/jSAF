@@ -7,13 +7,12 @@ import jsaf.intf.identity.ICredential;
 
 /**
  * An interface that encapsulates all the routing and credential information required to connect to a target host.
- * This targeting interface was introduced in version 1.0.2, for environments where hostnames are not unique identifiers.
- *
- * It replaces the deprecated IRemote interface, which requires that targets can be uniquely identified by hostname.
+ * This targeting interface was introduced in version 1.1, allowing for environments where hostnames are not unique
+ * identifiers.  It replaces the IRemote interface in 1.0.1.
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.0.2
+ * @since 1.1
  */
 public interface IConnectionSpecification {
     /**

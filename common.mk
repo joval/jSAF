@@ -46,6 +46,8 @@ COMPONENTS=$(TOP)/components
 LIBDIR=$(RSRC)/lib
 LIBS=$(subst $(SPACE),$(CLN),$(filter %.jar %.zip, $(wildcard $(LIBDIR)/*)))
 
+CSC=powershell.exe -File $(TOP)/tools/CSharpCompiler.ps1
+
 FACADE=$(COMPONENTS)/facade
 FACADE_LIB=$(FACADE)/jSAF.jar
 FACADE_DEPS=$(subst $(SPACE),$(CLN),$(filter %.jar %.zip, $(wildcard $(FACADE)/$(LIBDIR)/*)))

@@ -40,6 +40,13 @@ public class StreamLogger extends InputStream {
 	}
     }
 
+    /**
+     * Write some data to the log stream. This makes it possible to demarcate specific locations in the log.
+     */
+    public void appendLog(byte[] data) throws IOException {
+	out.write(data);
+    }
+
     public InputStream getInputStream() {
 	return in;
     }

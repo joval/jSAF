@@ -10,7 +10,7 @@ import jsaf.intf.system.IProcess;
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.0.2
+ * @since 1.1
  */
 public interface ISshProcess extends IProcess {
     /**

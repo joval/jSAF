@@ -24,7 +24,6 @@ CLASSES=\
 	jsaf.intf.ssh.system.ISshProcess	\
 	jsaf.intf.system.IEnvironment	\
 	jsaf.intf.system.IProcess	\
-	jsaf.intf.system.IRemote	\
 	jsaf.intf.system.ISession	\
 	jsaf.intf.unix.io.IUnixFileInfo	\
 	jsaf.intf.unix.io.IUnixFilesystem	\

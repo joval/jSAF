@@ -16,25 +16,13 @@ import jsaf.intf.system.ISession;
  */
 public interface ICredentialStore {
     /**
-     * Return the appropriate credential for the specified ISession.
-     *
-     * @return null if no credential is found
-     *
-     * @throws AccessControlException if access to the requested credential is not allowed.
-     *
-     * @since 1.0
-     * @deprecated
-     */
-    ICredential getCredential(ISession session) throws AccessControlException;
-
-    /**
      * Return the appropriate credential for the given identifier.
      *
      * @return null if no credential is found
      *
      * @throws AccessControlException if access to the requested credential is not allowed.
      *
-     * @since 1.0.2
+     * @since 1.1
      */
     ICredential getCredential(String identifier) throws AccessControlException;
 }

@@ -24,6 +24,8 @@ import jsaf.io.fs.AbstractFilesystem;
  * JDBM Serilizer implementation for Unix IFiles
  */
 public class UnixFileSerializer implements Serializer, Serializable {
+    static final long UNKNOWN_TIME = -1;
+
     static final int SER_FILE = 0;
     static final int SER_DIRECTORY = 1;
     static final int SER_LINK = 2;
@@ -45,11 +47,11 @@ public class UnixFileSerializer implements Serializer, Serializable {
 	String path = in.readUTF();
 	String link = null;
 	long temp = in.readLong();
-	Date ctime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
+	Date ctime = temp == UNKNOWN_TIME ? null : new Date(temp);
 	temp = in.readLong();
-	Date mtime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
+	Date mtime = temp == UNKNOWN_TIME ? null : new Date(temp);
 	temp = in.readLong();
-	Date atime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
+	Date atime = temp == UNKNOWN_TIME ? null : new Date(temp);
 	IFileMetadata.Type type = IFileMetadata.Type.FILE;
 	switch(in.readInt()) {
 	  case SER_DIRECTORY:
@@ -91,9 +93,9 @@ public class UnixFileSerializer implements Serializer, Serializable {
 	DataOutputStream out = new DataOutputStream(buff);
 	IFile f = (IFile)obj;
 	out.writeUTF(f.getPath());
-	out.writeLong(f.createTime());
-	out.writeLong(f.lastModified());
-	out.writeLong(f.accessTime());
+	out.writeLong(f.getCreateTime() == null ? UNKNOWN_TIME : f.getCreateTime().getTime());
+	out.writeLong(f.getLastModified() == null ? UNKNOWN_TIME : f.getLastModified().getTime());
+	out.writeLong(f.getAccessTime() == null ? UNKNOWN_TIME : f.getAccessTime().getTime());
 	IUnixFileInfo info = (IUnixFileInfo)f.getExtended();
 	if (f.isLink()) {
 	    out.writeInt(SER_LINK);

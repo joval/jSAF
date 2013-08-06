@@ -90,38 +90,4 @@ public interface IFileMetadata {
      * @since 1.0.1
      */
     public Date getCreateTime() throws IOException;
-
-    // Deprecated
-
-    /**
-     * Constant indicating the time value is unknown.
-     *
-     * @since 1.0
-     * @deprecated
-     */
-    long UNKNOWN_TIME = -1L;
-
-    /**
-     * Get the time that the file was last accessed.
-     *
-     * @since 1.0
-     * @deprecated
-     */
-    public long accessTime() throws IOException;
-
-    /**
-     * Get the time that the file was created.
-     *
-     * @since 1.0
-     * @deprecated
-     */
-    public long createTime() throws IOException;
-
-    /**
-     * Get the time this file was last modified.
-     *
-     * @since 1.0
-     * @deprecated
-     */
-    public long lastModified() throws IOException;
 }

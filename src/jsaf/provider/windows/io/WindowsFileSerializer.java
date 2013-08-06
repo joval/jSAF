@@ -28,6 +28,7 @@ import jsaf.io.fs.AbstractFilesystem;
  * JDBM Serilizer implementation for Windows IFiles
  */
 public class WindowsFileSerializer implements Serializer, Serializable {
+    static final long UNKNOWN_TIME = -1;
     static final int SER_FILE = 0;
     static final int SER_DIRECTORY = 1;
     static final int SER_LINK = 2;
@@ -49,11 +50,11 @@ public class WindowsFileSerializer implements Serializer, Serializable {
 	String path = in.readUTF();
 	String canonicalPath = in.readUTF();
 	long temp = in.readLong();
-	Date ctime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
+	Date ctime = temp == UNKNOWN_TIME ? null : new Date(temp);
 	temp = in.readLong();
-	Date mtime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
+	Date mtime = temp == UNKNOWN_TIME ? null : new Date(temp);
 	temp = in.readLong();
-	Date atime = temp == IFile.UNKNOWN_TIME ? null : new Date(temp);
+	Date atime = temp == UNKNOWN_TIME ? null : new Date(temp);
 	IFileMetadata.Type type = IFileMetadata.Type.FILE;
 	switch(in.readInt()) {
 	  case SER_DIRECTORY:
@@ -86,9 +87,9 @@ public class WindowsFileSerializer implements Serializer, Serializable {
 	IFile f = (IFile)obj;
 	out.writeUTF(f.getPath());
 	out.writeUTF(f.getCanonicalPath());
-	out.writeLong(f.createTime());
-	out.writeLong(f.lastModified());
-	out.writeLong(f.accessTime());
+	out.writeLong(f.getCreateTime() == null ? UNKNOWN_TIME : f.getCreateTime().getTime());
+	out.writeLong(f.getLastModified() == null ? UNKNOWN_TIME : f.getLastModified().getTime());
+	out.writeLong(f.getAccessTime() == null ? UNKNOWN_TIME : f.getAccessTime().getTime());
 	if (f.isLink()) {
 	    out.writeInt(SER_LINK);
 	} else if (f.isDirectory()) {

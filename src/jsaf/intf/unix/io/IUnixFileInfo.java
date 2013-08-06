@@ -234,9 +234,9 @@ public interface IUnixFileInfo extends IFileEx {
     boolean sticky();
 
     /**
-     * Test whether the file has an extended ACL. This test is similar to the deprecated hasExtendedAcl, except it can
-     * returns null if it is unknown whether or not the file has an extended ACL.
+     * Test whether the file has an extended ACL.
      *
+     * @returns null if it is unknown whether or not the file has an extended ACL.
      * @since 1.0.1
      */
     Boolean hasPosixAcl();
@@ -254,14 +254,4 @@ public interface IUnixFileInfo extends IFileEx {
      * @since 1.0
      */
     String getExtendedData(String key) throws NoSuchElementException;
-
-    // Deprecated
-
-    /**
-     * Test whether the file has an extended ACL.
-     *
-     * @since 1.0
-     * @deprecated
-     */
-    boolean hasExtendedAcl();
 }

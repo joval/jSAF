@@ -13,7 +13,6 @@ import jsaf.Message;
 import jsaf.intf.remote.IConnectionSpecification;
 import jsaf.intf.remote.IConnectionSpecificationFactory;
 import jsaf.intf.system.ISession;
-import jsaf.intf.system.IRemote;
 import jsaf.intf.util.ILoggable;
 
 /**
@@ -111,7 +110,7 @@ public abstract class SessionFactory implements ILoggable {
      * Set the IConnectionFactory that should be used by the SessionFactory instance to associate between target names
      * and IConnectionSpecificaiton information.
      *
-     * @since 1.0.2
+     * @since 1.1
      */
     public abstract void setConnectionSpecificationFactory(IConnectionSpecificationFactory cf);
 
@@ -134,19 +133,7 @@ public abstract class SessionFactory implements ILoggable {
      * Creates a session for the specified target. Interpretation of the target string is performed by the
      * underlying session factory implementation.
      *
-     * @since 1.0.2
+     * @since 1.1
      */
     public abstract ISession createSession(IConnectionSpecification spec) throws IOException;
-
-    // Deprecated
-
-    /**
-     * DEPRECATED: Get the factory's remote session management features.
-     *
-     * @since 1.0
-     * @deprecated
-     */
-    public IRemote getRemote() {
-	throw new UnsupportedOperationException();
-    }
 }

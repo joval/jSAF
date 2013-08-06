@@ -16,14 +16,6 @@ import jsaf.intf.identity.ICredential;
  */
 public interface ISshCredential extends ICredential {
     /**
-     * Get the credential for a user with "elevated" privileges (i.e., the root account).
-     *
-     * @deprecated Use getPrivilegeEscalation.
-     * @since 1.0
-     */
-    ICredential getRootCredential();
-
-    /**
      * Get the passphrase required to decrypt the private key file.
      *
      * @since 1.0.1
@@ -40,14 +32,14 @@ public interface ISshCredential extends ICredential {
     /**
      * Get the PrivilegeEscalation interface associated with this SSH credential.
      *
-     * @since 1.0.2
+     * @since 1.1
      */
     PrivilegeEscalation getPrivilegeEscalation();
 
     /**
      * An interface defining different privilege escalation types for SSH sessions.
      *
-     * @since 1.0.2
+     * @since 1.1
      */
     public interface PrivilegeEscalation {
 	public enum Type {

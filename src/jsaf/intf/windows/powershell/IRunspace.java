@@ -47,14 +47,14 @@ public interface IRunspace {
      * @throws IOException if there is a problem reading from the input, or writing to the Runspace
      * @throws PowershellException if there is an error loading the assembly
      *
-     * @since 1.0.2
+     * @since 1.1
      */
     void loadAssembly(InputStream in) throws IOException, PowershellException;
 
     /**
      * Load an assembly with the specified read timeout (in millis).
      *
-     * @since 1.0.2
+     * @since 1.1
      */
     void loadAssembly(InputStream in, long timeout) throws IOException, PowershellException;
 

@@ -66,24 +66,12 @@ public class DefaultMetadata implements IFileMetadata, IFileEx {
 	return ctime;
     }
 
-    public long createTime() {
-	return ctime == null ? IFile.UNKNOWN_TIME : ctime.getTime();
-    }
-
     public Date getLastModified() {
 	return mtime;
     }
 
-    public long lastModified() {
-	return mtime == null ? IFile.UNKNOWN_TIME : mtime.getTime();
-    }
-
     public Date getAccessTime() {
 	return atime;
-    }
-
-    public long accessTime() {
-	return atime == null ? IFile.UNKNOWN_TIME : atime.getTime();
     }
 
     public long length() {

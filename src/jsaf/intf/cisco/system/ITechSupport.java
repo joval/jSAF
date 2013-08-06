@@ -32,14 +32,14 @@ public interface ITechSupport {
     /**
      * IOS command string "show version"
      *
-     * @since 1.0.2
+     * @since 1.1
      */
     String VERSION = "show version";
 
     /**
      * IOS command string "show interfaces"
      *
-     * @since 1.0.2
+     * @since 1.1
      */
     String INTERFACES = "show interfaces";
 

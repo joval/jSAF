@@ -43,7 +43,7 @@ public interface IReader extends ILoggable {
      * Read a line of text, or read up until the end of the underlying stream, using the specified character set.
      * Returns null if the stream is closed or the end of the input has previously been reached.
      *
-     * @since 1.0.2
+     * @since 1.1
      */
     String readLine(Charset charset) throws IOException;
 

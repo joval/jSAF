@@ -10,10 +10,14 @@ CLASSPATH="$(CLASSLIB)$(CLN)$(API)$(CLN)$(LIBS)$(CLN)$(SRC)"
 RUNTIMECP="$(CLASSLIB)$(CLN)$(API)$(CLN)$(LIBS)$(CLN)$(PROVIDER_LIB)"
 
 include classes.mk
-
 CLASS_FILES:=$(foreach class, $(CLASSES), $(BUILD)/$(subst .,/,$(class)).class)
 PACKAGES=$(sort $(basename $(CLASSES)))
 PACKAGEDIRS=$(subst .,/,$(PACKAGES))
+
+ifeq ($(PLATFORM), win)
+    include assemblies.mk
+    ASSEMBLY_FILES:=$(foreach assembly, $(ASSEMBLIES), $(BUILD)/$(subst .,/,$(assembly)).dll)
+endif
 
 all: $(PROVIDER_LIB)
 
@@ -41,12 +45,17 @@ resources:
 	rm -f $(BUILD)/jsaf/provider/windows/registry/*.psm1
 	cp $(SRC)/jsaf/provider/windows/registry/*.psm1 $(BUILD)/jsaf/provider/windows/registry/
 
+assemblies: classdirs $(ASSEMBLY_FILES)
+
 classes: classdirs $(CLASS_FILES)
 
 classdirs: $(foreach pkg, $(PACKAGEDIRS), $(BUILD)/$(pkg)/)
+
+$(BUILD)/%.dll: $(SRC)/%.cs
+	$(CSC) $< $@
 
 $(BUILD)/%.class: $(SRC)/%.java
 	$(JAVAC) $(JAVACFLAGS) -d $(BUILD) -classpath $(CLASSPATH) $<
 
 $(BUILD)/%/:
-	mkdir -p $(subst PKG,,$@)
+	mkdir -p $@

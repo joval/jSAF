@@ -517,16 +517,8 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    return getInfo().getAccessTime();
 	}
 
-	public long accessTime() throws IOException {
-	    return getInfo().accessTime();
-	}
-
 	public Date getCreateTime() throws IOException {
 	    return getInfo().getCreateTime();
-	}
-
-	public long createTime() throws IOException {
-	    return getInfo().createTime();
 	}
 
 	public Date getLastModified() throws IOException {
@@ -534,14 +526,6 @@ public abstract class AbstractFilesystem implements IFilesystem {
 		return accessor.getMtime();
 	    } else {
 		return info.getLastModified();
-	    }
-	}
-
-	public long lastModified() throws IOException {
-	    if (info == null) {
-		return accessor.getMtime() == null ? IFile.UNKNOWN_TIME : accessor.getMtime().getTime();
-	    } else {
-		return info.lastModified();
 	    }
 	}
 

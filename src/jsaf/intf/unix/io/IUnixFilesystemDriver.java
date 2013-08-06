@@ -49,15 +49,6 @@ public interface IUnixFilesystemDriver extends ILoggable {
     public String getFindCommand(List<ISearchable.ICondition> conditions);
 
     /**
-     * Returns some variation of the ls or stat command.  The final argument (not included) should be the escaped path of
-     * the file being stat'd.
-     *
-     * @since 1.0
-     * @deprecated
-     */
-    public String getStatCommand();
-
-    /**
      * Returns a command whose output can be fed into the nextFileInfo method, to return file information for the path.
      *
      * @param path an unquoted path string (it will be quoted within the resulting command)

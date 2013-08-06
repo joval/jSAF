@@ -15,7 +15,7 @@ import jsaf.intf.remote.IConnectionSpecification;
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.0.2
+ * @since 1.1
  */
 public class ConnectionSpecification implements IConnectionSpecification {
     protected int port = -1;

@@ -5,11 +5,11 @@ package jsaf.intf.remote;
 
 /**
  * An interface that encapsulates access to all the routing and credential information required to connect to target hosts.
- * This interface was introduced in version 1.0.2 to replace IRemote, in order to eliminate its inherent limitations.
+ * This interface was introduced in version 1.1 to replace IRemote, in order to eliminate its inherent limitations.
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.0.2
+ * @since 1.1
  */
 public interface IConnectionSpecificationFactory {
     /**

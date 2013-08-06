@@ -12,7 +12,7 @@ import jsaf.intf.remote.IConnectionSpecification;
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.0.2
+ * @since 1.1
  */
 public interface ISshTools {
     /**

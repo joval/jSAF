@@ -52,18 +52,14 @@ class ActiveDirectory implements ILoggable {
     protected Hashtable<String, String> domains;
     protected boolean initialized = false;
 
-    ActiveDirectory() {
+    ActiveDirectory(IWmiProvider wmi, LocLogger logger) {
+	this.wmi = wmi;
+	this.logger = logger;
 	domains = new Hashtable<String, String>();
 	usersByUpn = new Hashtable<String, User>();
 	usersBySid = new Hashtable<String, User>();
 	groupsByNetbiosName = new Hashtable<String, Group>();
 	groupsBySid = new Hashtable<String, Group>();
-    }
-
-    ActiveDirectory(IWmiProvider wmi, LocLogger logger) {
-	this();
-	this.wmi = wmi;
-	this.logger = logger;
     }
 
     User queryUserBySid(String sid) throws NoSuchElementException, IdentityException {

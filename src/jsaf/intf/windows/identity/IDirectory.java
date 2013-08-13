@@ -6,13 +6,13 @@ package jsaf.intf.windows.identity;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
+import jsaf.identity.IdentityException;
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.windows.identity.IACE;
 import jsaf.intf.windows.identity.IDirectory;
 import jsaf.intf.windows.identity.IGroup;
 import jsaf.intf.windows.identity.IPrincipal;
 import jsaf.intf.windows.identity.IUser;
-import jsaf.provider.windows.wmi.WmiException;
 
 /**
  * Representation of a Windows user/group store.
@@ -23,18 +23,16 @@ import jsaf.provider.windows.wmi.WmiException;
  */
 public interface IDirectory extends ILoggable {
     /**
-     * Get the Name portion of a DOMAIN\NAME String.  If there is no domain portion, returns the original String.
-     *
-     * @since 1.0
+     * Returns the name of the machine for which this instance provides identity information.
      */
-    public String getName(String s);
+    public String getMachineName();
 
     /**
      * Returns the user corresponding to the specified SID.
      *
      * @since 1.0
      */
-    public IUser queryUserBySid(String sid) throws NoSuchElementException, WmiException;
+    public IUser queryUserBySid(String sid) throws NoSuchElementException, IdentityException;
 
     /**
      * Query for an individual user.  The input parameter should be of the form DOMAIN\NAME.  For built-in users, the
@@ -45,21 +43,21 @@ public interface IDirectory extends ILoggable {
      *
      * @since 1.0
      */
-    public IUser queryUser(String netbiosName) throws IllegalArgumentException, NoSuchElementException, WmiException;
+    public IUser queryUser(String netbiosName) throws IllegalArgumentException, NoSuchElementException, IdentityException;
 
     /**
      * Returns a Collection of all the local users.
      *
      * @since 1.0
      */
-    public Collection<IUser> queryAllUsers() throws WmiException;
+    public Collection<IUser> queryAllUsers() throws IdentityException;
 
     /**
      * Returns the group corresponding to the specified SID.
      *
      * @since 1.0
      */
-    public IGroup queryGroupBySid(String sid) throws NoSuchElementException, WmiException;
+    public IGroup queryGroupBySid(String sid) throws NoSuchElementException, IdentityException;
 
     /**
      * Query for an individual group.  The input parameter should be of the form DOMAIN\NAME.  For built-in groups, the
@@ -70,14 +68,14 @@ public interface IDirectory extends ILoggable {
      *
      * @since 1.0
      */
-    public IGroup queryGroup(String netbiosName) throws IllegalArgumentException, NoSuchElementException, WmiException;
+    public IGroup queryGroup(String netbiosName) throws IllegalArgumentException, NoSuchElementException, IdentityException;
 
     /**
      * Returns a Collection of all the local groups.
      *
      * @since 1.0
      */
-    public Collection<IGroup> queryAllGroups() throws WmiException;
+    public Collection<IGroup> queryAllGroups() throws IdentityException;
 
     /**
      * Returns a Principal (User or Group) given a Netbios name.
@@ -87,21 +85,22 @@ public interface IDirectory extends ILoggable {
      *
      * @since 1.0
      */
-    public IPrincipal queryPrincipal(String netbiosName) throws IllegalArgumentException, NoSuchElementException, WmiException;
+    public IPrincipal queryPrincipal(String netbiosName)
+	throws IllegalArgumentException, NoSuchElementException, IdentityException;
 
     /**
      * Returns a Principal (User or Group) given a sid.
      *
      * @since 1.0
      */
-    public IPrincipal queryPrincipalBySid(String sid) throws NoSuchElementException, WmiException;
+    public IPrincipal queryPrincipalBySid(String sid) throws NoSuchElementException, IdentityException;
 
     /**
      * Returns a Collection of all local users and groups.
      *
      * @since 1.0
      */
-    public Collection<IPrincipal> queryAllPrincipals() throws WmiException;
+    public Collection<IPrincipal> queryAllPrincipals() throws IdentityException;
 
     /**
      * Does the local machine recognize this principal?
@@ -147,5 +146,5 @@ public interface IDirectory extends ILoggable {
      * @since 1.0
      */
     public Collection<IPrincipal> getAllPrincipals(IPrincipal principal, boolean includeGroups, boolean resolveGroups)
-	throws WmiException;
+	throws IdentityException;
 }

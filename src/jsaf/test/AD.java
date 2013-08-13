@@ -5,13 +5,12 @@ package jsaf.test;
 
 import java.util.NoSuchElementException;
 
+import jsaf.identity.IdentityException;
 import jsaf.intf.system.ISession;
 import jsaf.intf.windows.identity.IDirectory;
 import jsaf.intf.windows.identity.IGroup;
 import jsaf.intf.windows.identity.IUser;
 import jsaf.intf.windows.system.IWindowsSession;
-import jsaf.intf.windows.wmi.IWmiProvider;
-import jsaf.provider.windows.wmi.WmiException;
 
 public class AD {
     IWindowsSession session;
@@ -49,7 +48,7 @@ public class AD {
 	    }
 	} catch (IllegalArgumentException e) {
 	    e.printStackTrace();
-	} catch (WmiException e) {
+	} catch (IdentityException e) {
 	    e.printStackTrace();
 	}
     }

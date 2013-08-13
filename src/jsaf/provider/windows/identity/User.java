@@ -4,7 +4,10 @@
 package jsaf.provider.windows.identity;
 
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
+import jsaf.Message;
+import jsaf.identity.IdentityException;
 import jsaf.intf.windows.identity.IDirectory;
 import jsaf.intf.windows.identity.IUser;
 import jsaf.intf.windows.system.IWindowsSession;
@@ -19,14 +22,15 @@ public class User extends Principal implements IUser {
     private Boolean enabled = null;
     private Collection<String> groupNetbiosNames = null;
 
-    private Directory directory = null;
-
     /**
      * Create a user whose group memberships and enabled status will be determined if and when queried.
      */
+    public User(Directory directory, String accountName, String sid) {
+	super(directory, accountName, sid);
+    }
+
     public User(IWindowsSession session, String accountName, String sid) {
-	super(session, accountName, sid);
-	directory = (Directory)session.getDirectory();
+	super((Directory)session.getDirectory(), accountName, sid);
     }
 
     User(String domain, String name, String sid, Collection<String> groupNetbiosNames, boolean enabled) {
@@ -45,23 +49,23 @@ public class User extends Principal implements IUser {
 
     // Implement IUser
 
-    public Collection<String> getGroupNetbiosNames() {
+    public Collection<String> getGroupNetbiosNames() throws IdentityException {
 	if (groupNetbiosNames == null) {
 	    try {
 		groupNetbiosNames = directory.resolveUserGroupNames(sid);
-	    } catch (Exception e) {
-		throw new RuntimeException(e);
+	    } catch (NoSuchElementException e) {
+		throw new IdentityException(Message.getMessage(Message.ERROR_AD_SID, sid));
 	    }
 	}
 	return groupNetbiosNames;
     }
 
-    public boolean isEnabled() {
+    public boolean isEnabled() throws IdentityException {
 	if (enabled == null) {
 	    try {
 		enabled = directory.userEnabled(sid);
-	    } catch (Exception e) {
-		throw new RuntimeException(e);
+	    } catch (NoSuchElementException e) {
+		throw new IdentityException(Message.getMessage(Message.ERROR_AD_SID, sid));
 	    }
 	}
 	return enabled.booleanValue();

@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
+import jsaf.identity.IdentityException;
 import jsaf.io.LittleEndian;
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.windows.wmi.IWmiProvider;
@@ -41,154 +42,172 @@ class ActiveDirectory implements ILoggable {
     private static final String GROUP_WQL_CN_CONDITION = "DS_cn='$cn'";
     private static final String SID_CONDITION = "DS_objectSid='$sid'";
 
-    private Directory parent;
     private IWmiProvider wmi;
-    private LocLogger logger;
-    private Hashtable<String, User> usersByUpn;
-    private Hashtable<String, User> usersBySid;
-    private Hashtable<String, Group> groupsByNetbiosName;
-    private Hashtable<String, Group> groupsBySid;
-    private Hashtable<String, String> domains;
-    private boolean initialized = false;
 
-    ActiveDirectory(Directory parent) {
-	this.parent = parent;
-	this.logger = parent.getLogger();
+    protected LocLogger logger;
+    protected Hashtable<String, User> usersByUpn;
+    protected Hashtable<String, User> usersBySid;
+    protected Hashtable<String, Group> groupsByNetbiosName;
+    protected Hashtable<String, Group> groupsBySid;
+    protected Hashtable<String, String> domains;
+    protected boolean initialized = false;
+
+    ActiveDirectory() {
 	domains = new Hashtable<String, String>();
 	usersByUpn = new Hashtable<String, User>();
 	usersBySid = new Hashtable<String, User>();
 	groupsByNetbiosName = new Hashtable<String, Group>();
 	groupsBySid = new Hashtable<String, Group>();
-	wmi = parent.getSession().getWmiProvider();
     }
 
-    User queryUserBySid(String sid) throws NoSuchElementException, WmiException {
+    ActiveDirectory(IWmiProvider wmi, LocLogger logger) {
+	this();
+	this.wmi = wmi;
+	this.logger = logger;
+    }
+
+    User queryUserBySid(String sid) throws NoSuchElementException, IdentityException {
 	User user = usersBySid.get(sid);
 	if (user == null) {
-	    StringBuffer wql = new StringBuffer(USER_WQL);
-	    wql.append(" WHERE ");
-	    wql.append(SID_CONDITION.replaceAll("(?i)\\$sid", Matcher.quoteReplacement(sid)));
-	    ISWbemObjectSet os = wmi.execQuery(AD_NAMESPACE, wql.toString());
-	    if (os == null || os.getSize() == 0) {
-		throw new NoSuchElementException(sid);
-	    } else {
-		ISWbemPropertySet props = os.iterator().next().getProperties();
-		String upn = props.getItem("DS_userPrincipalName").getValueAsString();
-		String dn = props.getItem("DS_distinguishedName").getValueAsString();
-		String netbiosName = toNetbiosName(dn);
-		String domain = getDomain(netbiosName);
-		String name = parent.getName(netbiosName);
-		Collection<String> groupNetbiosNames = parseGroups(props.getItem("DS_memberOf").getValueAsArray());
-		int uac = props.getItem("DS_userAccountControl").getValueAsInteger().intValue();
-		boolean enabled = 0x00000002 != (uac & 0x00000002); //0x02 flag indicates disabled
-		user = new User(domain, name, sid, groupNetbiosNames, enabled);
-		usersByUpn.put(upn.toUpperCase(), user);
-		usersBySid.put(sid, user);
+	    try {
+		StringBuffer wql = new StringBuffer(USER_WQL);
+		wql.append(" WHERE ");
+		wql.append(SID_CONDITION.replaceAll("(?i)\\$sid", Matcher.quoteReplacement(sid)));
+		ISWbemObjectSet os = wmi.execQuery(AD_NAMESPACE, wql.toString());
+		if (os == null || os.getSize() == 0) {
+		    throw new NoSuchElementException(sid);
+		} else {
+		    ISWbemPropertySet props = os.iterator().next().getProperties();
+		    String upn = props.getItem("DS_userPrincipalName").getValueAsString();
+		    String dn = props.getItem("DS_distinguishedName").getValueAsString();
+		    String netbiosName = toNetbiosName(dn);
+		    String domain = getDomain(netbiosName);
+		    String name = Directory.getName(netbiosName);
+		    Collection<String> groupNetbiosNames = parseGroups(props.getItem("DS_memberOf").getValueAsArray());
+		    int uac = props.getItem("DS_userAccountControl").getValueAsInteger().intValue();
+		    boolean enabled = 0x00000002 != (uac & 0x00000002); //0x02 flag indicates disabled
+		    user = new User(domain, name, sid, groupNetbiosNames, enabled);
+		    usersByUpn.put(upn.toUpperCase(), user);
+		    usersBySid.put(sid, user);
+		}
+	    } catch (WmiException e) {
+		throw new IdentityException(e);
 	    }
 	}
 	return user;
     }
 
-    User queryUser(String netbiosName) throws NoSuchElementException, IllegalArgumentException, WmiException {
+    User queryUser(String netbiosName) throws NoSuchElementException, IllegalArgumentException, IdentityException {
 	String upn = toUserPrincipalName(netbiosName);
 	User user = usersByUpn.get(upn.toUpperCase());
 	if (user == null) {
-	    StringBuffer wql = new StringBuffer(USER_WQL);
-	    wql.append(" WHERE ");
-	    wql.append(USER_WQL_UPN_CONDITION.replaceAll("(?i)\\$upn", Matcher.quoteReplacement(upn)));
-	    ISWbemObjectSet os = wmi.execQuery(AD_NAMESPACE, wql.toString());
-	    if (os == null || os.getSize() == 0) {
-		throw new NoSuchElementException(netbiosName);
-	    } else {
-		ISWbemPropertySet props = os.iterator().next().getProperties();
-		String name = parent.getName(netbiosName);
-		String domain = getDomain(netbiosName);
-		String sid = Directory.toSid(props.getItem("DS_objectSid").getValueAsString());
-		Collection<String> groupNetbiosNames = parseGroups(props.getItem("DS_memberOf").getValueAsArray());
-		int uac = props.getItem("DS_userAccountControl").getValueAsInteger().intValue();
-		boolean enabled = 0x00000002 != (uac & 0x00000002); //0x02 flag indicates disabled
-		user = new User(domain, name, sid, groupNetbiosNames, enabled);
-		usersByUpn.put(upn.toUpperCase(), user);
-		usersBySid.put(sid, user);
+	    try {
+		StringBuffer wql = new StringBuffer(USER_WQL);
+		wql.append(" WHERE ");
+		wql.append(USER_WQL_UPN_CONDITION.replaceAll("(?i)\\$upn", Matcher.quoteReplacement(upn)));
+		ISWbemObjectSet os = wmi.execQuery(AD_NAMESPACE, wql.toString());
+		if (os == null || os.getSize() == 0) {
+		    throw new NoSuchElementException(netbiosName);
+		} else {
+		    ISWbemPropertySet props = os.iterator().next().getProperties();
+		    String name = Directory.getName(netbiosName);
+		    String domain = getDomain(netbiosName);
+		    String sid = Directory.toSid(props.getItem("DS_objectSid").getValueAsString());
+		    Collection<String> groupNetbiosNames = parseGroups(props.getItem("DS_memberOf").getValueAsArray());
+		    int uac = props.getItem("DS_userAccountControl").getValueAsInteger().intValue();
+		    boolean enabled = 0x00000002 != (uac & 0x00000002); //0x02 flag indicates disabled
+		    user = new User(domain, name, sid, groupNetbiosNames, enabled);
+		    usersByUpn.put(upn.toUpperCase(), user);
+		    usersBySid.put(sid, user);
+		}
+	    } catch (WmiException e) {
+		throw new IdentityException(e);
 	    }
 	}
 	return user;
     }
 
-    Group queryGroupBySid(String sid) throws NoSuchElementException, WmiException {
+    Group queryGroupBySid(String sid) throws NoSuchElementException, IdentityException {
 	Group group = groupsBySid.get(sid);
 	if (group == null) {
-	    StringBuffer wql = new StringBuffer(GROUP_WQL);
-	    wql.append(" WHERE ");
-	    wql.append(SID_CONDITION.replaceAll("(?i)\\$sid", Matcher.quoteReplacement(sid)));
-	    ISWbemObjectSet rows = wmi.execQuery(AD_NAMESPACE, wql.toString());
-	    if (rows == null || rows.getSize() == 0) {
-		throw new NoSuchElementException(sid);
-	    } else {
-		ISWbemPropertySet columns = rows.iterator().next().getProperties();
-		String cn = columns.getItem("DS_cn").getValueAsString();
-		String dn = columns.getItem("DS_distinguishedName").getValueAsString();
-		String netbiosName = toNetbiosName(dn);
-		String domain = getDomain(netbiosName);
-		Collection<String> userNetbiosNames = new Vector<String>();
-		Collection<String> groupNetbiosNames = new Vector<String>();
-		String[] members = columns.getItem("DS_member").getValueAsArray();
-		for (int i=0; i < members.length; i++) {
-		    if (members[i].indexOf(",OU=Distribution Groups") != -1) {
-			groupNetbiosNames.add(toNetbiosName(members[i]));
-		    } else if (members[i].indexOf(",OU=Domain Users") != -1) {
-			userNetbiosNames.add(toNetbiosName(members[i]));
-		    } else {
-			logger.warn(Message.ERROR_AD_BAD_OU, members[i]);
+	    try {
+		StringBuffer wql = new StringBuffer(GROUP_WQL);
+		wql.append(" WHERE ");
+		wql.append(SID_CONDITION.replaceAll("(?i)\\$sid", Matcher.quoteReplacement(sid)));
+		ISWbemObjectSet rows = wmi.execQuery(AD_NAMESPACE, wql.toString());
+		if (rows == null || rows.getSize() == 0) {
+		    throw new NoSuchElementException(sid);
+		} else {
+		    ISWbemPropertySet columns = rows.iterator().next().getProperties();
+		    String cn = columns.getItem("DS_cn").getValueAsString();
+		    String dn = columns.getItem("DS_distinguishedName").getValueAsString();
+		    String netbiosName = toNetbiosName(dn);
+		    String domain = getDomain(netbiosName);
+		    Collection<String> userNetbiosNames = new Vector<String>();
+		    Collection<String> groupNetbiosNames = new Vector<String>();
+		    String[] members = columns.getItem("DS_member").getValueAsArray();
+		    for (int i=0; i < members.length; i++) {
+			if (members[i].indexOf(",OU=Distribution Groups") != -1) {
+			    groupNetbiosNames.add(toNetbiosName(members[i]));
+			} else if (members[i].indexOf(",OU=Domain Users") != -1) {
+			    userNetbiosNames.add(toNetbiosName(members[i]));
+			} else {
+			    logger.warn(Message.ERROR_AD_BAD_OU, members[i]);
+			}
 		    }
+		    group = new Group(domain, cn, sid, userNetbiosNames, groupNetbiosNames);
+		    groupsByNetbiosName.put(netbiosName.toUpperCase(), group);
+		    groupsBySid.put(sid, group);
 		}
-		group = new Group(domain, cn, sid, userNetbiosNames, groupNetbiosNames);
-		groupsByNetbiosName.put(netbiosName.toUpperCase(), group);
-		groupsBySid.put(sid, group);
+	    } catch (WmiException e) {
+		throw new IdentityException(e);
 	    }
 	}
 	return group;
     }
 
-    Group queryGroup(String netbiosName) throws NoSuchElementException, IllegalArgumentException, WmiException {
+    Group queryGroup(String netbiosName) throws NoSuchElementException, IllegalArgumentException, IdentityException {
 	Group group = groupsByNetbiosName.get(netbiosName.toUpperCase());
 	if (group == null) {
 	    if (isMember(netbiosName)) {
 		String domain = getDomain(netbiosName);
 		String dc = toDCString(domains.get(domain.toUpperCase()));
-		String cn = parent.getName(netbiosName);
-
-		StringBuffer wql = new StringBuffer(GROUP_WQL);
-		wql.append(" WHERE ");
-		wql.append(GROUP_WQL_CN_CONDITION.replaceAll("(?i)\\$cn", Matcher.quoteReplacement(cn)));
-		ISWbemObjectSet rows = wmi.execQuery(AD_NAMESPACE, wql.toString());
-		if (rows == null || rows.getSize() == 0) {
-		    throw new NoSuchElementException(netbiosName);
-		} else {
-		    for (ISWbemObject row : rows) {
-			ISWbemPropertySet columns = row.getProperties();
-			String dn = columns.getItem("DS_distinguishedName").getValueAsString();
-			if (dn.endsWith(dc)) {
-			    Collection<String> userNetbiosNames = new Vector<String>();
-			    Collection<String> groupNetbiosNames = new Vector<String>();
-			    String[] members = columns.getItem("DS_member").getValueAsArray();
-			    for (int i=0; i < members.length; i++) {
-				if (members[i].indexOf(",OU=Distribution Groups") != -1) {
-				    groupNetbiosNames.add(toNetbiosName(members[i]));
-				} else if (members[i].indexOf(",OU=Domain Users") != -1) {
-				    userNetbiosNames.add(toNetbiosName(members[i]));
-				} else {
-				    logger.warn(Message.ERROR_AD_BAD_OU, members[i]);
+		String cn = Directory.getName(netbiosName);
+		try {
+		    StringBuffer wql = new StringBuffer(GROUP_WQL);
+		    wql.append(" WHERE ");
+		    wql.append(GROUP_WQL_CN_CONDITION.replaceAll("(?i)\\$cn", Matcher.quoteReplacement(cn)));
+		    ISWbemObjectSet rows = wmi.execQuery(AD_NAMESPACE, wql.toString());
+		    if (rows == null || rows.getSize() == 0) {
+			throw new NoSuchElementException(netbiosName);
+		    } else {
+			for (ISWbemObject row : rows) {
+			    ISWbemPropertySet columns = row.getProperties();
+			    String dn = columns.getItem("DS_distinguishedName").getValueAsString();
+			    if (dn.endsWith(dc)) {
+				Collection<String> userNetbiosNames = new Vector<String>();
+				Collection<String> groupNetbiosNames = new Vector<String>();
+				String[] members = columns.getItem("DS_member").getValueAsArray();
+				for (int i=0; i < members.length; i++) {
+				    if (members[i].indexOf(",OU=Distribution Groups") != -1) {
+					groupNetbiosNames.add(toNetbiosName(members[i]));
+				    } else if (members[i].indexOf(",OU=Domain Users") != -1) {
+					userNetbiosNames.add(toNetbiosName(members[i]));
+				    } else {
+					logger.warn(Message.ERROR_AD_BAD_OU, members[i]);
+				    }
 				}
+				String sid = Directory.toSid(columns.getItem("DS_objectSid").getValueAsString());
+				group = new Group(domain, cn, sid, userNetbiosNames, groupNetbiosNames);
+				groupsByNetbiosName.put(netbiosName.toUpperCase(), group);
+				groupsBySid.put(sid, group);
+			    } else {
+				logger.trace(Message.STATUS_AD_GROUP_SKIP, dn, dc);
 			    }
-			    String sid = Directory.toSid(columns.getItem("DS_objectSid").getValueAsString());
-			    group = new Group(domain, cn, sid, userNetbiosNames, groupNetbiosNames);
-			    groupsByNetbiosName.put(netbiosName.toUpperCase(), group);
-			    groupsBySid.put(sid, group);
-			} else {
-			    logger.trace(Message.STATUS_AD_GROUP_SKIP, dn, dc);
 			}
 		    }
+		} catch (WmiException e) {
+		    throw new IdentityException(e);
 		}
 		if (group == null) {
 		    throw new NoSuchElementException(netbiosName);
@@ -200,7 +219,9 @@ class ActiveDirectory implements ILoggable {
 	return group;
     }
 
-    Principal queryPrincipal(String netbiosName) throws NoSuchElementException, IllegalArgumentException, WmiException {
+    Principal queryPrincipal(String netbiosName)
+		throws NoSuchElementException, IllegalArgumentException, IdentityException {
+
 	try {
 	    return queryUser(netbiosName);
 	} catch (NoSuchElementException e) {
@@ -208,7 +229,7 @@ class ActiveDirectory implements ILoggable {
 	return queryGroup(netbiosName);
     }
 
-    Principal queryPrincipalBySid(String sid) throws NoSuchElementException, WmiException {
+    Principal queryPrincipalBySid(String sid) throws NoSuchElementException, IdentityException {
 	try {
 	    return queryUserBySid(sid);
 	} catch (NoSuchElementException e) {
@@ -217,7 +238,7 @@ class ActiveDirectory implements ILoggable {
     }
 
     boolean isMember(String netbiosName) throws IllegalArgumentException {
-	init();
+	initDomains();
 	return domains.containsKey(getDomain(netbiosName));
     }
 
@@ -226,7 +247,7 @@ class ActiveDirectory implements ILoggable {
 	    queryPrincipalBySid(sid);
 	    return true;
 	} catch (NoSuchElementException e) {
-	} catch (WmiException e) {
+	} catch (IdentityException e) {
 	    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	}
 	return false;
@@ -242,12 +263,12 @@ class ActiveDirectory implements ILoggable {
 	return logger;
     }
 
-    // Private
+    // Protected
 
     /**
      * Initialize the domain list.
      */
-    private void init() {
+    void initDomains() {
 	if (initialized) {
 	    return;
 	}
@@ -274,11 +295,11 @@ class ActiveDirectory implements ILoggable {
     /**
      * Given a name of the form DOMAIN\\username, return the corresponding UserPrincipalName of the form username@domain.com.
      */
-    private String toUserPrincipalName(String netbiosName) throws IllegalArgumentException {
+    String toUserPrincipalName(String netbiosName) throws IllegalArgumentException {
 	String domain = getDomain(netbiosName);
 	if (isMember(netbiosName)) {
 	    String dns = domains.get(domain.toUpperCase());
-	    String upn = new StringBuffer(parent.getName(netbiosName)).append("@").append(dns).toString();
+	    String upn = new StringBuffer(Directory.getName(netbiosName)).append("@").append(dns).toString();
 	    logger.trace(Message.STATUS_UPN_CONVERT, netbiosName, upn);
 	    return upn;
 	} else {
@@ -289,7 +310,7 @@ class ActiveDirectory implements ILoggable {
     /**
      * Convert a DNS path into a Netbios domain name.
      */
-    private String toDomain(String dns) {
+    String toDomain(String dns) {
 	for (String domain : domains.keySet()) {
 	    if (dns.equals(domains.get(domain))) {
 		return domain;
@@ -301,7 +322,7 @@ class ActiveDirectory implements ILoggable {
     /**
      * Convert a String of the form a.b.com to a String of the form DC=a,DC=b,DC=com.
      */
-    private String toDCString(String dns) {
+    String toDCString(String dns) {
 	StringBuffer sb = new StringBuffer();
 	for (String token : StringTools.toList(StringTools.tokenize(dns, "."))) {
 	    if (sb.length() > 0) {
@@ -316,7 +337,7 @@ class ActiveDirectory implements ILoggable {
     /**
      * Get the Domain portion of a Domain\\Name String.
      */
-    private String getDomain(String s) throws IllegalArgumentException {
+    String getDomain(String s) throws IllegalArgumentException {
 	int ptr = s.indexOf("\\");
 	if (ptr == -1) {
 	    throw new IllegalArgumentException(Message.getMessage(Message.ERROR_AD_DOMAIN_REQUIRED, s));
@@ -330,7 +351,7 @@ class ActiveDirectory implements ILoggable {
      *
      * @throws NoSuchElementException if the domain can not be found
      */
-    private String toNetbiosName(String dn) throws NoSuchElementException {
+    String toNetbiosName(String dn) throws NoSuchElementException {
 	int ptr = dn.indexOf(",");
 	String groupName = dn.substring(3, ptr); // Starts with CN=
 	ptr = dn.indexOf(",DC=");
@@ -353,7 +374,7 @@ class ActiveDirectory implements ILoggable {
     /**
      * Convert a String of group DNs into a Collection of DOMAIN\\group names.
      */
-    private Collection<String> parseGroups(String[] sa) {
+    Collection<String> parseGroups(String[] sa) {
 	Collection<String> groups = new Vector<String>(sa.length);
 	for (int i=0; i < sa.length; i++) {
 	    try {

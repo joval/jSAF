@@ -12,6 +12,7 @@ import java.util.NoSuchElementException;
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
+import jsaf.identity.IdentityException;
 import jsaf.intf.windows.identity.IACE;
 import jsaf.intf.windows.identity.IDirectory;
 import jsaf.intf.windows.identity.IGroup;
@@ -20,7 +21,6 @@ import jsaf.intf.windows.identity.IUser;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.intf.windows.wmi.IWmiProvider;
 import jsaf.io.LittleEndian;
-import jsaf.provider.windows.wmi.WmiException;
 
 /**
  * Implementation of IDirectory.
@@ -30,12 +30,24 @@ import jsaf.provider.windows.wmi.WmiException;
  */
 public class Directory implements IDirectory {
     /**
+     * Get the Name portion of a DOMAIN\NAME String.  If there is no domain portion, returns the original String.
+     */
+    public static final String getName(String s) {
+	int ptr = s.indexOf("\\");
+	if (ptr == -1) {
+	    return s;
+	} else {
+	    return s.substring(ptr+1);
+	}
+    }
+
+    /**
      * Convert a hexidecimal String representation of a SID into a "readable" SID String.
      *
      * The WMI implementations return this kind of String when a binary is fetched using getAsString.
      * @see org.joval.intf.windows.wmi.ISWbemProperty
      */
-    public static String toSid(String hex) {
+    public static final String toSid(String hex) {
 	int len = hex.length();
 	if (len % 2 == 1) {
 	    throw new IllegalArgumentException(hex);
@@ -54,7 +66,7 @@ public class Directory implements IDirectory {
     /**
      * Convert a byte[] representation of a SID into a "readable" SID String.
      */
-    public static String toSid(byte[] raw) {
+    public static final String toSid(byte[] raw) {
 	int rev = raw[0];
 	int subauthCount = raw[1];
 
@@ -89,22 +101,28 @@ public class Directory implements IDirectory {
     private LocalDirectory local;
     private ServiceDirectory service;
 
+    /**
+     * Create a Directory with an AD interface based on the WMI provider.
+     */
     public Directory(IWindowsSession session) throws Exception {
-	this.session = session;
-	logger = session.getLogger();
-	ad = new ActiveDirectory(this);
-	local = new LocalDirectory(session.getMachineName(), this);
-	service = new ServiceDirectory(session);
+	this(session, new ActiveDirectory(session.getWmiProvider(), session.getLogger()));
     }
 
-    IWindowsSession getSession() {
-	return session;
+    /**
+     * Create a Directory with the specified AD interface.
+     */
+    public Directory(IWindowsSession session, ActiveDirectory ad) throws Exception {
+	this.session = session;
+	this.ad = ad;
+	logger = session.getLogger();
+	local = new LocalDirectory(this, session.getWmiProvider());
+	service = new ServiceDirectory(session);
     }
 
     /**
      * Returns whether the user is enabled. Used by "thin" local user objects.
      */
-    boolean userEnabled(String sid) throws NoSuchElementException, WmiException {
+    boolean userEnabled(String sid) throws NoSuchElementException, IdentityException {
 	if (service.isServiceSid(sid)) {
 	    return true;
 	} else {
@@ -120,7 +138,7 @@ public class Directory implements IDirectory {
      * Returns the collection of NETBIOS names of groups of which the user is a member. Used by "thin" local
      * user objects.
      */
-    Collection<String> resolveUserGroupNames(String sid) throws NoSuchElementException, WmiException {
+    Collection<String> resolveUserGroupNames(String sid) throws NoSuchElementException, IdentityException {
 	if (service.isServiceSid(sid)) {
 	    return new ArrayList<String>();
 	} else {
@@ -146,16 +164,11 @@ public class Directory implements IDirectory {
 
     // Implement IDirectory
 
-    public String getName(String s) {
-	int ptr = s.indexOf("\\");
-	if (ptr == -1) {
-	    return s;
-	} else {
-	    return s.substring(ptr+1);
-	}
+    public String getMachineName() {
+	return session.getMachineName();
     }
 
-    public IUser queryUserBySid(String sid) throws NoSuchElementException, WmiException {
+    public IUser queryUserBySid(String sid) throws NoSuchElementException, IdentityException {
 	if (service.isServiceSid(sid)) {
 	    return service.queryUserBySid(sid);
 	} else {
@@ -167,7 +180,7 @@ public class Directory implements IDirectory {
 	}
     }
 
-    public IUser queryUser(String netbiosName) throws IllegalArgumentException, NoSuchElementException, WmiException {
+    public IUser queryUser(String netbiosName) throws IllegalArgumentException, NoSuchElementException, IdentityException {
 	if (netbiosName.toUpperCase().startsWith("NT SERVICE\\")) {
 	    return service.queryUser(netbiosName);
 	} else if (isLocal(netbiosName)) {
@@ -177,11 +190,11 @@ public class Directory implements IDirectory {
 	}
     }
 
-    public Collection<IUser> queryAllUsers() throws WmiException {
+    public Collection<IUser> queryAllUsers() throws IdentityException {
 	return local.queryAllUsers();
     }
 
-    public IGroup queryGroupBySid(String sid) throws NoSuchElementException, WmiException {
+    public IGroup queryGroupBySid(String sid) throws NoSuchElementException, IdentityException {
 	try {
 	    return local.queryGroupBySid(sid);
 	} catch (NoSuchElementException e) {
@@ -189,7 +202,7 @@ public class Directory implements IDirectory {
 	}
     }
 
-    public IGroup queryGroup(String netbiosName) throws IllegalArgumentException, NoSuchElementException, WmiException {
+    public IGroup queryGroup(String netbiosName) throws IllegalArgumentException, NoSuchElementException, IdentityException {
 	if (isLocal(netbiosName)) {
 	    return local.queryGroup(netbiosName);
 	} else {
@@ -197,11 +210,13 @@ public class Directory implements IDirectory {
 	}
     }
 
-    public Collection<IGroup> queryAllGroups() throws WmiException {
+    public Collection<IGroup> queryAllGroups() throws IdentityException {
 	return local.queryAllGroups();
     }
 
-    public IPrincipal queryPrincipal(String netbiosName) throws NoSuchElementException, IllegalArgumentException, WmiException {
+    public IPrincipal queryPrincipal(String netbiosName)
+		throws NoSuchElementException, IllegalArgumentException, IdentityException {
+
 	if (netbiosName.toUpperCase().startsWith("NT SERVICE\\")) {
 	    return service.queryUser(netbiosName);
 	} else if (isLocal(netbiosName)) {
@@ -211,7 +226,7 @@ public class Directory implements IDirectory {
 	}
     }
 
-    public IPrincipal queryPrincipalBySid(String sid) throws NoSuchElementException, WmiException {
+    public IPrincipal queryPrincipalBySid(String sid) throws NoSuchElementException, IdentityException {
 	if (service.isServiceSid(sid)) {
 	    return service.queryUserBySid(sid);
 	} else {
@@ -223,7 +238,7 @@ public class Directory implements IDirectory {
 	}
     }
 
-    public Collection<IPrincipal> queryAllPrincipals() throws WmiException {
+    public Collection<IPrincipal> queryAllPrincipals() throws IdentityException {
 	return local.queryAllPrincipals();
     }
 
@@ -248,7 +263,7 @@ public class Directory implements IDirectory {
     }
 
     public Collection<IPrincipal> getAllPrincipals(IPrincipal principal, boolean includeGroups, boolean resolveGroups)
-		throws WmiException {
+		throws IdentityException {
 
 	//
 	// Resolve group members if resolveGroups == true
@@ -286,7 +301,7 @@ public class Directory implements IDirectory {
     /**
      * Won't get stuck in a loop because it adds the groups themselves to the Map as it goes.
      */
-    private void queryAllMembers(IPrincipal principal, Map<String, IPrincipal> principals) throws WmiException {
+    private void queryAllMembers(IPrincipal principal, Map<String, IPrincipal> principals) throws IdentityException {
 	if (!principals.containsKey(principal.getSid())) {
 	    principals.put(principal.getSid(), principal);
 	    switch(principal.getType()) {

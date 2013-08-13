@@ -5,6 +5,8 @@ package jsaf.intf.windows.identity;
 
 import java.util.Collection;
 
+import jsaf.identity.IdentityException;
+
 /**
  * The IUser interface provides information about a Windows user.
  *
@@ -19,12 +21,12 @@ public interface IUser extends IPrincipal {
      *
      * @since 1.0
      */
-    Collection<String> getGroupNetbiosNames();
+    Collection<String> getGroupNetbiosNames() throws IdentityException;
 
     /**
      * Is the user account enabled or disabled?
      *
      * @since 1.0
      */
-    boolean isEnabled();
+    boolean isEnabled() throws IdentityException;
 }

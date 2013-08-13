@@ -169,6 +169,11 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
     }
 
     @Override
+    public String getUsername() {
+	return System.getenv("USERDOMAIN") + "\\" + System.getProperty("user.name");
+    }
+
+    @Override
     public String getMachineName() {
 	if (isConnected()) {
 	    try {

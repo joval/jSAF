@@ -82,6 +82,16 @@ public class Runspace implements IRunspace {
 	return p;
     }
 
+    // Implement ILoggable
+
+    public LocLogger getLogger() {
+	return logger;
+    }
+
+    public void setLogger(LocLogger logger) {
+	this.logger = logger;
+    }
+
     // Implement IRunspace
 
     public String getId() {

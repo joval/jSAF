@@ -6,6 +6,7 @@ package jsaf.intf.windows.powershell;
 import java.io.InputStream;
 import java.io.IOException;
 
+import jsaf.intf.util.ILoggable;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.provider.windows.powershell.PowershellException;
 
@@ -16,7 +17,7 @@ import jsaf.provider.windows.powershell.PowershellException;
  * @version %I% %G%
  * @since 1.0
  */
-public interface IRunspace {
+public interface IRunspace extends ILoggable {
     /**
      * Get a unique identifier for this runspace.
      *

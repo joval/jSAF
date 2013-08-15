@@ -316,7 +316,7 @@ public class Directory implements IDirectory {
 		    } catch (IllegalArgumentException e) {
 			logger.warn(e.getMessage());
 		    } catch (NoSuchElementException e) {
-			logger.warn(Message.ERROR_GROUP_USER, e.getMessage(), g.getName());
+			logger.warn(Message.ERROR_GROUP_USER, e.getMessage(), g.getNetbiosName());
 		    }
 		}
 		//
@@ -328,7 +328,7 @@ public class Directory implements IDirectory {
 		    } catch (IllegalArgumentException e) {
 			logger.warn(e.getMessage());
 		    } catch (NoSuchElementException e) {
-			logger.warn(Message.ERROR_GROUP_SUBGROUP, e.getMessage(), g.getName());
+			logger.warn(Message.ERROR_GROUP_SUBGROUP, e.getMessage(), g.getNetbiosName());
 		    }
 		}
 		break;

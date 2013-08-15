@@ -314,9 +314,9 @@ public class Directory implements IDirectory {
 		    try {
 			queryAllMembers(queryUser(netbiosName), principals);
 		    } catch (IllegalArgumentException e) {
-			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+			logger.warn(e.getMessage());
 		    } catch (NoSuchElementException e) {
-			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+			logger.warn(Message.ERROR_GROUP_USER, e.getMessage(), g.getName());
 		    }
 		}
 		//
@@ -326,9 +326,9 @@ public class Directory implements IDirectory {
 		    try {
 			queryAllMembers(queryGroup(netbiosName), principals);
 		    } catch (IllegalArgumentException e) {
-			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+			logger.warn(e.getMessage());
 		    } catch (NoSuchElementException e) {
-			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+			logger.warn(Message.ERROR_GROUP_SUBGROUP, e.getMessage(), g.getName());
 		    }
 		}
 		break;

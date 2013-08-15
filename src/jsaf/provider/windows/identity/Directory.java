@@ -48,6 +48,17 @@ public class Directory implements IDirectory {
      * @see org.joval.intf.windows.wmi.ISWbemProperty
      */
     public static final String toSid(String hex) {
+	if (hex.startsWith("{") && hex.endsWith("}")) {
+	    //
+	    // hex is formatted as "{00,01,02}"
+	    //
+	    StringBuffer sb = new StringBuffer();
+	    for (String b : hex.substring(1, hex.length()-1).split(",")) {
+		sb.append(b);
+	    }
+	    hex = sb.toString();
+	}
+
 	int len = hex.length();
 	if (len % 2 == 1) {
 	    throw new IllegalArgumentException(hex);
@@ -57,7 +68,11 @@ public class Directory implements IDirectory {
 	int index = 0;
 	for (int i=0; i < len; i+=2) {
 	    String s = hex.substring(i, i+2);
-	    raw[index++] = (byte)(Integer.parseInt(s, 16) & 0xFF);
+	    try {
+		raw[index++] = (byte)(Integer.parseInt(s, 16) & 0xFF);
+	    } catch (NumberFormatException e) {
+		throw new IllegalArgumentException(hex);
+	    }
 	}
 
 	return toSid(raw);

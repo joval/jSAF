@@ -6,7 +6,7 @@ package jsaf.provider.windows.identity;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,11 +35,14 @@ class ActiveDirectory implements ILoggable {
     private static final String DOMAIN_WQL = "SELECT Name, DomainName, DnsForestName FROM Win32_NTDomain";
 
     private static final String AD_NAMESPACE = "root\\directory\\ldap";
-    private static final String USER_WQL = "SELECT DS_userPrincipalName, DS_distinguishedName, DS_memberOf, " +
-					   "DS_userAccountControl, DS_objectSid FROM DS_User";
+    private static final String COMMON_SELECT = "SELECT DS_sAMAccountName, DS_distinguishedName, DS_objectSid";
+    private static final String USER_WQL = COMMON_SELECT +
+	", DS_userPrincipalName, DS_memberOf, DS_userAccountControl FROM DS_User";
     private static final String USER_WQL_UPN_CONDITION = "DS_userPrincipalName='$upn'";
-    private static final String GROUP_WQL = "SELECT DS_member, DS_distinguishedName, DS_objectSid FROM DS_Group";
-    private static final String GROUP_WQL_CN_CONDITION = "DS_cn='$cn'";
+    private static final String GROUP_WQL = COMMON_SELECT + ", DS_member FROM DS_Group";
+    private static final String GROUP_WQL_NAME_CONDITION = "DS_sAMAccountName='$name'";
+    private static final String GROUP_WQL_DN_CONDITION = "DS_distinguishedName='$dn'";
+    private static final String MEMBER_CONDITION = "DS_memberOf='$dn'";
     private static final String SID_CONDITION = "DS_objectSid='$sid'";
 
     private IWmiProvider wmi;
@@ -135,23 +138,14 @@ class ActiveDirectory implements ILoggable {
 		    throw new NoSuchElementException(sid);
 		} else {
 		    ISWbemPropertySet columns = rows.iterator().next().getProperties();
-		    String cn = columns.getItem("DS_cn").getValueAsString();
+		    String name = columns.getItem("DS_sAMAccountName").getValueAsString();
 		    String dn = columns.getItem("DS_distinguishedName").getValueAsString();
 		    String netbiosName = toNetbiosName(dn);
 		    String domain = getDomain(netbiosName);
-		    Collection<String> userNetbiosNames = new Vector<String>();
-		    Collection<String> groupNetbiosNames = new Vector<String>();
-		    String[] members = columns.getItem("DS_member").getValueAsArray();
-		    for (int i=0; i < members.length; i++) {
-			if (members[i].indexOf(",OU=Distribution Groups") != -1) {
-			    groupNetbiosNames.add(toNetbiosName(members[i]));
-			} else if (members[i].indexOf(",OU=Domain Users") != -1) {
-			    userNetbiosNames.add(toNetbiosName(members[i]));
-			} else {
-			    logger.warn(Message.ERROR_AD_BAD_OU, members[i]);
-			}
-		    }
-		    group = new Group(domain, cn, sid, userNetbiosNames, groupNetbiosNames);
+		    Collection<String> userNetbiosNames = new ArrayList<String>();
+		    Collection<String> groupNetbiosNames = new ArrayList<String>();
+		    getMembers(dn, userNetbiosNames, groupNetbiosNames);
+		    group = new Group(domain, name, sid, userNetbiosNames, groupNetbiosNames);
 		    groupsByNetbiosName.put(netbiosName.toUpperCase(), group);
 		    groupsBySid.put(sid, group);
 		}
@@ -168,11 +162,11 @@ class ActiveDirectory implements ILoggable {
 	    if (isMember(netbiosName)) {
 		String domain = getDomain(netbiosName);
 		String dc = toDCString(domains.get(domain.toUpperCase()));
-		String cn = Directory.getName(netbiosName);
+		String name = Directory.getName(netbiosName);
 		try {
 		    StringBuffer wql = new StringBuffer(GROUP_WQL);
 		    wql.append(" WHERE ");
-		    wql.append(GROUP_WQL_CN_CONDITION.replaceAll("(?i)\\$cn", Matcher.quoteReplacement(cn)));
+		    wql.append(GROUP_WQL_NAME_CONDITION.replaceAll("(?i)\\$name", Matcher.quoteReplacement(name)));
 		    ISWbemObjectSet rows = wmi.execQuery(AD_NAMESPACE, wql.toString());
 		    if (rows == null || rows.getSize() == 0) {
 			throw new NoSuchElementException(netbiosName);
@@ -181,22 +175,14 @@ class ActiveDirectory implements ILoggable {
 			    ISWbemPropertySet columns = row.getProperties();
 			    String dn = columns.getItem("DS_distinguishedName").getValueAsString();
 			    if (dn.endsWith(dc)) {
-				Collection<String> userNetbiosNames = new Vector<String>();
-				Collection<String> groupNetbiosNames = new Vector<String>();
-				String[] members = columns.getItem("DS_member").getValueAsArray();
-				for (int i=0; i < members.length; i++) {
-				    if (members[i].indexOf(",OU=Distribution Groups") != -1) {
-					groupNetbiosNames.add(toNetbiosName(members[i]));
-				    } else if (members[i].indexOf(",OU=Domain Users") != -1) {
-					userNetbiosNames.add(toNetbiosName(members[i]));
-				    } else {
-					logger.warn(Message.ERROR_AD_BAD_OU, members[i]);
-				    }
-				}
+				Collection<String> userNetbiosNames = new ArrayList<String>();
+				Collection<String> groupNetbiosNames = new ArrayList<String>();
+				getMembers(dn, userNetbiosNames, groupNetbiosNames);
 				String sid = Directory.toSid(columns.getItem("DS_objectSid").getValueAsString());
-				group = new Group(domain, cn, sid, userNetbiosNames, groupNetbiosNames);
+				group = new Group(domain, name, sid, userNetbiosNames, groupNetbiosNames);
 				groupsByNetbiosName.put(netbiosName.toUpperCase(), group);
 				groupsBySid.put(sid, group);
+				break;
 			    } else {
 				logger.trace(Message.STATUS_AD_GROUP_SKIP, dn, dc);
 			    }
@@ -262,7 +248,7 @@ class ActiveDirectory implements ILoggable {
     // Protected
 
     /**
-     * Initialize the domain list.
+     * Initialize the domain map, which is used to correlate domain names with their corresponding DNS names.
      */
     void initDomains() {
 	if (initialized) {
@@ -304,9 +290,32 @@ class ActiveDirectory implements ILoggable {
     }
 
     /**
+     * Get the DNS name of the DN's domain.
+     */
+    String getDNS(String dn) {
+	StringBuffer dns = new StringBuffer();
+	String remainder = dn;
+	int ptr = dn.indexOf(",DC=");
+	if (ptr == -1) return null;
+	while (ptr != -1) {
+	    int next = dn.indexOf(",DC=", ptr+4);
+	    if (dns.length() > 0) {
+		dns.append(".");
+	    }
+	    if (next == -1) {
+		dns.append(dn.substring(ptr+4));
+	    } else {
+		dns.append(dn.substring(ptr+4, next));
+	    }
+	    ptr = next;
+	}
+	return dns.toString();
+    }
+
+    /**
      * Convert a DNS path into a Netbios domain name.
      */
-    String toDomain(String dns) {
+    String dnsToDomain(String dns) {
 	for (String domain : domains.keySet()) {
 	    if (dns.equals(domains.get(domain))) {
 		return domain;
@@ -333,12 +342,12 @@ class ActiveDirectory implements ILoggable {
     /**
      * Get the Domain portion of a Domain\\Name String.
      */
-    String getDomain(String s) throws IllegalArgumentException {
-	int ptr = s.indexOf("\\");
+    String getDomain(String netbiosName) throws IllegalArgumentException {
+	int ptr = netbiosName.indexOf("\\");
 	if (ptr == -1) {
-	    throw new IllegalArgumentException(Message.getMessage(Message.ERROR_AD_DOMAIN_REQUIRED, s));
+	    throw new IllegalArgumentException(Message.getMessage(Message.ERROR_AD_DOMAIN_REQUIRED, netbiosName));
 	} else {
-	    return s.substring(0, ptr);
+	    return netbiosName.substring(0, ptr);
 	}
     }
 
@@ -358,7 +367,7 @@ class ActiveDirectory implements ILoggable {
 	    }
 	    dns.append(name);
 	}
-	String domain = toDomain(dns.toString());
+	String domain = dnsToDomain(dns.toString());
 	if (domain == null) {
 	    throw new NoSuchElementException(Message.getMessage(Message.STATUS_NAME_DOMAIN_ERR, dn));
 	}
@@ -367,18 +376,57 @@ class ActiveDirectory implements ILoggable {
 	return name;
     }
 
+    // Private
+
     /**
-     * Convert a String of group DNs into a Collection of DOMAIN\\group names.
+     * Convert a String[] of group DNs into a Collection of DOMAIN\\group names.
      */
-    Collection<String> parseGroups(String[] sa) {
-	Collection<String> groups = new Vector<String>(sa.length);
-	for (int i=0; i < sa.length; i++) {
-	    try {
-		groups.add(toNetbiosName(sa[i]));
-	    } catch (NoSuchElementException e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+    Collection<String> parseGroups(String[] dns) throws IdentityException {
+	try {
+	    Collection<String> groups = new ArrayList<String>(dns.length);
+	    for (String groupDN : dns) {
+		StringBuffer wql = new StringBuffer(GROUP_WQL);
+		wql.append(" WHERE ");
+		wql.append(GROUP_WQL_DN_CONDITION.replaceAll("(?i)\\$dn", Matcher.quoteReplacement(groupDN)));
+		ISWbemObjectSet rows = wmi.execQuery(AD_NAMESPACE, wql.toString());
+		if (rows == null || rows.getSize() == 0) {
+		    throw new NoSuchElementException(groupDN);
+		} else {
+		    ISWbemPropertySet columns = rows.iterator().next().getProperties();
+		    String name = columns.getItem("DS_sAMAccountName").getValueAsString();
+		    String domain = dnsToDomain(getDNS(columns.getItem("DS_distinguishedName").getValueAsString()));
+		    groups.add(domain + "\\" + name);
+		}
 	    }
+	    return groups;
+	} catch (WmiException e) {
+	    throw new IdentityException(e);
 	}
-	return groups;
+    }
+
+    /**
+     * Given the DN of a group, sort its user and subgroup members into different collections.
+     */
+    private void getMembers(String groupDN, Collection<String> users, Collection<String> groups) throws IdentityException {
+	try {
+	    StringBuffer wql = new StringBuffer(USER_WQL);
+	    wql.append(" WHERE ");
+	    wql.append(MEMBER_CONDITION.replaceAll("(?i)\\$dn", Matcher.quoteReplacement(groupDN)));
+	    for (ISWbemObject row : wmi.execQuery(AD_NAMESPACE, wql.toString())) {
+		ISWbemPropertySet props = row.getProperties();
+		String name = props.getItem("DS_sAMAccountName").getValueAsString();
+		users.add(toNetbiosName("CN=" + name + "," + props.getItem("DS_distinguishedName").getValueAsString()));
+	    }
+	    wql = new StringBuffer(GROUP_WQL);
+	    wql.append(" WHERE ");
+	    wql.append(MEMBER_CONDITION.replaceAll("(?i)\\$dn", Matcher.quoteReplacement(groupDN)));
+	    for (ISWbemObject row : wmi.execQuery(AD_NAMESPACE, wql.toString())) {
+		ISWbemPropertySet props = row.getProperties();
+		String name = props.getItem("DS_sAMAccountName").getValueAsString();
+		groups.add(toNetbiosName("CN=" + name + "," + props.getItem("DS_distinguishedName").getValueAsString()));
+	    }
+	} catch (WmiException e) {
+	    throw new IdentityException(e);
+	}
     }
 }

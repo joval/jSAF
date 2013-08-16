@@ -231,9 +231,12 @@ public abstract class AbstractFilesystem implements IFilesystem {
      *
      * <code>AbstractFilesystem.instances.get(instanceKey).createFileFromInfo(...)</code>
      */
-    public IFile createFileFromInfo(IFileMetadata info) {
-	IFile f = new DefaultFile(info, IFile.Flags.READONLY);
-	return f;
+    public final IFile createFileFromInfo(IFileMetadata info) {
+	return createFileFromInfo(info, IFile.Flags.READONLY);
+    }
+
+    protected IFile createFileFromInfo(IFileMetadata info, IFile.Flags flags) {
+	return new DefaultFile(info, flags);
     }
 
     // Implement ILoggable
@@ -265,9 +268,13 @@ public abstract class AbstractFilesystem implements IFilesystem {
     }
 
     public IFile[] getFiles(String[] paths) throws IOException {
+	return getFiles(paths, IFile.Flags.READONLY);
+    }
+
+    public IFile[] getFiles(String[] paths, IFile.Flags flags) throws IOException {
 	IFile[] files = new IFile[paths.length];
 	for (int i=0; i < paths.length; i++) {
-	    files[i] = getFile(paths[i], IFile.Flags.READONLY);
+	    files[i] = getFile(paths[i], flags);
 	}
 	return files;
     }
@@ -672,17 +679,12 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    if (fnames == null) {
 		return null;
 	    }
-	    List<IFile> result = new ArrayList<IFile>();
-	    for (String fname : fnames) {
-		if (p == null || p.matcher(fname).find()) {
-		    if (path.endsWith(DELIM)) {
-			result.add(getFile(path + fname, flags));
-		    } else {
-			result.add(getFile(path + DELIM + fname, flags));
-		    }
-		}
+	    String base = path.endsWith(DELIM) ? path : path + DELIM;
+	    String[] paths = new String[fnames.length];
+	    for (int i=0; i < fnames.length; i++) {
+		paths[i] = base + fnames[i];
 	    }
-	    return result.toArray(new IFile[result.size()]);
+	    return getFiles(paths, flags);
 	}
 
 	public IFile getChild(String name) throws IOException {

@@ -176,16 +176,16 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
     }
 
     @Override
-    public IFile createFileFromInfo(IFileMetadata info) {
+    protected IFile createFileFromInfo(IFileMetadata info, IFile.Flags flags) {
 	if (info instanceof WindowsFileInfo) {
-	    return new WindowsFile((WindowsFileInfo)info);
+	    return new WindowsFile((WindowsFileInfo)info, flags);
 	} else {
-	    return super.createFileFromInfo(info);
+	    return super.createFileFromInfo(info, flags);
 	}
     }
 
     @Override
-    public IFile[] getFiles(String[] paths) throws IOException {
+    public IFile[] getFiles(String[] paths, IFile.Flags flags) throws IOException {
 	try {
 	    HashSet<String> uniquePaths = new HashSet<String>();
 	    for (String path : paths) {
@@ -200,7 +200,9 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 		sb.append("\"").append(path).append("\"");
 	    }
 	    sb.append(" | Print-FileInfo | Transfer-Encode");
-	    String data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.UTF8);
+	    long timeout = session.getTimeout(IWindowsSession.Timeout.M) + (30 * paths.length);
+logger.info("DAS Timeout is " + timeout + "ms for " + paths.length + " files in getFiles()");
+	    String data = new String(Base64.decode(runspace.invoke(sb.toString(), timeout)), StringTools.UTF8);
 	    Map<String, IFile> fileMap = new HashMap<String, IFile>();
 	    Iterator<String> iter = Arrays.asList(data.split("\r\n")).iterator();
 	    IWindowsFileInfo info = null;
@@ -209,7 +211,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 		  case IWindowsFileInfo.FILE_TYPE_UNKNOWN:
 		    break;
 		  default:
-		    IFile f = createFileFromInfo((IFileMetadata)info);
+		    IFile f = createFileFromInfo((IFileMetadata)info, flags);
 		    fileMap.put(f.getPath().toLowerCase(), f);
 		    break;
 		}
@@ -348,8 +350,8 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	    super(path, new WindowsAccessor(path, file), flags);
 	}
 
-	WindowsFile(WindowsFileInfo info) {
-	    super(info, Flags.READONLY);
+	WindowsFile(WindowsFileInfo info, Flags flags) {
+	    super(info, flags);
 	}
 
 	@Override

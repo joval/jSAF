@@ -90,16 +90,16 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
     }
 
     @Override
-    public IFile createFileFromInfo(IFileMetadata info) {
+    protected IFile createFileFromInfo(IFileMetadata info, IFile.Flags flags) {
 	if (info instanceof UnixFileInfo) {
-	    return new UnixFile((UnixFileInfo)info);
+	    return new UnixFile((UnixFileInfo)info, flags);
 	} else {
-	    return super.createFileFromInfo(info);
+	    return super.createFileFromInfo(info, flags);
 	}
     }
 
     @Override
-    public IFile[] getFiles(String[] paths) throws IOException {
+    public IFile[] getFiles(String[] paths, IFile.Flags flags) throws IOException {
 	try {
 	    HashSet<String> uniquePaths = new HashSet<String>();
 	    for (String path : paths) {
@@ -119,7 +119,7 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 	    Iterator<String> iter = SafeCLI.manyLines(cmd.toString(), null, (IUnixSession)session);
 	    IUnixFileInfo info = null;
 	    while ((info = getDriver().nextFileInfo(iter)) != null) {
-		IFile f = createFileFromInfo((IFileMetadata)info);
+		IFile f = createFileFromInfo((IFileMetadata)info, flags);
 		fileMap.put(f.getPath().toLowerCase(), f);
 	    }
 	    IFile[] files = new IFile[paths.length];
@@ -221,15 +221,15 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 	    super(file.getPath(), new UnixAccessor(file), flags);
 	}
 
-	protected UnixFile(String path, IAccessor accessor, IFile.Flags flags) {
+	protected UnixFile(String path, IAccessor accessor, Flags flags) {
 	    super(path, accessor, flags);
 	}
 
 	/**
 	 * Create a UnixFile using information.
 	 */
-	protected UnixFile(UnixFileInfo info) {
-	    super(info, IFile.Flags.READONLY);
+	protected UnixFile(UnixFileInfo info, Flags flags) {
+	    super(info, flags);
 	}
 
 	@Override

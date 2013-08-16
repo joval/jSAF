@@ -117,6 +117,15 @@ public interface IFilesystem extends ILoggable {
     IFile getFile(String path) throws IOException;
 
     /**
+     * Retrieve an IFile with the specified flags.
+     *
+     * @arg flags IFile.READONLY, IFile.READWRITE, IFile.READVOLATILE, IFile.NOCACHE
+     *
+     * @since 1.0
+     */
+    IFile getFile(String path, IFile.Flags flags) throws IOException;
+
+    /**
      * Retrieve multiple IFiles at once, all with default (IFile.READONLY) access. The order of the files corresponds to the
      * order of the path argument array.
      *
@@ -125,13 +134,14 @@ public interface IFilesystem extends ILoggable {
     IFile[] getFiles(String[] paths) throws IOException;
 
     /**
-     * Retrieve an IFile with the specified flags.
+     * Retrieve multiple IFiles at once, all with the specified access. The order of the files corresponds to the
+     * order of the path argument array.
      *
      * @arg flags IFile.READONLY, IFile.READWRITE, IFile.READVOLATILE, IFile.NOCACHE
      *
-     * @since 1.0
+     * @since 1.1
      */
-    IFile getFile(String path, IFile.Flags flags) throws IOException;
+    IFile[] getFiles(String[] paths, IFile.Flags flags) throws IOException;
 
     /**
      * Get random access to an IFile.

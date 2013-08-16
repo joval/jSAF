@@ -60,6 +60,12 @@ import jsaf.util.StringTools;
  * @version %I% %G%
  */
 public abstract class AbstractFilesystem implements IFilesystem {
+    /**
+     * The maximum number of candidate pathnames that will be processed by guessParent before it simply returns the
+     * single parent of all the candidates.
+     */
+    public static int MAX_GUESSES = 100;
+
     protected boolean autoExpand = true;
     protected IProperty props;
     protected ISession session;
@@ -197,12 +203,37 @@ public abstract class AbstractFilesystem implements IFilesystem {
 			    pattern = Pattern.compile(prefix.toString());
 			    break;
 			}
-			for (IFile f : base.listFiles(pattern)) {
-			    if (f.isDirectory()) {
-				candidates.add(f.getPath());
+			//
+			// For fastest performance, we list the children of base and construct paths to match
+			// against the pattern BEFORE determining which of them are directories.
+			//
+			String basename = base.getPath().endsWith(DELIM) ? base.getPath() : base.getPath() + DELIM;
+			for (String fname : base.list()) {
+			    String pathname = basename + fname;
+			    if (pattern.matcher(pathname).find()) {
+				candidates.add(pathname);
 			    }
 			}
-			return candidates.toArray(new String[candidates.size()]);
+			int count = candidates.size();
+			logger.trace(Message.STATUS_FS_SEARCH_GUESS, count, base.getPath(), pattern.pattern());
+			if (count == 0) {
+			    return new String[0];
+			} else if (count < MAX_GUESSES) {
+			    logger.debug(Message.STATUS_FS_SEARCH_GUESS_OVERFLOW, count, base.getPath(), pattern.pattern());
+			    List<String> result = new ArrayList<String>();
+			    for (IFile f : getFiles(candidates.toArray(new String[candidates.size()]))) {
+				if (f.isDirectory()) {
+				    result.add(f.getPath());
+				}
+			    }
+			    return result.toArray(new String[result.size()]);
+			} else {
+			    //
+			    // Performing a lot of searches ends up adding too much overhead, so just search
+			    // the whole base directory
+			    //
+			    return new String[] {base.getPath()};
+			}
 		    } else {
 			return new String[0];
 		    }
@@ -680,11 +711,18 @@ public abstract class AbstractFilesystem implements IFilesystem {
 		return null;
 	    }
 	    String base = path.endsWith(DELIM) ? path : path + DELIM;
-	    String[] paths = new String[fnames.length];
+	    List<String> paths = new ArrayList<String>();
 	    for (int i=0; i < fnames.length; i++) {
-		paths[i] = base + fnames[i];
+		String path = base + fnames[i];
+		if (p == null) {
+		    if (p.matcher(path).find()) {
+			paths.add(path);
+		    }
+		} else {
+		    paths.add(path);
+		}
 	    }
-	    return getFiles(paths, flags);
+	    return getFiles(paths.toArray(new String[paths.size()]), flags);
 	}
 
 	public IFile getChild(String name) throws IOException {

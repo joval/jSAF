@@ -201,7 +201,6 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	    }
 	    sb.append(" | Print-FileInfo | Transfer-Encode");
 	    long timeout = session.getTimeout(IWindowsSession.Timeout.M) + (30 * paths.length);
-logger.info("DAS Timeout is " + timeout + "ms for " + paths.length + " files in getFiles()");
 	    String data = new String(Base64.decode(runspace.invoke(sb.toString(), timeout)), StringTools.UTF8);
 	    Map<String, IFile> fileMap = new HashMap<String, IFile>();
 	    Iterator<String> iter = Arrays.asList(data.split("\r\n")).iterator();

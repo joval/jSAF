@@ -110,7 +110,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
     public synchronized ISearchable<IFile> getSearcher() throws IOException {
 	if (searcher == null) {
 	    try {
-		searcher = new WindowsFileSearcher((IWindowsSession)session, runspace);
+		searcher = new WindowsFileSearcher((IWindowsSession)session, runspace, getSearchCache());
 	    } catch (IOException e) {
 		throw e;
 	    } catch (Exception e) {

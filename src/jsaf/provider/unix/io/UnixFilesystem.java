@@ -60,7 +60,7 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 
     public ISearchable<IFile> getSearcher() {
 	if (searcher == null) {
-	    searcher = new UnixFileSearcher((IUnixSession)session, getDriver());
+	    searcher = new UnixFileSearcher((IUnixSession)session, getDriver(), getSearchCache());
 	}
 	return searcher;
     }

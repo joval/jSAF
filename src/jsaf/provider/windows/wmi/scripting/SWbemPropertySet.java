@@ -4,7 +4,7 @@
 package jsaf.provider.windows.wmi.scripting;
 
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import com.jacob.com.Dispatch;
 import com.jacob.com.EnumVariant;
@@ -21,12 +21,12 @@ import jsaf.provider.windows.wmi.WmiException;
  */
 public class SWbemPropertySet implements ISWbemPropertySet {
     private Dispatch dispatch;
-    private Vector<ISWbemProperty> properties;
+    private ArrayList<ISWbemProperty> properties;
 
     SWbemPropertySet(Dispatch dispatch) {
 	this.dispatch = dispatch;
 	EnumVariant enumVariant = new EnumVariant(dispatch);
-	properties = new Vector<ISWbemProperty>();
+	properties = new ArrayList<ISWbemProperty>();
 	while(enumVariant.hasMoreElements()) {
 	    properties.add(new SWbemProperty(enumVariant.nextElement().toDispatch()));
 	}

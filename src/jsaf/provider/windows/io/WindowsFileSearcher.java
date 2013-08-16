@@ -56,13 +56,15 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
     private AbstractFilesystem fs;
     private IRunspace runspace;
     private LocLogger logger;
+    private Map<String, String[]> cache;
 
-    public WindowsFileSearcher(IWindowsSession session, IRunspace runspace) throws Exception {
+    public WindowsFileSearcher(IWindowsSession session, IRunspace runspace, Map<String, String[]> cache) throws Exception {
 	this.session = session;
 	logger = session.getLogger();
 	this.runspace = runspace;
 	runspace.loadModule(getClass().getResourceAsStream("WindowsFileSearcher.psm1"));
 	fs = (AbstractFilesystem)session.getFilesystem(runspace.getView());
+	this.cache = cache;
     }
 
     // Implement ILogger
@@ -177,53 +179,64 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	String cmd = command.toString();
 
 	Collection<IFile> results = new ArrayList<IFile>();
-	if (fs.getFile(from).isDirectory()) {
-	    logger.debug(Message.STATUS_FS_SEARCH_START, cmd);
-	    File localTemp = null;
-	    IFile remoteTemp = null;
-	    InputStream in = null;
-	    Collection<String> paths = new ArrayList<String>();
-	    try {
-		//
-		// Run the command on the remote host, storing the results in a temporary file, then tranfer the file
-		// locally and read it.
-		//
-		remoteTemp = execToFile(cmd);
-		if (session.getWorkspace() == null || ISession.LOCALHOST.equals(session.getHostname())) {
-		    in = new GZIPInputStream(remoteTemp.getInputStream());
-		} else {
-		    localTemp = File.createTempFile("search", null, session.getWorkspace());
-		    StreamTool.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
-		    in = new GZIPInputStream(new FileInputStream(localTemp));
-		}
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in, StreamTool.detectEncoding(in)));
-		Iterator<String> iter = new ReaderIterator(reader);
-		IFile file = null;
-		while ((file = createObject(iter)) != null) {
-		    String path = file.getPath();
-		    logger.debug(Message.STATUS_FS_SEARCH_MATCH, path);
-		    results.add(file);
-		    paths.add(path);
-		}
-		logger.debug(Message.STATUS_FS_SEARCH_DONE, results.size(), cmd);
-	    } catch (Exception e) {
-		logger.warn(Message.ERROR_FS_SEARCH);
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    } finally {
-		if (in != null) {
-		    try {
-			in.close();
-		    } catch (IOException e) {
+	if (cache.containsKey(cmd.toUpperCase())) {
+	    logger.debug(Message.STATUS_FS_SEARCH_CACHED, cmd);
+	    for (String path : cache.get(cmd)) {
+		results.add(fs.getFile(path));
+	    }
+	} else {
+	    if (fs.getFile(from).isDirectory()) {
+		logger.debug(Message.STATUS_FS_SEARCH_START, cmd);
+		File localTemp = null;
+		IFile remoteTemp = null;
+		InputStream in = null;
+		Collection<String> paths = new ArrayList<String>();
+		try {
+		    //
+		    // Run the command on the remote host, storing the results in a temporary file, then tranfer the file
+		    // locally and read it.
+		    //
+		    remoteTemp = execToFile(cmd);
+		    if (session.getWorkspace() == null || ISession.LOCALHOST.equals(session.getHostname())) {
+			in = new GZIPInputStream(remoteTemp.getInputStream());
+		    } else {
+			localTemp = File.createTempFile("search", null, session.getWorkspace());
+			StreamTool.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
+			in = new GZIPInputStream(new FileInputStream(localTemp));
 		    }
-		}
-		if (localTemp != null) {
-		    localTemp.delete();
-		}
-		if (remoteTemp != null) {
-		    try {
-			remoteTemp.delete();
-		    } catch (Exception e) {
-			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		    BufferedReader reader = new BufferedReader(new InputStreamReader(in, StreamTool.detectEncoding(in)));
+		    Iterator<String> iter = new ReaderIterator(reader);
+		    IFile file = null;
+		    while ((file = createObject(iter)) != null) {
+			String path = file.getPath();
+			logger.debug(Message.STATUS_FS_SEARCH_MATCH, path);
+			results.add(file);
+			paths.add(path);
+		    }
+		    //
+		    // Store results in the cache for future use; NB: Windows search command key is not case-sensitive.
+		    //
+		    cache.put(cmd.toUpperCase(), paths.toArray(new String[paths.size()]));
+		    logger.debug(Message.STATUS_FS_SEARCH_DONE, results.size(), cmd);
+		} catch (Exception e) {
+		    logger.warn(Message.ERROR_FS_SEARCH);
+		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		} finally {
+		    if (in != null) {
+			try {
+			    in.close();
+			} catch (IOException e) {
+			}
+		    }
+		    if (localTemp != null) {
+			localTemp.delete();
+		    }
+		    if (remoteTemp != null) {
+			try {
+			    remoteTemp.delete();
+			} catch (Exception e) {
+			    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+			}
 		    }
 		}
 	    }
@@ -265,7 +278,7 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	}
 	tempPath = tempPath + "find." + unique + ".out";
 	tempPath = session.getEnvironment().expand(tempPath);
-	logger.debug(Message.STATUS_FS_SEARCH_CACHE_TEMP, tempPath);
+	logger.debug(Message.STATUS_FS_SEARCH_TEMP, tempPath);
 
 	String cmd = new StringBuffer(command).append(" | Out-File ").append(tempPath).toString();
 
@@ -365,7 +378,7 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 		    Thread.sleep(15000);
 		    IFile f = fs.getFile(path, IFile.Flags.READVOLATILE);
 		    if (f.exists()) {
-			logger.info(Message.STATUS_FS_SEARCH_CACHE_PROGRESS, f.length());
+			logger.info(Message.STATUS_FS_SEARCH_PROGRESS, f.length());
 		    } else {
 			cancel = true;
 		    }

@@ -32,12 +32,14 @@ public class UnixFileSearcher implements ISearchable<IFile>, ILoggable {
     private IUnixFilesystemDriver driver;
     private AbstractFilesystem fs;
     private LocLogger logger;
+    private Map<String, String[]> cache;
 
-    public UnixFileSearcher(IUnixSession session, IUnixFilesystemDriver driver) {
+    public UnixFileSearcher(IUnixSession session, IUnixFilesystemDriver driver, Map<String, String[]> cache) {
 	this.session = session;
 	this.driver = driver;
 	logger = session.getLogger();
 	fs = (AbstractFilesystem)session.getFilesystem();
+	this.cache = cache;
     }
 
     // Implement ILogger
@@ -71,20 +73,30 @@ public class UnixFileSearcher implements ISearchable<IFile>, ILoggable {
 
     public Collection<IFile> search(List<ISearchable.ICondition> conditions) throws Exception {
 	String cmd = driver.getFindCommand(conditions);
-	logger.debug(Message.STATUS_FS_SEARCH_START, cmd);
 	Collection<IFile> results = new ArrayList<IFile>();
-	try {
-	    Iterator<String> iter = SafeCLI.manyLines(cmd, null, session);
-	    IFile file = null;
-	    while ((file = createObject(iter)) != null) {
-		String path = file.getPath();
-		logger.debug(Message.STATUS_FS_SEARCH_MATCH, path);
-		results.add(file);
+	if (cache.containsKey(cmd)) {
+	    logger.debug(Message.STATUS_FS_SEARCH_CACHED, cmd);
+	    for (String path : cache.get(cmd)) {
+		results.add(fs.getFile(path));
 	    }
-	    logger.debug(Message.STATUS_FS_SEARCH_DONE, results.size(), cmd);
-	} catch (Exception e) {
-	    logger.warn(Message.ERROR_FS_SEARCH);
-	    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	} else {
+	    logger.debug(Message.STATUS_FS_SEARCH_START, cmd);
+	    try {
+		List<String> paths = new ArrayList<String>();
+		Iterator<String> iter = SafeCLI.manyLines(cmd, null, session);
+		IFile file = null;
+		while ((file = createObject(iter)) != null) {
+		    String path = file.getPath();
+		    logger.debug(Message.STATUS_FS_SEARCH_MATCH, path);
+		    paths.add(path);
+		    results.add(file);
+		}
+		cache.put(cmd, paths.toArray(new String[paths.size()]));
+		logger.debug(Message.STATUS_FS_SEARCH_DONE, results.size(), cmd);
+	    } catch (Exception e) {
+		logger.warn(Message.ERROR_FS_SEARCH);
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
 	}
 	return results;
     }

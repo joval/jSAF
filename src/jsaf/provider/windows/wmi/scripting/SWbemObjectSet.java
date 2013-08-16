@@ -3,8 +3,8 @@
 
 package jsaf.provider.windows.wmi.scripting;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
 
 import com.jacob.com.Dispatch;
 import com.jacob.com.EnumVariant;
@@ -21,12 +21,12 @@ import jsaf.provider.windows.wmi.WmiException;
  */
 public class SWbemObjectSet implements ISWbemObjectSet {
     Dispatch dispatch;
-    Vector<ISWbemObject> objects;
+    ArrayList<ISWbemObject> objects;
 
     public SWbemObjectSet(Dispatch dispatch) {
 	this.dispatch = dispatch;
 	EnumVariant enumVariant = new EnumVariant(dispatch);
-	objects = new Vector<ISWbemObject>();
+	objects = new ArrayList<ISWbemObject>();
 	try {
 	    while(enumVariant.hasMoreElements()) {
 		objects.add(new SWbemObject(enumVariant.nextElement().toDispatch()));

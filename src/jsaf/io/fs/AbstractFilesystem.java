@@ -85,13 +85,16 @@ public abstract class AbstractFilesystem implements IFilesystem {
 
 	if (session.getProperties().getBooleanProperty(IFilesystem.PROP_CACHE_JDBM)) {
 	    try {
-		cache = new JDBMCache(dbkey);
+		fscache = new JDBMCache<IFile>(dbkey, 10000, getFileSerializer(this));
+		searchcache = new JDBMCache<String[]>(dbkey + "_searches", 5, null);
 	    } catch (IOException e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		cache = new HashMap<String, IFile>();
+		fscache = new HashMap<String, IFile>();
+		searchcache = new HashMap<String, String[]>();
 	    }
 	} else {
-	    cache = new HashMap<String, IFile>();
+	    fscache = new HashMap<String, IFile>();
+	    searchcache = new HashMap<String, String[]>();
 	}
     }
 
@@ -104,14 +107,22 @@ public abstract class AbstractFilesystem implements IFilesystem {
     }
 
     public void dispose() {
-	if (cache instanceof JDBMCache) {
+	if (fscache instanceof JDBMCache) {
 	    try {
-		((JDBMCache)cache).dispose();
+		((JDBMCache)fscache).dispose();
 	    } catch (Exception e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
 	}
-	cache = null;
+	fscache = null;
+	if (searchcache instanceof JDBMCache) {
+	    try {
+		((JDBMCache)searchcache).dispose();
+	    } catch (Exception e) {
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
+	}
+	searchcache = null;
     }
 
     /**
@@ -266,6 +277,10 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	return createFileFromInfo(info, IFile.Flags.READONLY);
     }
 
+    protected final Map<String, String[]> getSearchCache() {
+	return searchcache;
+    }
+
     protected IFile createFileFromInfo(IFileMetadata info, IFile.Flags flags) {
 	return new DefaultFile(info, flags);
     }
@@ -349,22 +364,24 @@ public abstract class AbstractFilesystem implements IFilesystem {
     /**
      * A JDBM-backed implementation of the cache Map.
      */
-    public class JDBMCache implements Map<String, IFile> {
+    public class JDBMCache<T> implements Map<String, T> {
 	private RecordManager recman;
 	private String dbkey;
 	private BTree tree;
 	private BTree index;
 	private int writes = 0;
+	private int commitThreshold = 1000;
 
-	JDBMCache(String dbkey) throws IOException {
+	JDBMCache(String dbkey, int commitThreshold, Serializer serializer) throws IOException {
 	    this.dbkey = dbkey;
+	    this.commitThreshold = commitThreshold;
 	    cleanFiles();
 	    String basename = new File(session.getWorkspace(), dbkey).toString();
 	    Properties props = new Properties();
 	    props.setProperty(RecordManagerOptions.CACHE_TYPE, RecordManagerOptions.NORMAL_CACHE);
 	    props.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "true");
 	    recman = RecordManagerFactory.createRecordManager(basename, props);
-	    tree = BTree.createInstance(recman, new StringComparator(), null, getFileSerializer(AbstractFilesystem.this));
+	    tree = BTree.createInstance(recman, new StringComparator(), null, serializer);
 	    index = BTree.createInstance(recman, new StringComparator());
 	}
 
@@ -404,9 +421,11 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    return false;
 	}
 
-	public IFile get(Object key) {
+	public T get(Object key) {
 	    try {
-		return (IFile)tree.find(key);
+		@SuppressWarnings("unchecked")
+		T result = (T)tree.find(key);
+		return result;
 	    } catch (IOException e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
@@ -417,21 +436,22 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    return size() == 0;
 	}
 
-	public IFile put(String key, IFile value) {
+	public T put(String key, T value) {
 	    try {
-		IFile f = (IFile)tree.insert(key, value, true);
+		@SuppressWarnings("unchecked")
+		T result = (T)tree.insert(key, value, true);
 		index.insert(key, "", false);
 		wrote();
-		return f;
+		return result;
 	    } catch (IOException e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
 	    return null;
 	}
 
-	public void putAll(Map<? extends String, ? extends IFile> m) {
+	public void putAll(Map<? extends String, ? extends T> m) {
 	    try {
-		for (Map.Entry<? extends String, ? extends IFile> entry : m.entrySet()) {
+		for (Map.Entry<? extends String, ? extends T> entry : m.entrySet()) {
 		    tree.insert(entry.getKey(), entry.getValue(), true);
 		    index.insert(entry.getKey(), "", true);
 		}
@@ -441,12 +461,13 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    }
 	}
 
-	public IFile remove(Object key) {
+	public T remove(Object key) {
 	    try {
-		IFile f = (IFile)tree.remove(key);
+		@SuppressWarnings("unchecked")
+		T result = (T)tree.remove(key);
 		index.remove(key);
 		wrote();
-		return f;
+		return result;
 	    } catch (IOException e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
@@ -461,7 +482,7 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    throw new UnsupportedOperationException();
 	}
 
-	public Set<Map.Entry<String, IFile>> entrySet() {
+	public Set<Map.Entry<String, T>> entrySet() {
 	    throw new UnsupportedOperationException();
 	}
 
@@ -469,7 +490,7 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    throw new UnsupportedOperationException();
 	}
 
-	public Collection<IFile> values() {
+	public Collection<T> values() {
 	    throw new UnsupportedOperationException();
 	}
 
@@ -489,7 +510,7 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	 * Register performance of a write operation to the cache.  This triggers the occasional commit to disk.
 	 */
 	private void wrote() throws IOException {
-	    if (++writes % 10000 == 0) {
+	    if (++writes % commitThreshold == 0) {
 		recman.commit();
 		writes = 0;
 	    }
@@ -915,7 +936,8 @@ public abstract class AbstractFilesystem implements IFilesystem {
 
     // Private
 
-    private Map<String, IFile> cache;
+    private Map<String, IFile> fscache;
+    private Map<String, String[]> searchcache;
 
     /**
      * Attempt to retrieve an IFile from the cache.
@@ -923,7 +945,7 @@ public abstract class AbstractFilesystem implements IFilesystem {
      * TBD: expire objects that get too old
      */
     private IFile getCache(String path) throws NoSuchElementException {
-	IFile f = cache.get(path);
+	IFile f = fscache.get(path);
 	if (f == null) {
 	    throw new NoSuchElementException(path);
 	} else {
@@ -942,9 +964,9 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	//
 	// TBD: see if the data is newer than what's already in the cache?
 	//
-	if (!cache.containsKey(path)) {
+	if (!fscache.containsKey(path)) {
 	    logger.trace(Message.STATUS_FS_CACHE_STORE, path);
-	    cache.put(path, file);
+	    fscache.put(path, file);
 	}
     }
 }

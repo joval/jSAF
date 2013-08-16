@@ -9,7 +9,7 @@ using Microsoft.Win32.SafeHandles;
 namespace jSAF.File {
     public class Probe {
 	[Flags]
-	public enum FileType : uint {
+	enum FileType : uint {
 	    FileTypeUnknown	= 0x0000,
 	    FileTypeDisk	= 0x0001,
 	    FileTypeChar	= 0x0002,
@@ -18,7 +18,7 @@ namespace jSAF.File {
 	}
 
 	[Flags]
-	public enum EFileAccess : uint {
+	enum EFileAccess : uint {
 	    AccessSystemSecurity	= 0x1000000,
 	    MaximumAllowed		= 0x2000000,
 
@@ -65,7 +65,7 @@ namespace jSAF.File {
 	}
 
 	[Flags]
-	public enum EFileShare : uint {
+	enum EFileShare : uint {
 	    None	= 0x00000000,
 	    Read	= 0x00000001,
 	    Write	= 0x00000002,
@@ -73,7 +73,7 @@ namespace jSAF.File {
 	}
 
 	[Flags]
-	public enum ECreationDisposition : uint {
+	enum ECreationDisposition : uint {
 	    New = 1,
 	    CreateAlways = 2,
 	    OpenExisting = 3,
@@ -82,7 +82,7 @@ namespace jSAF.File {
 	}
 
 	[Flags]
-	public enum EFileAttributes : uint {
+	enum EFileAttributes : uint {
 	    Readonly		= 0x00000001,
 	    Hidden		= 0x00000002,
 	    System		= 0x00000004,
@@ -111,15 +111,15 @@ namespace jSAF.File {
 	}
 
 	[DllImport("kernel32.dll")]
-	public extern static int GetLastError();
+	extern static int GetLastError();
 
 	[DllImport("kernel32.dll", SetLastError=true, CharSet=CharSet.Auto)]
-	public extern static SafeFileHandle CreateFile
+	extern static SafeFileHandle CreateFile
 		(String lpFileName, EFileAccess dwDesiredAccess, EFileShare dwShareMode, IntPtr lpSecurityAttributes,
 		 ECreationDisposition dwCreationDisposition, EFileAttributes dwFlagsAndAttributes, IntPtr hTemplateFile);
 
 	[DllImport("kernel32.dll")]
-	public extern static FileType GetFileType(SafeFileHandle hFile);
+	extern static FileType GetFileType(SafeFileHandle hFile);
 
 	[DllImport("kernel32.dll", SetLastError=true, CharSet=CharSet.Auto)]
 	static extern uint GetLongPathName(String ShortPath, StringBuilder sb, int buffer);
@@ -134,12 +134,12 @@ namespace jSAF.File {
 	public static int GetFileType(String Path) {
 	    IntPtr hSecurityAttributes = IntPtr.Zero;
 	    IntPtr hTemplate = IntPtr.Zero;
-	    SafeFileHandle hFile = CreateFile(Path, EFileAccess.FILE_GENERIC_READ, EFileShare.Read, hSecurityAttributes,
+	    SafeFileHandle hFile = CreateFile(Path, 0, EFileShare.Read, hSecurityAttributes,
 					      ECreationDisposition.OpenExisting, EFileAttributes.Normal, hTemplate);
-	    FileType type = GetFileType(hFile);
 	    if (hFile.IsInvalid) {
 		throw new System.ComponentModel.Win32Exception(GetLastError());
 	    }
+	    FileType type = GetFileType(hFile);
 	    hFile.Close();
 	    return (int)type;
 	}

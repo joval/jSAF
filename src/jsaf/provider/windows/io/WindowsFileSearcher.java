@@ -181,7 +181,7 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	Collection<IFile> results = new ArrayList<IFile>();
 	if (cache.containsKey(cmd.toUpperCase())) {
 	    logger.debug(Message.STATUS_FS_SEARCH_CACHED, cmd);
-	    for (String path : cache.get(cmd)) {
+	    for (String path : cache.get(cmd.toUpperCase())) {
 		results.add(fs.getFile(path));
 	    }
 	} else {

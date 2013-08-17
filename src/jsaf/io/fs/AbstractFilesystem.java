@@ -221,7 +221,7 @@ public abstract class AbstractFilesystem implements IFilesystem {
 			String basename = base.getPath().endsWith(DELIM) ? base.getPath() : base.getPath() + DELIM;
 			for (String fname : base.list()) {
 			    String pathname = basename + fname;
-			    if (pattern.matcher(pathname).find()) {
+			    if (pattern.matcher(fname).find()) {
 				candidates.add(pathname);
 			    }
 			}

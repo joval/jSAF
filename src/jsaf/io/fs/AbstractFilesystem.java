@@ -85,7 +85,7 @@ public abstract class AbstractFilesystem implements IFilesystem {
 
 	if (session.getProperties().getBooleanProperty(IFilesystem.PROP_CACHE_JDBM)) {
 	    try {
-		fscache = new JDBMCache<IFile>(dbkey, 10000, getFileSerializer(this));
+		fscache = new JDBMCache<IFile>(dbkey + "_files", 10000, getFileSerializer(this));
 		searchcache = new JDBMCache<String[]>(dbkey + "_searches", 5, null);
 	    } catch (IOException e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);

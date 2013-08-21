@@ -269,7 +269,7 @@ public class StringTools {
      */
     public static String regexPosix2Java(String pcre) {
 	String javaExpression = pcre;
-	javaExpression = javaExpression.replaceAll("(?<!(\\.|\\?|\\]|\\\\p))\\{(.*?)\\}", "\\\\{$2\\\\}");
+	javaExpression = javaExpression.replaceAll("(?<!(\\.|\\?|\\]|\\\\|\\\\p))\\{(.*?)(?<!\\\\)\\}", "\\\\{$2\\\\}");
 
 	javaExpression = javaExpression.replace("[:digit:]", "\\p{Digit}");
 	javaExpression = javaExpression.replace("[:alnum:]", "\\p{Alnum}");

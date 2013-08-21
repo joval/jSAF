@@ -317,17 +317,24 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	return getFiles(paths, IFile.Flags.READONLY);
     }
 
-    public IFile[] getFiles(String[] paths, IFile.Flags flags) throws IOException {
-	IFile[] files = new IFile[paths.length];
-	for (int i=0; i < paths.length; i++) {
-	    files[i] = getFile(paths[i], flags);
-	}
-	return files;
-    }
-
     public final IFile getFile(String path, IFile.Flags flags) throws IOException {
 	if (autoExpand) {
 	    path = env.expand(path);
+	}
+	if (path.endsWith(DELIM)) {
+	    //
+	    // Only mount paths are allowed to end in the delimiter
+	    //
+	    boolean isMount = false;
+	    for (IMount mount : getMounts()) {
+		if (path.equals(mount.getPath())) {
+		    isMount = true;
+		    break;
+		}
+	    }
+	    if (!isMount) {
+		path = path.substring(0, path.length() - DELIM.length());
+	    }
 	}
 	switch(flags) {
 	  case READONLY:
@@ -340,6 +347,14 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	  default:
 	    return getPlatformFile(path, flags);
 	}
+    }
+
+    public IFile[] getFiles(String[] paths, IFile.Flags flags) throws IOException {
+	IFile[] files = new IFile[paths.length];
+	for (int i=0; i < paths.length; i++) {
+	    files[i] = getFile(paths[i], flags);
+	}
+	return files;
     }
 
     public final IRandomAccess getRandomAccess(IFile file, String mode) throws IllegalArgumentException, IOException {

@@ -3,19 +3,6 @@
 
 package jsaf.provider.windows.system;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.Enumeration;
-import java.util.NoSuchElementException;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.regex.Matcher;
-
-import org.slf4j.cal10n.LocLogger;
-
-import jsaf.intf.system.IEnvironment;
-import jsaf.intf.system.IProcess;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.util.AbstractEnvironment;
 import jsaf.util.SafeCLI;

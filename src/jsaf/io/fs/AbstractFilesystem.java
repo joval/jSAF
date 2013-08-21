@@ -736,11 +736,11 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    for (int i=0; i < fnames.length; i++) {
 		String path = base + fnames[i];
 		if (p == null) {
+		    paths.add(path);
+		} else {
 		    if (p.matcher(path).find()) {
 			paths.add(path);
 		    }
-		} else {
-		    paths.add(path);
 		}
 	    }
 	    return getFiles(paths.toArray(new String[paths.size()]), flags);

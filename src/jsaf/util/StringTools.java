@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.NoSuchElementException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -153,6 +154,15 @@ public class StringTools {
     }
 
     /**
+     * Check for ASCII values between [0-9].
+     *
+     * @since 1.1
+     */
+    public static boolean isNumber(int c) {
+	return c >= 48 && c <= 57;
+    }
+
+    /**
      * Convert a char array to a byte array using UTF16 encoding.
      *
      * @since 1.0.1
@@ -225,19 +235,7 @@ public class StringTools {
 	for (int i=1; i < REGEX_STRS.length; i++) { // skip ESCAPE
 	    int ptr = -1;
 	    while ((ptr = s.indexOf(REGEX_STRS[i], ptr+1)) != -1) {
-		int escapes = 0, ptr2 = ptr;
-		while (ptr2-- > 0) {
-		    if ('\\' == s.charAt(ptr2)) {
-			escapes++;
-		    } else {
-			break;
-		    }
-		}
-
-		//
-		// If the regex character is preceded by an even number of escapes, then it is unescaped.
-		//
-		if (escapes % 2 == 0) {
+		if (!isEscaped(s, ptr)) {
 		    return true;
 		}
 	    }
@@ -246,16 +244,17 @@ public class StringTools {
     }
 
     /**
-     * Like java.util.regex.Pattern.compile, but converts Posix character classes.
+     * Compiles a Perl-style regular expression with POSIX-style character classes into a Java regular expression.
      *
      * @since 1.0.1
      */
     public static Pattern pattern(String regex) throws PatternSyntaxException {
-	return Pattern.compile(regexPosix2Java(regex));
+	return pattern(regex, 0);
     }
 
     /**
-     * Like java.util.regex.Pattern.compile, but converts Posix character classes.
+     * Compiles a Perl-style regular expression with POSIX-style character classes into a Java regular expression, with
+     * the specified flags (from java.util.regex.Pattern).
      *
      * @since 1.0.1
      */
@@ -270,6 +269,8 @@ public class StringTools {
      */
     public static String regexPosix2Java(String pcre) {
 	String javaExpression = pcre;
+	javaExpression = javaExpression.replaceAll("(?<!(\\.|\\?|\\]|\\\\p))\\{(.*?)\\}", "\\\\{$2\\\\}");
+
 	javaExpression = javaExpression.replace("[:digit:]", "\\p{Digit}");
 	javaExpression = javaExpression.replace("[:alnum:]", "\\p{Alnum}");
 	javaExpression = javaExpression.replace("[:alpha:]", "\\p{Alpha}");
@@ -308,6 +309,28 @@ public class StringTools {
     }
 
     // Private
+
+    /**
+     * Determine whether or not the character at ptr is preceeded by an even number of escape characters.
+     */
+    private static boolean isEscaped(String s, int ptr) {
+	int escapes = 0;
+	while (ptr-- > 0) {
+	    if ('\\' == s.charAt(ptr)) {
+		escapes++;
+	    } else {
+		break;
+	    }
+	}
+	//
+	// If the character is preceded by an even number of escapes, then it is unescaped.
+	//
+	if (escapes % 2 == 0) {
+	    return false;
+	}
+	return true;
+    }
+
 
     /**
      * Comparator implementation for Strings.

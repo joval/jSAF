@@ -8,7 +8,6 @@ import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.slf4j.cal10n.LocLogger;
 

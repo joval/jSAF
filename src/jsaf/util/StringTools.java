@@ -29,11 +29,46 @@ import jsaf.Message;
  */
 public class StringTools {
     /**
+     * Escape character (as a String).
+     *
+     * @since 1.1
+     */
+    public static final String ESCAPE = "\\";
+
+    /**
+     * Open curly-bracket. Declaring this as a constant makes it easier to use in code.
+     *
+     * @since 1.1
+     */
+    public static final String OPEN = "{";
+
+    /**
+     * Close curly-bracket. Declaring this as a constant makes it easier to use in code.
+     *
+     * @since 1.1
+     */
+    public static final String CLOSE = "}";
+
+    /**
+     * A regular expression pattern for a quantifier string (which would be enclosed by curly-brackets).
+     *
+     * @since 1.1
+     */
+    public static final String QUALIFIER_PATTERN = "[0-9]+,{0,1}[0-9]*";
+
+    /**
      * Array containing all the regex special characters.
      *
      * @since 1.0
      */
     public static final char[] REGEX_CHARS = {'\\', '^', '.', '$', '|', '(', ')', '[', ']', '{', '}', '*', '+', '?'};
+
+    /**
+     * String equivalents of REGEX_CHARS.
+     *
+     * @since 1.1
+     */
+    public static final String[] REGEX_STRS = {ESCAPE, "^", ".", "$", "|", "(", ")", "[", "]", OPEN, CLOSE, "*", "+", "?"};
 
     /**
      * An ascending Comparator for Strings.
@@ -268,22 +303,61 @@ public class StringTools {
      * @since 1.0
      */
     public static String regexPosix2Java(String pcre) {
-	String javaExpression = pcre;
-	javaExpression = javaExpression.replaceAll("(?<!(\\.|\\?|\\]|\\\\|\\\\p))\\{(.*?)(?<!\\\\)\\}", "\\\\{$2\\\\}");
+	//
+	// Escape all curly-brackets that are not:
+	// 1) part of a Java character class
+	// 2) part of a qualifier
+	// 3) already escaped
+	//
+	StringBuffer sb = new StringBuffer();
+	int start = 0;
+	int next = pcre.indexOf(OPEN);
+	if (next == -1) {
+	    sb.append(escapeUnescaped(pcre, CLOSE));
+	} else {
+	    do {
+		sb.append(escapeUnescaped(pcre.substring(start, next), CLOSE));
+		if (isEscaped(pcre, next)) {
+		    sb.append(OPEN);
+		    start = next+1;
+		} else {
+		    int p2 = pcre.indexOf(CLOSE, next);
+		    if (p2 == -1) {
+			sb.append(escapeUnescaped(pcre.substring(next), OPEN));
+			start = pcre.length();
+		    } else {
+			if (Pattern.matches(QUALIFIER_PATTERN, pcre.substring(next+1, p2))) {
+			    // Qualifier
+			    sb.append(pcre.substring(next, p2+1));
+			    start = p2+1;
+			} else if (next > 1 && !isEscaped(pcre,next-2) && pcre.substring(next-2,next).equals("\\p")) {
+			    // Java character class
+			    sb.append(pcre.substring(next, p2+1));
+			    start = p2+1;
+			} else {
+			    sb.append("\\").append(OPEN);
+			    start = next+1;
+			}
+		    } 
+		} 
+	    } while((next = pcre.indexOf(OPEN, start)) != -1);
+	    sb.append(escapeUnescaped(pcre.substring(start), CLOSE));
+	}
+	String jcre = sb.toString();
 
-	javaExpression = javaExpression.replace("[:digit:]", "\\p{Digit}");
-	javaExpression = javaExpression.replace("[:alnum:]", "\\p{Alnum}");
-	javaExpression = javaExpression.replace("[:alpha:]", "\\p{Alpha}");
-	javaExpression = javaExpression.replace("[:blank:]", "\\p{Blank}");
-	javaExpression = javaExpression.replace("[:xdigit:]","\\p{XDigit}");
-	javaExpression = javaExpression.replace("[:punct:]", "\\p{Punct}");
-	javaExpression = javaExpression.replace("[:print:]", "\\p{Print}");
-	javaExpression = javaExpression.replace("[:space:]", "\\p{Space}");
-	javaExpression = javaExpression.replace("[:graph:]", "\\p{Graph}");
-	javaExpression = javaExpression.replace("[:upper:]", "\\p{Upper}");
-	javaExpression = javaExpression.replace("[:lower:]", "\\p{Lower}");
-	javaExpression = javaExpression.replace("[:cntrl:]", "\\p{Cntrl}");
-	return javaExpression;
+	jcre = jcre.replace("[:digit:]", "\\p{Digit}");
+	jcre = jcre.replace("[:alnum:]", "\\p{Alnum}");
+	jcre = jcre.replace("[:alpha:]", "\\p{Alpha}");
+	jcre = jcre.replace("[:blank:]", "\\p{Blank}");
+	jcre = jcre.replace("[:xdigit:]","\\p{XDigit}");
+	jcre = jcre.replace("[:punct:]", "\\p{Punct}");
+	jcre = jcre.replace("[:print:]", "\\p{Print}");
+	jcre = jcre.replace("[:space:]", "\\p{Space}");
+	jcre = jcre.replace("[:graph:]", "\\p{Graph}");
+	jcre = jcre.replace("[:upper:]", "\\p{Upper}");
+	jcre = jcre.replace("[:lower:]", "\\p{Lower}");
+	jcre = jcre.replace("[:cntrl:]", "\\p{Cntrl}");
+	return jcre;
     }
 
     /**
@@ -358,8 +432,24 @@ public class StringTools {
 	}
     }
 
-    private static final String ESCAPE = "\\";
-    private static final String[] REGEX_STRS = {ESCAPE, "^", ".", "$", "|", "(", ")", "[", "]", "{", "}", "*", "+", "?"};
+    /**
+     * Escape instances of the pattern in s which are not already escaped.
+     */
+    private static String escapeUnescaped(String s, String pattern) {
+	StringBuffer sb = new StringBuffer();
+	int last = 0;
+	int next = 0;
+	while ((next = s.indexOf(pattern, last)) != -1) {
+	    sb.append(s.substring(last, next));
+	    if (isEscaped(s, next)) {
+		sb.append(pattern);
+	    } else {
+		sb.append("\\").append(pattern);
+	    }
+	    last = next + pattern.length();
+	}
+	return sb.append(s.substring(last)).toString();
+    }
 
     private static String safeEscape(Stack<String> delims, String s) {
 	if (delims.empty()) {

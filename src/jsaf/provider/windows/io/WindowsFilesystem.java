@@ -141,7 +141,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	    }
 	    if (filter == null) {
 		for (IMount mount : mounts) {
-		    logger.info(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+		    logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
 		}
 		return mounts;
 	    } else {
@@ -149,16 +149,16 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 		for (IMount mount : mounts) {
 		    if (filter.matcher(mount.getType()).find()) {
 			if (include) {
-			    logger.info(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+			    logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
 			    results.add(mount);
 			} else {
-			    logger.info(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
+			    logger.debug(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
 			}
 		    } else {
 			if (include) {
-			    logger.info(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
+			    logger.debug(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
 			} else {
-			    logger.info(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+			    logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
 			    results.add(mount);
 			}
 		    }

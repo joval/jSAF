@@ -43,7 +43,7 @@ public class ConnectionSpecification implements IConnectionSpecification {
     public ConnectionSpecification(Proxy proxy) throws IllegalArgumentException {
 	switch(proxy.type()) {
 	  case HTTP:
-	    type = Type.SOCKS_PROXY;
+	    type = Type.HTTP_PROXY;
 	    break;
 	  case SOCKS:
 	    type = Type.SOCKS_PROXY;

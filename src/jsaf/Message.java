@@ -181,5 +181,5 @@ public enum Message {
 	public String getMessage(MessageParameterObj mpo) throws MessageConveyorException {
 	    return getMessage(mpo.getKey(), mpo.getArgs());
 	}
-     }
+    }
 }

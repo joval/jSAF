@@ -4,6 +4,7 @@
 package jsaf.intf.ssh;
 
 import jsaf.intf.remote.IConnectionSpecification;
+import jsaf.intf.util.ILoggable;
 
 /**
  * An interface for a provider of certain SSH utility functions. This interface makes it possible for a jSAF provider
@@ -14,7 +15,7 @@ import jsaf.intf.remote.IConnectionSpecification;
  * @version %I% %G%
  * @since 1.1
  */
-public interface ISshTools {
+public interface ISshTools extends ILoggable {
     /**
      * Decrypts/decodes the provided encrypted bytes using the specified passphrase (or null if not protected by one).
      * Both the encrypted bytes and passphrase (if any) will be zeroed-out as part of this call.  The returned byte buffer

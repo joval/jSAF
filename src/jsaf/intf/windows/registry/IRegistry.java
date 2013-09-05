@@ -170,15 +170,6 @@ public interface IRegistry extends ILoggable {
     String ESCAPED_DELIM = "\\\\";
 
     /**
-     * Get Windows license data from the registry.
-     *
-     * @throws Exception if there was a problem retrieving the license information.
-     *
-     * @since 1.0
-     */
-    ILicenseData getLicenseData() throws Exception;
-
-    /**
      * Get an ISearchable for the registry.
      *
      * @since 1.0

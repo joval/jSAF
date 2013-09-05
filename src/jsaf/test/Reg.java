@@ -19,8 +19,6 @@ import jsaf.intf.windows.registry.IValue;
 import jsaf.intf.windows.registry.IBinaryValue;
 import jsaf.intf.windows.registry.IDwordValue;
 import jsaf.intf.windows.registry.IExpandStringValue;
-import jsaf.intf.windows.registry.ILicenseData;
-import jsaf.intf.windows.registry.ILicenseData.IEntry;
 import jsaf.intf.windows.registry.IMultiStringValue;
 import jsaf.intf.windows.registry.IStringValue;
 import jsaf.intf.windows.system.IWindowsSession;
@@ -31,18 +29,6 @@ public class Reg {
 
     public Reg(ISession session) {
 	this.session = (IWindowsSession)session;
-    }
-
-    public void testLicense() {
-	try {
-	    IRegistry r = session.getRegistry(IWindowsSession.View._64BIT);
-	    Map<String, IEntry> ht = r.getLicenseData().getEntries();
-	    for (IEntry entry : ht.values()) {
-		System.out.println(entry.toString());
-	    }
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
     }
 
     public void test(String keyName, String valueName) {

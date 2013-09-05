@@ -28,7 +28,6 @@ import jsaf.intf.util.ISearchable;
 import jsaf.intf.windows.powershell.IRunspace;
 import jsaf.intf.windows.registry.IExpandStringValue;
 import jsaf.intf.windows.registry.IKey;
-import jsaf.intf.windows.registry.ILicenseData;
 import jsaf.intf.windows.registry.IRegistry;
 import jsaf.intf.windows.registry.IStringValue;
 import jsaf.intf.windows.registry.IValue;
@@ -47,7 +46,6 @@ public class Registry implements IRegistry {
     protected IWindowsSession session;
     protected IRunspace runspace;
     protected RegistrySearcher searcher;
-    protected ILicenseData license = null;
     protected LocLogger logger;
     protected IKey hklm, hku, hkcu, hkcr, hkcc;
     protected Map<String, IKey> keyMap;
@@ -92,13 +90,6 @@ public class Registry implements IRegistry {
     }
 
     // Implement IRegistry
-
-    public ILicenseData getLicenseData() throws Exception {
-	if (license == null) {
-	    license = new LicenseData(this);
-	}
-	return license;
-    }
 
     public ISearchable<IKey> getSearcher() {
 	if (searcher == null) {

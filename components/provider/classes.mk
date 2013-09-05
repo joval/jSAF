@@ -37,7 +37,6 @@ CLASSES=\
 	jsaf.provider.windows.registry.DwordValue	\
 	jsaf.provider.windows.registry.ExpandStringValue	\
 	jsaf.provider.windows.registry.Key	\
-	jsaf.provider.windows.registry.LicenseData	\
 	jsaf.provider.windows.registry.MultiStringValue	\
 	jsaf.provider.windows.registry.NoneValue	\
 	jsaf.provider.windows.registry.QwordValue	\

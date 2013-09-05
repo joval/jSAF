@@ -49,7 +49,6 @@ CLASSES=\
 	jsaf.intf.windows.registry.IDwordValue	\
 	jsaf.intf.windows.registry.IExpandStringValue	\
 	jsaf.intf.windows.registry.IKey	\
-	jsaf.intf.windows.registry.ILicenseData	\
 	jsaf.intf.windows.registry.IMultiStringValue	\
 	jsaf.intf.windows.registry.INoneValue	\
 	jsaf.intf.windows.registry.IQwordValue	\

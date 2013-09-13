@@ -38,7 +38,7 @@ public class WmiProvider implements IWmiProvider {
     public boolean register() {
 	try {
 	    if (locator == null) {
-		logger.info(Message.STATUS_WMI_CONNECT);
+		logger.debug(Message.STATUS_WMI_CONNECT);
 		locator = new ActiveXComponent("WbemScripting.SWbemLocator");
 	    }
 	    return true;
@@ -50,7 +50,7 @@ public class WmiProvider implements IWmiProvider {
 
     public void deregister() {
 	if (locator != null) {
-	    logger.info(Message.STATUS_WMI_DISCONNECT);
+	    logger.debug(Message.STATUS_WMI_DISCONNECT);
 	    locator.safeRelease();
 	    locator = null;
 	}

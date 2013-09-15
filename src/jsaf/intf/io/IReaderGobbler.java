@@ -19,4 +19,17 @@ public interface IReaderGobbler {
      * @since 1.0
      */
     void gobble(IReader reader) throws IOException;
+
+    /**
+     * Gobbler to /dev/null
+     *
+     * @since 1.1
+     */
+    IReaderGobbler DEVNULL = new IReaderGobbler() {
+	public void gobble(IReader reader) throws IOException {
+	    String line = null;
+	    while((line = reader.readLine()) != null) {
+	    }
+	}
+    };
 } 

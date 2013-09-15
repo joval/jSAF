@@ -227,7 +227,7 @@ public class SafeCLI {
 	FileMonitor mon = new FileMonitor(fs, tempPath);
 	JSAFSystem.getTimer().schedule(mon, 15000, 15000);
 	try {
-	    exec(cmd, null, null, session, session.getTimeout(ISession.Timeout.XL), new DevNull(), new ErrorLogger(session));
+	    exec(cmd, null, null, session, session.getTimeout(ISession.Timeout.XL), IReaderGobbler.DEVNULL, new ErrorLogger(session));
 	} finally {
 	    mon.cancel();
 	    JSAFSystem.getTimer().purge();
@@ -393,7 +393,7 @@ public class SafeCLI {
 		reader.setLogger(session.getLogger());
 		if (errorGobbler == null) {
 		    long timeout = session.getTimeout(ISession.Timeout.XL);
-		    new GobblerThread(new DevNull()).start(PerishableReader.newInstance(p.getErrorStream(), timeout));
+		    new GobblerThread(IReaderGobbler.DEVNULL).start(PerishableReader.newInstance(p.getErrorStream(), timeout));
 		} else {
 		    new GobblerThread(errorGobbler).start(PerishableReader.newInstance(p.getErrorStream(), readTimeout));
 		}
@@ -496,18 +496,6 @@ public class SafeCLI {
 	    try {
 		gobbler.gobble(reader);
 	    } catch (IOException e) {
-	    }
-	}
-    }
-
-    static class DevNull implements IReaderGobbler {
-	DevNull() {}
-
-	// Implement IReaderGobbler
-
-	public void gobble(IReader reader) throws IOException {
-	    String line = null;
-	    while((line = reader.readLine()) != null) {
 	    }
 	}
     }

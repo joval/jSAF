@@ -25,7 +25,7 @@ public interface IReaderGobbler {
      *
      * @since 1.1
      */
-    IReaderGobbler DEVNULL = new IReaderGobbler() {
+    IReaderGobbler DevNull = new IReaderGobbler() {
 	public void gobble(IReader reader) throws IOException {
 	    String line = null;
 	    while((line = reader.readLine()) != null) {

@@ -28,6 +28,7 @@ import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFilesystem;
 import jsaf.intf.io.IReader;
 import jsaf.intf.io.IReaderGobbler;
+import static jsaf.intf.io.IReaderGobbler.DevNull;
 import jsaf.intf.system.IProcess;
 import jsaf.intf.system.ISession;
 import jsaf.intf.unix.system.IUnixSession;
@@ -203,7 +204,6 @@ public class SafeCLI {
      * @since 1.0.1
      */
     public static final Iterator<String> manyLines(String cmd, String[] env, IUnixSession session) throws Exception {
-
 	//
 	// Modify the command to redirect output to a temp file (compressed)
 	//
@@ -227,7 +227,7 @@ public class SafeCLI {
 	FileMonitor mon = new FileMonitor(fs, tempPath);
 	JSAFSystem.getTimer().schedule(mon, 15000, 15000);
 	try {
-	    exec(cmd, null, null, session, session.getTimeout(ISession.Timeout.XL), IReaderGobbler.DEVNULL, new ErrorLogger(session));
+	    exec(cmd, null, null, session, session.getTimeout(ISession.Timeout.XL), DevNull, new ErrorLogger(session));
 	} finally {
 	    mon.cancel();
 	    JSAFSystem.getTimer().purge();
@@ -393,7 +393,7 @@ public class SafeCLI {
 		reader.setLogger(session.getLogger());
 		if (errorGobbler == null) {
 		    long timeout = session.getTimeout(ISession.Timeout.XL);
-		    new GobblerThread(IReaderGobbler.DEVNULL).start(PerishableReader.newInstance(p.getErrorStream(), timeout));
+		    new GobblerThread(DevNull).start(PerishableReader.newInstance(p.getErrorStream(), timeout));
 		} else {
 		    new GobblerThread(errorGobbler).start(PerishableReader.newInstance(p.getErrorStream(), readTimeout));
 		}

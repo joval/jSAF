@@ -1,9 +1,11 @@
 # Copyright (C) 2013 jOVAL.org.  All rights reserved.
 # This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 #
-if ($args.length -eq 2) {
-    [String]$Source = $args[0]
-    [String]$Output = $args[1]
+function Compile {
+    param (
+      [String]$Source = $(throw "Mandatory parameter -Source missing."),
+      [String]$Output = $(throw "Mandatory parameter -Output missing.")
+    )
 
     $Params = New-Object System.CodeDom.Compiler.CompilerParameters
     $Params.ReferencedAssemblies.Add("System.dll");
@@ -39,7 +41,6 @@ if ($args.length -eq 2) {
 	    Write-Error $_.ToString()
 	}
     }
-} else {
-    Write-Error "Invalid arguments."
 }
 
+Compile -Source "..\..\src\jsaf\provider\windows\io\WindowsFilesystem.cs" -Output "rsrc\assembly\WindowsFilesystem.dll"

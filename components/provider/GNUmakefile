@@ -24,6 +24,12 @@ all: $(PROVIDER_LIB)
 $(PROVIDER_LIB): classes resources
 	$(JAR) cvf $@ -C $(BUILD)/ .
 
+native:
+	cat CSharpCompiler.ps1 | powershell -File -
+
+native-clean:
+	rm -f $(RSRC)/assembly/WindowsFilesystem.dll
+
 test:
 	$(JRE) -Djava.library.path=$(LIBDIR) -classpath $(RUNTIMECP) jsaf.test.Default test.properties
 

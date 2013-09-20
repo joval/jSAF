@@ -16,12 +16,11 @@ import java.util.NoSuchElementException;
  */
 public interface ISupportInformation {
     /**
-     * The JunOS command string for retrieving the set-style device configuration (i.e., a list of commands that would
-     * configure the device to match its current configuration state).
+     * The JunOS command string for retrieving the XML device configuration.
      *
-     * @since 1.0
+     * @since 1.1
      */
-    String GLOBAL = "show configuration | display set";
+    String XML_CONFIG = "show configuration | display xml";
 
     /**
      * A list of subcommands for which information is available.

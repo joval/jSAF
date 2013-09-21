@@ -20,7 +20,7 @@ public class Timestamp {
     private final static SimpleDateFormat WMIDATEFORMAT = new SimpleDateFormat("yyyyMMddHHmmssZ");
 
     /**
-     * Given a Java timestamp, return a Windows-style decimal timestamp, converted to a String.  Note that the last 4
+     * Given a Java timestamp, return a Windows-style timestamp, converted to a String.  Note that the last 4
      * digits will always be 0, as there is only enough information to express the time in milliseconds.
      */
     public static String toWindowsTimestamp(long javaTS) {
@@ -30,7 +30,7 @@ public class Timestamp {
     }
 
     /**
-     * Given a WBEM timestamp of the form yyyyMMddHHmmss.SSSSSSsutc, return a Windows-style decimal timestamp.  The last
+     * Given a WBEM timestamp of the form yyyyMMddHHmmss.SSSSSSsutc, return a Windows-style timestamp.  The last
      * digit will always be a 0, as there is only enough information to express the time in microseconds.
      */
     public static BigInteger toWindowsTimestamp(String wmistr) throws NumberFormatException, ParseException {

@@ -32,7 +32,6 @@ import jsaf.util.PropertyUtil;
 public abstract class AbstractBaseSession implements IConfigurable, ISession {
     protected File wsdir = null;
     protected LocLogger logger;
-    protected boolean debug;
     protected InternalProperties internalProps;
     protected boolean connected = false;
 
@@ -40,7 +39,6 @@ public abstract class AbstractBaseSession implements IConfigurable, ISession {
 	logger = Message.getLogger();
 	internalProps = new InternalProperties();
 	Configurator.configure(this);
-	debug = internalProps.getBooleanProperty(PROP_DEBUG);
     }
 
     /**
@@ -90,10 +88,6 @@ public abstract class AbstractBaseSession implements IConfigurable, ISession {
 	  default:
 	    return internalProps.getLongProperty(PROP_READ_TIMEOUT_S);
 	}
-    }
-
-    public boolean isDebug() {
-	return internalProps.getBooleanProperty(PROP_DEBUG);
     }
 
     public File getWorkspace() {

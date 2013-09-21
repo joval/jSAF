@@ -179,7 +179,7 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	public InputStream getInputStream() throws IOException {
 	    if (p == null) {
 		return null;
-	    } else if (debug) {
+	    } else if (internalProps.getBooleanProperty(PROP_DEBUG)) {
 		if (debugIn == null) {
 		    File f = null;
 		    if (wsdir == null) {
@@ -198,7 +198,7 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	public InputStream getErrorStream() throws IOException {
 	    if (p == null) {
 		return null;
-	    } else if (debug) {
+	    } else if (internalProps.getBooleanProperty(PROP_DEBUG)) {
 		if (debugErr == null) {
 		    File f = null;
 		    if (wsdir == null) {

@@ -221,14 +221,6 @@ public interface ISession extends ILoggable {
     IProperty getProperties();
 
     /**
-     * Check if the session is using debugging mode.
-     * Shortcut for "true".equals(ISession.getProperties().getProperty(ISession.PROP_DEBUG))
-     *
-     * @since 1.0
-     */
-    boolean isDebug();
-
-    /**
      * Connect the session.
      *
      * @since 1.0

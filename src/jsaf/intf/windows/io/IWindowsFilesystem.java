@@ -3,6 +3,8 @@
 
 package jsaf.intf.windows.io;
 
+import java.io.IOException;
+
 import jsaf.intf.io.IFilesystem;
 
 /**
@@ -128,6 +130,18 @@ public interface IWindowsFilesystem extends IFilesystem {
 	    }
 	    return UNKNOWN;
 	}
+    }
+
+    /**
+     * Interface extending IMount for Windows volumes, containing extended information.
+     *
+     * @since 1.1
+     */
+    interface IVolume extends IMount {
+	/**
+	 * flags from GetVolumeInformation
+	 */
+	int getFlags() throws IOException;
     }
 
     /**

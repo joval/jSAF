@@ -131,6 +131,10 @@ namespace jSAF.File {
 		SetLastError=true)]
 	static extern uint MapFileAndCheckSum(String Filename, out uint HeaderSum, out uint CheckSum);
 
+	[DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+	static extern bool GetVolumeInformation(string Volume, StringBuilder VolumeName, uint VolumeNameSize,
+		out uint SerialNumber, out uint SerialNumberLength, out uint flags, StringBuilder fs, uint fs_size);
+
 	public static int GetFileType(String Path) {
 	    IntPtr hSecurityAttributes = IntPtr.Zero;
 	    IntPtr hTemplate = IntPtr.Zero;
@@ -180,6 +184,18 @@ namespace jSAF.File {
 	    }
 
 	    return null;
+	}
+
+	public static uint GetVolumeFlags(String path) {
+	    uint serialNum, serialNumLength, flags;
+	    StringBuilder volName = new StringBuilder(256);
+	    StringBuilder fsType = new StringBuilder(256); 
+
+	    if (GetVolumeInformation(path, volName, 254, out serialNum, out serialNumLength, out flags, fsType, 254)) {
+		return flags;
+	    } else {
+		throw new System.ComponentModel.Win32Exception(GetLastError());
+	    }
 	}
     }
 }

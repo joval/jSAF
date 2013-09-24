@@ -61,7 +61,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 
     private WindowsFileSearcher searcher;
     private final IWindowsSession.View apparentView, accessorView;
-    private Collection<IMount> mounts;
+    private Collection<IVolume> volumes;
     private String system32, sysWOW64, sysNative;
 
     protected IRunspace runspace;
@@ -131,39 +131,41 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 
     public Collection<IMount> getMounts(Pattern filter, boolean include) throws IOException {
 	try {
-	    if (mounts == null) {
-		mounts = new ArrayList<IMount>();
+	    if (volumes == null) {
+		volumes = new ArrayList<IVolume>();
 		IWmiProvider wmi = ((IWindowsSession)session).getWmiProvider();
 		for (ISWbemObject obj : wmi.execQuery(IWmiProvider.CIMv2, DRIVE_QUERY)) {
-		    IMount mount = new WindowsMount(obj);
-		    mounts.add(mount);
+		    IVolume volume = new WindowsVolume(obj);
+		    volumes.add(volume);
 		}
 	    }
 	    if (filter == null) {
-		for (IMount mount : mounts) {
-		    logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+		Collection<IMount> result = new ArrayList<IMount>();
+		for (IVolume volume : volumes) {
+		    logger.debug(Message.STATUS_FS_MOUNT_ADD, volume.getPath(), volume.getType());
+		    result.add(volume);
 		}
-		return mounts;
+		return result;
 	    } else {
-		Collection<IMount> results = new ArrayList<IMount>();
-		for (IMount mount : mounts) {
-		    if (filter.matcher(mount.getType()).find()) {
+		Collection<IMount> result = new ArrayList<IMount>();
+		for (IVolume volume : volumes) {
+		    if (filter.matcher(volume.getType()).find()) {
 			if (include) {
-			    logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
-			    results.add(mount);
+			    logger.debug(Message.STATUS_FS_MOUNT_ADD, volume.getPath(), volume.getType());
+			    result.add(volume);
 			} else {
-			    logger.debug(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
+			    logger.debug(Message.STATUS_FS_MOUNT_SKIP, volume.getPath(), volume.getType());
 			}
 		    } else {
 			if (include) {
-			    logger.debug(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
+			    logger.debug(Message.STATUS_FS_MOUNT_SKIP, volume.getPath(), volume.getType());
 			} else {
-			    logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
-			    results.add(mount);
+			    logger.debug(Message.STATUS_FS_MOUNT_ADD, volume.getPath(), volume.getType());
+			    result.add(volume);
 			}
 		    }
 		}
-		return results;
+		return result;
 	    }
 	} catch (Exception e) {
 	    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
@@ -320,17 +322,19 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 
     // Private
 
-    class WindowsMount implements IMount {
+    class WindowsVolume implements IVolume {
 	private String path;
 	private FsType type;
+	private Integer flags;
 
 	/**
 	 * Create a new mount given a drive string and a type.
 	 */
-	public WindowsMount(ISWbemObject obj) throws WmiException {
+	public WindowsVolume(ISWbemObject obj) throws WmiException {
 	    ISWbemPropertySet props = obj.getProperties();
 	    path = props.getItem("Name").getValueAsString() + DELIM_STR;
 	    type = FsType.typeOf(props.getItem("DriveType").getValueAsInteger().intValue());
+	    flags = null;
 	}
 
 	// Implement IMount
@@ -341,6 +345,20 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 
 	public String getType() {
 	    return type.value();
+	}
+
+	// Implement IVolume
+
+	public int getFlags() throws IOException {
+	    if (flags == null) {
+		try {
+		    flags = new Integer(Integer.parseInt(runspace.invoke("Get-VolumeFlags -Path '" + path + "'").trim(), 16));
+		} catch (Exception e) {
+		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		    throw new IOException(e.getMessage());
+		}
+	    }
+	    return flags.intValue();
 	}
     }
 

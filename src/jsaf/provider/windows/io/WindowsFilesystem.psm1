@@ -81,3 +81,11 @@ function Print-FileInfo {
     }
   }
 }
+
+function Get-VolumeFlags {
+  param(
+    [String]$Path = $(throw "Mandatory parameter -Path")
+  )
+
+  "{0:X}" -f [jSAF.File.Probe]::GetVolumeFlags($Path)
+}

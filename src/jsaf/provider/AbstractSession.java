@@ -75,7 +75,11 @@ public abstract class AbstractSession extends AbstractBaseSession {
 
     @Override
     public IFilesystem getFilesystem() {
-	return fs;
+	if (fs == null) {
+	    return super.getFilesystem();
+	} else {
+	    return fs;
+	}
     }
 
     @Override

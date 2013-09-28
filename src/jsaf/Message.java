@@ -106,7 +106,8 @@ public enum Message {
     STATUS_WMI_QUERY,
     WARNING_COMMAND_OUTPUT,
     WARNING_MISSING_OUTPUT,
-    WARNING_PERISHABLEIO_INTERRUPT;
+    WARNING_PERISHABLEIO_INTERRUPT,
+    WARNING_UNIX_FLAVOR;
 
     private static IMessageConveyor baseConveyor;
     private static MultiConveyor conveyor;

@@ -119,20 +119,19 @@ public interface IUnixSession extends ISession {
 	 * @since 1.0
 	 */
 	public static Flavor flavorOf(IUnixSession session) {
-	    Flavor flavor = UNKNOWN;
 	    try {
 		String osName = SafeCLI.exec("uname -s", session, Timeout.S);
-		for (Flavor f : values()) {
-		    if (f.value().equals(osName)) {
-			flavor = f;
-			break;
+		for (Flavor flavor : values()) {
+		    if (flavor.value().equals(osName)) {
+			return flavor;
 		    }
 		}
+		session.getLogger().warn(Message.WARNING_UNIX_FLAVOR, osName);
 	    } catch (Exception e) {
 		session.getLogger().warn(Message.ERROR_UNIX_FLAVOR);
 		session.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
-	    return flavor;
+	    return Flavor.UNKNOWN;
 	}
     }
 }

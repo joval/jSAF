@@ -44,11 +44,19 @@ public class SWbemProperty implements ISWbemProperty {
     }
 
     public Integer getValueAsInteger() throws WmiException {
-	return value.getInt();
+	if (value.isNull()) {
+	    return new Integer(0);
+	} else {
+	    return value.getInt();
+	}
     }
     
     public Long getValueAsLong() throws WmiException {
-	return value.getLong();
+	if (value.isNull()) {
+	    return new Long(0L);
+	} else {
+	    return value.getLong();
+	}
     }
 
     public BigInteger getValueAsTimestamp() throws WmiException {
@@ -70,8 +78,12 @@ public class SWbemProperty implements ISWbemProperty {
     }
 
     public Boolean getValueAsBoolean() throws WmiException {
-	value.changeType(Variant.VariantBoolean);
-	return value.getBoolean();
+	if (value.isNull()) {
+	    return Boolean.FALSE;
+	} else {
+	    value.changeType(Variant.VariantBoolean);
+	    return value.getBoolean();
+	}
     }
 
     /**

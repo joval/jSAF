@@ -214,6 +214,15 @@ public class IniFile {
     }
 
     /**
+     * Set or replace a section of the INI file.
+     *
+     * @since 1.1
+     */
+    public void setSection(String name, IProperty props) {
+	sections.put(name, props);
+    }
+
+    /**
      * Remove a section from the INI file.
      *
      * @since 1.0

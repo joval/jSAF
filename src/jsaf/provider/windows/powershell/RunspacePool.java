@@ -60,7 +60,7 @@ public class RunspacePool implements IRunspacePool {
 		}
 		logger.debug(Message.STATUS_POWERSHELL_EXIT, runspace.getId(), p.exitValue());
 	    } catch (Exception e) {
-		e.printStackTrace();
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
 	}
 	pool.clear();

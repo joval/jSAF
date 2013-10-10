@@ -49,6 +49,7 @@ public class MacOSXDriver extends AbstractDriver {
     void getMounts() throws Exception {
 	mounts = new ArrayList<IFilesystem.IMount>();
 	for (String line : SafeCLI.multiLine("mount", session, IUnixSession.Timeout.S)) {
+	    if (line.trim().length() == 0) continue;
 	    int ptr = line.indexOf(" on ");
 	    String device = line.substring(0, ptr);
 	    int begin = ptr + 4;
@@ -184,6 +185,9 @@ public class MacOSXDriver extends AbstractDriver {
 	    line = lines.next();
 	} else {
 	    return null;
+	}
+	if (line.trim().length() == 0) {
+	    return nextFileInfo(lines);
 	}
 
 	char unixType = line.charAt(0);

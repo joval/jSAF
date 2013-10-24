@@ -389,10 +389,10 @@ public class Runspace implements IRunspace {
      */
     private void readBOM() throws IOException {
 	if (encoding == StringTools.UTF8) {
-	    // EE BB BF
+	    // EF BB BF
 	    int x = stdout.read();
 	    switch(x) {
-	      case 0xEE:
+	      case 0xEF:
 		stdout.read();
 		stdout.read();
 		break;
@@ -400,11 +400,22 @@ public class Runspace implements IRunspace {
 		notBOM = new Character((char)(0xFF & x));
 		break;
 	    }
-	} else if (encoding == StringTools.UTF16 || encoding == StringTools.UTF16LE) {
-	    // FE FF (big) or FF FE (little)
+	} else if (encoding == StringTools.UTF16) {
+	    // FE FF
 	    int x = stdout.read();
 	    switch(x) {
 	      case 0xFE:
+		stdout.read();
+		break;
+	      default:
+		notBOM = new Character((char)(0xFF & x));
+		break;
+	    }
+	} else if (encoding == StringTools.UTF16LE) {
+	    // FF FE
+	    int x = stdout.read();
+	    switch(x) {
+	      case 0xFF:
 		stdout.read();
 		break;
 	      default:

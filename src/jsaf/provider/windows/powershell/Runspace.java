@@ -35,7 +35,7 @@ import jsaf.util.StringTools;
  * @version %I% %G%
  */
 public class Runspace implements IRunspace {
-    public static final String INIT_COMMAND = "powershell -version 2.0 -NoProfile -File -";
+    public static final String INIT_COMMAND = "powershell -NoProfile -File -";
 
     private long timeout;		// contains default timeout
     private String id, prompt;

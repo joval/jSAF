@@ -10,23 +10,23 @@ function Print-FileInfo {
     if (!($inputObject -eq $null)) {
       $type = $inputObject | Get-Member | %{$_.TypeName}
       if ($type -eq "System.String") {
-	if (Test-Path $inputObject) {
-	  Get-Item $inputObject | Print-FileInfo
-	} else {
+        if (Test-Path $inputObject) {
+          Get-Item $inputObject | Print-FileInfo
+        } else {
           "{"
           "Path: {0}" -f $inputObject
           "}"
-	}
+        }
       } else {
-	$OwnerSid = $inputObject.GetAccessControl().GetOwner([System.Security.Principal.SecurityIdentifier]).ToString()
-	$OwnerAccount = $inputObject.GetAccessControl().GetOwner([System.Security.Principal.NTAccount]).ToString()
+        $OwnerSid = $inputObject.GetAccessControl().GetOwner([System.Security.Principal.SecurityIdentifier]).ToString()
+        $OwnerAccount = $inputObject.GetAccessControl().GetOwner([System.Security.Principal.NTAccount]).ToString()
         if ($type -eq "System.IO.DirectoryInfo") {
           "{"
           "Type: Directory"
           $path = [jSAF.File.Probe]::GetWindowsPhysicalPath($inputObject.FullName)
           "Path: $path"
-	  "Owner.SID: " -f $OwnerSid
-	  "Owner.Account: $($OwnerAccount)"
+          "Owner.SID: " -f $OwnerSid
+          "Owner.Account: $($OwnerAccount)"
           "Ctime: {0:D}" -f $inputObject.CreationTimeUtc.toFileTimeUtc()
           "Mtime: {0:D}" -f $inputObject.LastWriteTimeUtc.toFileTimeUtc()
           "Atime: {0:D}" -f $inputObject.LastAccessTimeUtc.toFileTimeUtc()
@@ -38,8 +38,8 @@ function Print-FileInfo {
             $path = [jSAF.File.Probe]::GetWindowsPhysicalPath($inputObject.FullName)
             "WinType: {0:D}" -f [jSAF.File.Probe]::GetFileType($path)
             "Path: {0}" -f $path
-	    "Owner.SID: {0}" -f $OwnerSid
-	    "Owner.Account: {0}" -f $OwnerAccount
+            "Owner.SID: {0}" -f $OwnerSid
+            "Owner.Account: {0}" -f $OwnerAccount
             "Ctime: {0:D}" -f $inputObject.CreationTimeUtc.toFileTimeUtc()
             "Mtime: {0:D}" -f $inputObject.LastWriteTimeUtc.toFileTimeUtc()
             "Atime: {0:D}" -f $inputObject.LastAccessTimeUtc.toFileTimeUtc()

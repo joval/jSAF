@@ -48,6 +48,7 @@ public class Runspace implements IRunspace {
     private HashSet<String> modules, assemblies;
     private Charset encoding = null;
     private boolean buffered;
+    private Character notBOM = null;
 
     /**
      * Create a new Runspace, using the specified architecture (null for default) and encoding.
@@ -76,6 +77,7 @@ public class Runspace implements IRunspace {
 	err = null;
 	readBOM();
 	read(timeout);
+	notBOM = null;
     }
 
     public IProcess getProcess() {
@@ -375,19 +377,40 @@ public class Runspace implements IRunspace {
     }
 
     private boolean isPrompt(String str) {
+	if (notBOM != null) {
+	    str = new StringBuffer().append(notBOM.charValue()).append(str).toString();
+	}
 	return (str.startsWith("PS") && str.endsWith("> ")) || str.equals(">> ");
     }
 
+    /**
+     * Attempt to read the appropriate BOM from the process stdout. In the stream doesn't start with a BOM,
+     * we keep track of the first char read for use in isPrompt, until the first prompt has been read.
+     */
     private void readBOM() throws IOException {
 	if (encoding == StringTools.UTF8) {
 	    // EE BB BF
-	    stdout.read();
-	    stdout.read();
-	    stdout.read();
+	    int x = stdout.read();
+	    switch(x) {
+	      case 0xEE:
+		stdout.read();
+		stdout.read();
+		break;
+	      default:
+		notBOM = new Character((char)(0xFF & x));
+		break;
+	    }
 	} else if (encoding == StringTools.UTF16 || encoding == StringTools.UTF16LE) {
 	    // FE FF (big) or FF FE (little)
-	    stdout.read();
-	    stdout.read();
+	    int x = stdout.read();
+	    switch(x) {
+	      case 0xFE:
+		stdout.read();
+		break;
+	      default:
+		notBOM = new Character((char)(0xFF & x));
+		break;
+	    }
 	}
     }
 }

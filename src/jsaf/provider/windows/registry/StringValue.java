@@ -13,13 +13,24 @@ import jsaf.intf.windows.registry.IStringValue;
  * @version %I% %G%
  */
 public class StringValue extends Value implements IStringValue {
+    private static final char NULL = 0;
+
     private String data;
 
     public StringValue(IKey parent, String name, String data) {
 	type = Type.REG_SZ;
 	this.parent = parent;
 	this.name = name;
-	this.data = data;
+
+	//
+	// Just in case a stray null appears at the end, clip it off
+	//
+	int len = data.length();
+	if (len > 0 && data.charAt(len-1) == NULL) {
+	    this.data = data.substring(0,len-1);
+	} else {
+	    this.data = data;
+	}
     }
 
     public String getData() {

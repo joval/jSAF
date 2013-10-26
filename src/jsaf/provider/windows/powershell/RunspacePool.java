@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.slf4j.cal10n.LocLogger;
 
@@ -50,8 +51,10 @@ public class RunspacePool implements IRunspacePool {
 	pool = new HashMap<String, Runspace>();
     }
 
-    public void shutdown() {
-	for (Runspace runspace : pool.values()) {
+    public synchronized void shutdown() {
+	Iterator<Runspace> iter = pool.values().iterator();
+	while(iter.hasNext()) {
+	    Runspace runspace = iter.next();
 	    try {
 		runspace.invoke("exit", 2000L);
 		IProcess p = runspace.getProcess();
@@ -61,9 +64,10 @@ public class RunspacePool implements IRunspacePool {
 		logger.debug(Message.STATUS_POWERSHELL_EXIT, runspace.getId(), p.exitValue());
 	    } catch (Exception e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    } finally {
+		iter.remove();
 	    }
 	}
-	pool.clear();
     }
 
     @Override

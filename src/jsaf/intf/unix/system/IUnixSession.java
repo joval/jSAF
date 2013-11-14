@@ -4,7 +4,7 @@
 package jsaf.intf.unix.system;
 
 import jsaf.Message;
-import jsaf.intf.system.ISession;
+import jsaf.intf.system.IComputerSystem;
 import jsaf.util.SafeCLI;
 
 /**
@@ -14,7 +14,7 @@ import jsaf.util.SafeCLI;
  * @version %I% %G%
  * @since 1.0
  */
-public interface IUnixSession extends ISession {
+public interface IUnixSession extends IComputerSystem {
     /**
      * Property indicating the number of milliseconds to wait for a read before quiting a privilege escalation attempt.
      *

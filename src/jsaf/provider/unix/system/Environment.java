@@ -22,7 +22,7 @@ public class Environment extends AbstractEnvironment {
 	    for (String line : SafeCLI.multiLine("env", session, IUnixSession.Timeout.S)) {
 		int ptr = line.indexOf("=");
 		if (ptr > 0) {
-		    props.setProperty(line.substring(0, ptr), line.substring(ptr+1));
+		    map.put(line.substring(0, ptr), line.substring(ptr+1));
 		}
 	    }
 	} catch (Exception e) {

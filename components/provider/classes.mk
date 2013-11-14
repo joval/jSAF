@@ -3,8 +3,8 @@ CLASSES=\
 	jsaf.io.fs.DefaultMetadata	\
 	jsaf.io.fs.IAccessor	\
 	jsaf.io.StreamLogger	\
-	jsaf.provider.AbstractBaseSession	\
-	jsaf.provider.AbstractSession	\
+	jsaf.provider.BaseSession	\
+	jsaf.provider.ComputerSystemSession	\
 	jsaf.provider.Configurator	\
 	jsaf.provider.LocalSessionFactory	\
 	jsaf.provider.unix.io.driver.AbstractDriver	\

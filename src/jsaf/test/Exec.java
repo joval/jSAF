@@ -5,14 +5,15 @@ package jsaf.test;
 
 import java.io.InputStream;
 
+import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.system.IProcess;
 import jsaf.intf.system.ISession;
 
 public class Exec {
-    ISession session;
+    IComputerSystem session;
 
     public Exec(ISession session) {
-	this.session = session;
+	this.session = (IComputerSystem)session;
     }
 
     public void test(String command) {

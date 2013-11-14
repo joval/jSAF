@@ -23,6 +23,7 @@ CLASSES=\
 	jsaf.intf.ssh.identity.ISshCredential	\
 	jsaf.intf.ssh.system.IShell	\
 	jsaf.intf.ssh.system.ISshProcess	\
+	jsaf.intf.system.IComputerSystem	\
 	jsaf.intf.system.IEnvironment	\
 	jsaf.intf.system.IProcess	\
 	jsaf.intf.system.ISession	\

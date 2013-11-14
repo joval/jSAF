@@ -30,6 +30,7 @@ import jsaf.intf.io.IReader;
 import jsaf.intf.io.IReaderGobbler;
 import static jsaf.intf.io.IReaderGobbler.DevNull;
 import jsaf.intf.system.IProcess;
+import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.system.ISession;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.io.PerishableReader;
@@ -57,8 +58,8 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static String checkArgument(String arg, ISession session) throws IllegalArgumentException {
-	switch(session.getType()) {
+    public static String checkArgument(String arg, IComputerSystem sys) throws IllegalArgumentException {
+	switch(sys.getType()) {
 	  case WINDOWS:
 	    if (arg.indexOf("'") != -1 || arg.indexOf("\"") != -1) {
 		throw new IllegalArgumentException(arg);
@@ -79,8 +80,8 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final String exec(String cmd, ISession session, ISession.Timeout to) throws Exception {
-	return exec(cmd, null, session, session.getTimeout(to));
+    public static final String exec(String cmd, IComputerSystem sys, ISession.Timeout to) throws Exception {
+	return exec(cmd, null, sys, sys.getTimeout(to));
     }
 
     /**
@@ -88,8 +89,8 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final String exec(String cmd, String[] env, ISession session, ISession.Timeout to) throws Exception {
-	return exec(cmd, env, null, session, session.getTimeout(to));
+    public static final String exec(String cmd, String[] env, IComputerSystem sys, ISession.Timeout to) throws Exception {
+	return exec(cmd, env, null, sys, sys.getTimeout(to));
     }
 
     /**
@@ -97,10 +98,10 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final String exec(String cmd, String[] env, String dir, ISession session, ISession.Timeout to)
+    public static final String exec(String cmd, String[] env, String dir, IComputerSystem sys, ISession.Timeout to)
 		throws Exception {
 
-	return exec(cmd, env, dir, session, session.getTimeout(to));
+	return exec(cmd, env, dir, sys, sys.getTimeout(to));
     }
 
     /**
@@ -108,8 +109,8 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final String exec(String cmd, ISession session, long readTimeout) throws Exception {
-	return exec(cmd, null, null, session, readTimeout);
+    public static final String exec(String cmd, IComputerSystem sys, long readTimeout) throws Exception {
+	return exec(cmd, null, null, sys, readTimeout);
     }
 
     /**
@@ -117,8 +118,8 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final String exec(String cmd, String[] env, ISession session, long readTimeout) throws Exception {
-	return exec(cmd, env, null, session, readTimeout);
+    public static final String exec(String cmd, String[] env, IComputerSystem sys, long readTimeout) throws Exception {
+	return exec(cmd, env, null, sys, readTimeout);
     }
 
     /**
@@ -126,8 +127,10 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final String exec(String cmd, String[] env, String dir, ISession session, long readTimeout) throws Exception {
-	List<String> lines = multiLine(cmd, env, dir, session, readTimeout);
+    public static final String exec(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout)
+		throws Exception {
+
+	List<String> lines = multiLine(cmd, env, dir, sys, readTimeout);
 	if (lines.size() == 2 && lines.get(0).equals("")) {
 	    return lines.get(1);
 	} else {
@@ -140,8 +143,8 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, ISession session, ISession.Timeout to) throws Exception {
-	return multiLine(cmd, null, null, session, session.getTimeout(to));
+    public static final List<String> multiLine(String cmd, IComputerSystem sys, ISession.Timeout to) throws Exception {
+	return multiLine(cmd, null, null, sys, sys.getTimeout(to));
     }
 
     /**
@@ -149,10 +152,10 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, String[] env, ISession session, ISession.Timeout to)
+    public static final List<String> multiLine(String cmd, String[] env, IComputerSystem sys, ISession.Timeout to)
 		throws Exception {
 
-	return multiLine(cmd, env, null, session, session.getTimeout(to));
+	return multiLine(cmd, env, null, sys, sys.getTimeout(to));
     }
 
     /**
@@ -160,10 +163,10 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, String[] env, String dir, ISession session, ISession.Timeout to)
+    public static final List<String> multiLine(String cmd, String[] env, String dir, IComputerSystem sys, ISession.Timeout to)
 		throws Exception {
 
-	return multiLine(cmd, env, dir, session, session.getTimeout(to));
+	return multiLine(cmd, env, dir, sys, sys.getTimeout(to));
     }
 
     /**
@@ -171,8 +174,8 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, ISession session, long readTimeout) throws Exception {
-	return multiLine(cmd, null, null, session, readTimeout);
+    public static final List<String> multiLine(String cmd, IComputerSystem sys, long readTimeout) throws Exception {
+	return multiLine(cmd, null, null, sys, readTimeout);
     }
 
     /**
@@ -180,45 +183,47 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, String[] env, ISession session, long readTimeout) throws Exception {
-	return multiLine(cmd, env, null, session, readTimeout);
-    }
-
-    /**
-     * Run a command and get the resulting lines of output, using the specified environment.
-     *
-     * @since 1.0
-     */
-    public static final List<String> multiLine(String cmd, String[] env, String dir, ISession session, long readTimeout)
+    public static final List<String> multiLine(String cmd, String[] env, IComputerSystem sys, long readTimeout)
 		throws Exception {
 
-	return execData(cmd, env, dir, session, readTimeout).getLines();
+	return multiLine(cmd, env, null, sys, readTimeout);
+    }
+
+    /**
+     * Run a command and get the resulting lines of output, using the specified environment.
+     *
+     * @since 1.0
+     */
+    public static final List<String> multiLine(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout)
+		throws Exception {
+
+	return execData(cmd, env, dir, sys, readTimeout).getLines();
     }
 
     /**
      * Run a command and get the resulting lines of output, using the specified environment. This command assumes that
      * there will be a large volume of output from the command, so it will pipe the output to a file, transfer the file
-     * locally (if the session is a remote session), and then return an iterator that reads lines from the local file.
+     * locally (if sys is a remote session), and then return an iterator that reads lines from the local file.
      * When the end of the iterator is reached, the local file is deleted.
      *
      * @since 1.0.1
      */
-    public static final Iterator<String> manyLines(String cmd, String[] env, IUnixSession session) throws Exception {
+    public static final Iterator<String> manyLines(String cmd, String[] env, IUnixSession sys) throws Exception {
 	//
 	// Modify the command to redirect output to a temp file (compressed)
 	//
 	String unique = null;
-	synchronized(session) {
+	synchronized(sys) {
 	    unique = Long.toString(System.currentTimeMillis());
 	    Thread.sleep(1);
 	}
-	String tempPath = session.getTempDir();
-	IFilesystem fs = session.getFilesystem();
+	String tempPath = sys.getTempDir();
+	IFilesystem fs = sys.getFilesystem();
 	if (!tempPath.endsWith(fs.getDelimiter())) {
 	    tempPath = tempPath + fs.getDelimiter();
 	}
 	tempPath = new StringBuffer(tempPath).append("cmd.").append(unique).append(".out").toString();
-	tempPath = session.getEnvironment().expand(tempPath);
+	tempPath = sys.getEnvironment().expand(tempPath);
 	cmd = new StringBuffer(cmd).append(" | gzip > ").append(tempPath).toString();
 
 	//
@@ -227,7 +232,7 @@ public class SafeCLI {
 	FileMonitor mon = new FileMonitor(fs, tempPath);
 	JSAFSystem.getTimer().schedule(mon, 15000, 15000);
 	try {
-	    exec(cmd, null, null, session, session.getTimeout(ISession.Timeout.XL), DevNull, new ErrorLogger(session));
+	    exec(cmd, null, null, sys, sys.getTimeout(ISession.Timeout.XL), DevNull, new ErrorLogger(sys));
 	} finally {
 	    mon.cancel();
 	    JSAFSystem.getTimer().purge();
@@ -236,11 +241,11 @@ public class SafeCLI {
 	//
 	// Create and return a reader/Iterator<String> based on a local cache file
 	//
-	if (ISession.LOCALHOST.equals(session.getHostname())) {
+	if (ISession.LOCALHOST.equals(sys.getHostname())) {
 	    return new ReaderIterator(new File(tempPath));
 	} else {
 	    IFile remoteTemp = fs.getFile(tempPath, IFile.Flags.READWRITE);
-	    File tempDir = session.getWorkspace() == null ? new File(System.getProperty("user.home")) : session.getWorkspace();
+	    File tempDir = sys.getWorkspace() == null ? new File(System.getProperty("user.home")) : sys.getWorkspace();
 	    File localTemp = File.createTempFile("cmd", null, tempDir);
 	    StreamTool.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
 	    try {
@@ -248,10 +253,10 @@ public class SafeCLI {
 	    } catch (IOException e) {
 		try {
 		    if (remoteTemp.exists()) {
-			exec("rm -f " + remoteTemp.getPath(), session, ISession.Timeout.S);
+			exec("rm -f " + remoteTemp.getPath(), sys, ISession.Timeout.S);
 		    }
 		} catch (Exception e2) {
-		    session.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e2);
+		    sys.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e2);
 		}
 	    }
 	    return new ReaderIterator(localTemp);
@@ -263,8 +268,8 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final ExecData execData(String cmd, String[] env, ISession session, long readTimeout) throws Exception {
-	return execData(cmd, env, null, session, readTimeout);
+    public static final ExecData execData(String cmd, String[] env, IComputerSystem sys, long readTimeout) throws Exception {
+	return execData(cmd, env, null, sys, readTimeout);
     }
 
     /**
@@ -272,10 +277,10 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final ExecData execData(String cmd, String[] env, String dir, ISession session, long readTimeout)
+    public static final ExecData execData(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout)
 		throws Exception {
 
-	SafeCLI cli = new SafeCLI(cmd, env, dir, session, readTimeout);
+	SafeCLI cli = new SafeCLI(cmd, env, dir, sys, readTimeout);
 	cli.exec();
 	return cli.getResult();
     }
@@ -292,10 +297,10 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final void exec(String cmd, String[] env, String dir, ISession session, long readTimeout,
+    public static final void exec(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout,
 				  IReaderGobbler out, IReaderGobbler err) throws Exception {
 
-	new SafeCLI(cmd, env, dir, session, readTimeout).exec(out, err);
+	new SafeCLI(cmd, env, dir, sys, readTimeout).exec(out, err);
     }
 
     /**
@@ -351,7 +356,7 @@ public class SafeCLI {
 		lines.add(line);
 	    }
 	    if (lines.size() == 0) {
-		session.getLogger().debug(Message.WARNING_MISSING_OUTPUT, cmd, exitCode, data.length);
+		sys.getLogger().debug(Message.WARNING_MISSING_OUTPUT, cmd, exitCode, data.length);
 		lines.add("");
 	    }
 	    return lines;
@@ -362,18 +367,18 @@ public class SafeCLI {
 
     private String cmd, dir;
     private String[] env;
-    private ISession session;
+    private IComputerSystem sys;
     private ExecData result;
     private long readTimeout;
     private int execRetries = 0;
 
-    private SafeCLI(String cmd, String[] env, String dir, ISession session, long readTimeout) throws Exception {
+    private SafeCLI(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout) throws Exception {
 	this.cmd = cmd;
 	this.env = env;
 	this.dir = dir;
-	this.session = session;
+	this.sys = sys;
 	this.readTimeout = readTimeout;
-	execRetries = session.getProperties().getIntProperty(ISession.PROP_EXEC_RETRIES);
+	execRetries = sys.getProperties().getIntProperty(IComputerSystem.PROP_EXEC_RETRIES);
 	result = new ExecData();
     }
 
@@ -387,19 +392,19 @@ public class SafeCLI {
 	    IProcess p = null;
 	    PerishableReader reader = null;
 	    try {
-		p = session.createProcess(cmd, env, dir);
+		p = sys.createProcess(cmd, env, dir);
 		p.start();
 		reader = PerishableReader.newInstance(p.getInputStream(), readTimeout);
-		reader.setLogger(session.getLogger());
+		reader.setLogger(sys.getLogger());
 		if (errorGobbler == null) {
-		    long timeout = session.getTimeout(ISession.Timeout.XL);
+		    long timeout = sys.getTimeout(ISession.Timeout.XL);
 		    new GobblerThread(DevNull).start(PerishableReader.newInstance(p.getErrorStream(), timeout));
 		} else {
 		    new GobblerThread(errorGobbler).start(PerishableReader.newInstance(p.getErrorStream(), readTimeout));
 		}
 		outputGobbler.gobble(reader);
 		try {
-		    p.waitFor(session.getTimeout(ISession.Timeout.M));
+		    p.waitFor(sys.getTimeout(ISession.Timeout.M));
 		    result.exitCode = p.exitValue();
 		    success = true;
 		} catch (InterruptedException e) {
@@ -412,19 +417,19 @@ public class SafeCLI {
 			// the process has hung up, so kill it
 			p.destroy();
 			p = null;
-			session.getLogger().info(Message.STATUS_PROCESS_RETRY, cmd);
+			sys.getLogger().info(Message.STATUS_PROCESS_RETRY, cmd);
 		    }
 		} else {
 		    throw e;
 		}
 	    } catch (SessionException e) {
 		if (attempt > execRetries) {
-		    session.getLogger().warn(Message.ERROR_PROCESS_RETRY, cmd, attempt);
+		    sys.getLogger().warn(Message.ERROR_PROCESS_RETRY, cmd, attempt);
 		    throw e;
 		} else {
-		    session.getLogger().warn(Message.ERROR_SESSION_INTEGRITY, e.getMessage());
-		    session.getLogger().info(Message.STATUS_PROCESS_RETRY, cmd);
-		    session.disconnect();
+		    sys.getLogger().warn(Message.ERROR_SESSION_INTEGRITY, e.getMessage());
+		    sys.getLogger().info(Message.STATUS_PROCESS_RETRY, cmd);
+		    sys.disconnect();
 		}
 	    } finally {
 		if (reader != null) {
@@ -501,10 +506,10 @@ public class SafeCLI {
     }
 
     static class ErrorLogger implements IReaderGobbler {
-	private ISession session;
+	private IComputerSystem sys;
 
-	ErrorLogger(ISession session) {
-	    this.session = session;
+	ErrorLogger(IComputerSystem sys) {
+	    this.sys = sys;
 	}
 
 	// Implement IReaderGobbler
@@ -512,7 +517,7 @@ public class SafeCLI {
 	public void gobble(IReader reader) throws IOException {
 	    String line = null;
 	    while((line = reader.readLine()) != null) {
-		session.getLogger().warn(Message.WARNING_COMMAND_OUTPUT, line);
+		sys.getLogger().warn(Message.WARNING_COMMAND_OUTPUT, line);
 	    }
 	}
     }

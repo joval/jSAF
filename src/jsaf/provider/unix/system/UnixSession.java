@@ -5,9 +5,6 @@ package jsaf.provider.unix.system;
 
 import java.io.File;
 
-import jsaf.intf.system.IProcess;
-import jsaf.intf.unix.system.IUnixSession;
-import jsaf.provider.AbstractSession;
 import jsaf.provider.unix.io.UnixFilesystem;
 
 /**
@@ -24,7 +21,9 @@ public class UnixSession extends BaseUnixSession {
 
     // Implement ISession
 
+    @Override
     public boolean connect() {
+	connected = true; // set this now so that createProcess will work
 	if (env == null) {
 	    env = new Environment(this);
 	}
@@ -32,11 +31,6 @@ public class UnixSession extends BaseUnixSession {
 	    fs = new UnixFilesystem(this);
 	}
 	flavor = Flavor.flavorOf(this);
-	connected = true;
 	return true;
-    }
-
-    public void disconnect() {
-	connected = false;
     }
 }

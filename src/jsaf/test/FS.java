@@ -16,16 +16,17 @@ import java.util.regex.Pattern;
 
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFilesystem;
+import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.system.IEnvironment;
 import jsaf.intf.system.ISession;
 import jsaf.intf.util.ISearchable;
 import jsaf.util.Checksum;
 
 public class FS {
-    private ISession session;
+    private IComputerSystem session;
 
     public FS(ISession session) {
-	this.session = (ISession)session;
+	this.session = (IComputerSystem)session;
     }
 
     public synchronized void test(String path) {

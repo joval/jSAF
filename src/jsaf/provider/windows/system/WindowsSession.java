@@ -24,7 +24,7 @@ import jsaf.intf.windows.registry.IValue;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.intf.windows.wmi.IWmiProvider;
 import jsaf.io.fs.AbstractFilesystem;
-import jsaf.provider.AbstractSession;
+import jsaf.provider.ComputerSystemSession;
 import jsaf.provider.windows.identity.Directory;
 import jsaf.provider.windows.io.WindowsFilesystem;
 import jsaf.provider.windows.powershell.RunspacePool;
@@ -37,7 +37,7 @@ import jsaf.provider.windows.wmi.WmiProvider;
  * @author David A. Solin
  * @version %I% %G%
  */
-public class WindowsSession extends AbstractSession implements IWindowsSession {
+public class WindowsSession extends ComputerSystemSession implements IWindowsSession {
     static {
 	//
 	// Load the JACOB DLL
@@ -82,20 +82,19 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
     // Implement ISession
 
     @Override
-    public void dispose() {
-	super.dispose();
-	if (fs32 instanceof AbstractFilesystem) {
-	    ((AbstractFilesystem)fs32).dispose();
-	}
+    public String getUsername() {
+	return System.getenv("USERDOMAIN") + "\\" + System.getProperty("user.name");
     }
 
+    @Override
     public boolean connect() {
+	connected = true; // set this now so createProcess will work
 	if (env == null) {
 	    try {
 		env = new Environment(this);
 	    } catch (Exception e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		return false;
+		return connected = false;
 	    }
 	}
 	is64bit = ((Environment)env).is64bit();
@@ -121,7 +120,7 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 		reg = new Registry(this);
 	    } catch (Exception e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		return false;
+		return connected = false;
 	    }
 	    if (!is64bit) reg32 = reg;
 	}
@@ -138,40 +137,46 @@ public class WindowsSession extends AbstractSession implements IWindowsSession {
 		}
 	    } catch (Exception e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		return false;
+		return connected = false;
 	    }
 	}
 	if (wmi.register()) {
-	    connected = true; // set this now so the IDirectory has access to the machine name
 	    if (directory == null) {
 		try {
 		    directory = new Directory(this);
 		} catch (Exception e) {
 		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		    connected = false;
-		    return false;
+		    return connected = false;
 		}
 	    }
 	    return true;
 	} else {
-	    return false;
+	    return connected = false;
 	}
     }
 
+    @Override
     public void disconnect() {
 	runspaces.shutdown();
 	wmi.deregister();
+	env = null;
 	connected = false;
+    }
+
+    @Override
+    public void dispose() {
+	super.dispose();
+	if (fs32 instanceof AbstractFilesystem) {
+	    ((AbstractFilesystem)fs32).dispose();
+	}
     }
 
     public Type getType() {
 	return Type.WINDOWS;
     }
 
-    @Override
-    public String getUsername() {
-	return System.getenv("USERDOMAIN") + "\\" + System.getProperty("user.name");
-    }
+    // Implement IComputerSystem
 
     @Override
     public String getMachineName() {

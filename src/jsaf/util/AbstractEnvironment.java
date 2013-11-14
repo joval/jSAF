@@ -6,8 +6,9 @@ package jsaf.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Properties;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 import jsaf.intf.system.IEnvironment;
@@ -20,7 +21,7 @@ import jsaf.intf.system.IEnvironment;
  */
 public abstract class AbstractEnvironment implements IEnvironment {
     protected boolean caseInsensitive;
-    protected Properties props;
+    protected Map<String, String> map;
 
     protected AbstractEnvironment() {
 	this(false);
@@ -28,7 +29,13 @@ public abstract class AbstractEnvironment implements IEnvironment {
 
     protected AbstractEnvironment(boolean caseInsensitive) {
 	this.caseInsensitive = caseInsensitive;
-	props = new Properties();
+	map = new HashMap<String, String>();
+    }
+
+    // Implement Iterable<String>
+
+    public Iterator<String> iterator() {
+	return map.keySet().iterator();
     }
 
     // Implement IEnvironment
@@ -38,11 +45,9 @@ public abstract class AbstractEnvironment implements IEnvironment {
 	    return data;
 	}
 	String originalData = data;
-	Iterator <String>names = props.stringPropertyNames().iterator();
-	while (names.hasNext()) {
-	    String name = names.next();
-	    String pattern = new StringBuffer(caseInsensitive ? "(?i)%" : "%").append(name).append("%").toString();
-	    data = data.replaceAll(pattern, Matcher.quoteReplacement(props.getProperty(name)));
+	for(Map.Entry<String, String> entry : map.entrySet()) {
+	    String pattern = new StringBuffer(caseInsensitive ? "(?i)%" : "%").append(entry.getKey()).append("%").toString();
+	    data = data.replaceAll(pattern, Matcher.quoteReplacement(entry.getValue()));
 	}
 	if (data.equals(originalData)) {
 	    return data; // Some unexpandable pattern exists in there
@@ -55,17 +60,13 @@ public abstract class AbstractEnvironment implements IEnvironment {
 	if (caseInsensitive) {
 	    for (String key : this) {
 		if (key.equalsIgnoreCase(var)) {
-		    return props.getProperty(key);
+		    return map.get(key);
 		}
 	    }
 	    return null;
 	} else {
-	    return props.getProperty(var);
+	    return map.get(var);
 	}
-    }
-
-    public Iterator<String> iterator() {
-	return props.stringPropertyNames().iterator();
     }
 
     public String[] toArray() {

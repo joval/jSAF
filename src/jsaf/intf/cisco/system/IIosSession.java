@@ -8,16 +8,21 @@ import java.util.regex.PatternSyntaxException;
 import java.util.regex.Matcher;
 
 import jsaf.intf.netconf.INetconf;
+import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.ssh.system.IShell;
 
 /**
  * A representation of an IOS command-line session.
  *
+ * Implementations should also implement IComputerSystem (specifically, the createProcess method).
+ *
+ * @see jsaf.intf.system.IComputerSystem
+ *
  * @author David A. Solin
  * @version %I% %G%
  * @since 1.0
  */
-public interface IIosSession extends INetconf {
+public interface IIosSession extends IComputerSystem {
     /**
      * The IOS command to enable privilege level 15 (the highest privilege level).
      */
@@ -86,4 +91,12 @@ public interface IIosSession extends INetconf {
      * @since 1.0
      */
     IShell getShell() throws Exception;
+
+    /**
+     * Cast this JunOS session to an INetconf.  Since Java does not permit polymorphism by inheritance, this method
+     * serves that purpose.
+     *
+     * @since 1.1
+     */
+    INetconf asNetconf();
 }

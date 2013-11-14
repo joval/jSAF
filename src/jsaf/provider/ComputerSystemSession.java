@@ -20,11 +20,13 @@ import jsaf.JSAFSystem;
 import jsaf.Message;
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFilesystem;
+import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.system.IEnvironment;
 import jsaf.intf.system.IProcess;
-import jsaf.intf.unix.system.IUnixSession;
+import jsaf.intf.system.ISession;
 import jsaf.io.StreamLogger;
 import jsaf.io.fs.AbstractFilesystem;
+import jsaf.util.Environment;
 
 /**
  * Base class for the local and remote Windows and Unix ISession implementations.
@@ -32,14 +34,14 @@ import jsaf.io.fs.AbstractFilesystem;
  * @author David A. Solin
  * @version %I% %G%
  */
-public abstract class AbstractSession extends AbstractBaseSession {
+public abstract class ComputerSystemSession extends BaseSession implements IComputerSystem {
     protected IEnvironment env;
     protected IFilesystem fs;
 
     /**
      * Create an ISession with no workspace to store state information, i.e., for a local ISession.
      */
-    protected AbstractSession() {
+    protected ComputerSystemSession() {
 	super();
     }
 
@@ -61,34 +63,7 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	}
     }
 
-    // Implement ISession (sparsely)
-
-    @Override
-    public String getTempDir() throws IOException {
-	return System.getProperty("java.io.tmpdir");
-    }
-
-    @Override
-    public IEnvironment getEnvironment() {
-	return env;
-    }
-
-    @Override
-    public IFilesystem getFilesystem() {
-	if (fs == null) {
-	    return super.getFilesystem();
-	} else {
-	    return fs;
-	}
-    }
-
-    @Override
-    public void dispose() {
-	super.dispose();
-	if (fs instanceof AbstractFilesystem) {
-	    ((AbstractFilesystem)fs).dispose();
-	}
-    }
+    // ISession overrides
 
     /**
      * The account name running the Java process.
@@ -99,16 +74,63 @@ public abstract class AbstractSession extends AbstractBaseSession {
     }
 
     @Override
+    public boolean connect() {
+	if (!isConnected()) {
+	    env = new Environment(System.getenv());
+	}
+	return super.connect();
+    }
+
+    @Override
+    public void disconnect() {
+	env = null;
+	super.disconnect();
+    }
+
+    @Override
+    public void dispose() {
+	super.dispose();
+	if (fs instanceof AbstractFilesystem) {
+	    ((AbstractFilesystem)fs).dispose();
+	}
+    }
+
+    // Implement IComputerSystem
+
+    public String getMachineName() {
+	return getHostname();
+    }
+
     public long getTime() throws Exception {
 	return System.currentTimeMillis();
     }
 
-    /**
-     * Here, we provide an implementation for local ISessions.
-     */
-    @Override
+    public String getTempDir() throws IOException {
+	return System.getProperty("java.io.tmpdir");
+    }
+
+    public IEnvironment getEnvironment() {
+	if (isConnected()) {
+	    return env;
+	} else {
+	    throw new IllegalStateException("disconnected");
+	}
+    }
+
+    public IFilesystem getFilesystem() {
+	if (isConnected()) {
+	    return fs;
+	} else {
+	    throw new IllegalStateException("disconnected");
+	}
+    }
+
     public IProcess createProcess(String command, String[] env, String dir) throws Exception {
-	return new JavaProcess(command, env, dir);
+	if (isConnected()) {
+	    return new JavaProcess(command, env, dir);
+	} else {
+	    throw new IllegalStateException("disconnected");
+	}
     }
 
     // Internal
@@ -134,7 +156,7 @@ public abstract class AbstractSession extends AbstractBaseSession {
 	    this.command = command;
 	    this.env = env;
 	    this.dir = dir;
-	    this.pid = AbstractSession.this.pid++;
+	    this.pid = ComputerSystemSession.this.pid++;
 	}
 
 	// Implement IProcess

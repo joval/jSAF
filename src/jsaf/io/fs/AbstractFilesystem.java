@@ -47,7 +47,7 @@ import jsaf.intf.unix.system.IUnixSession;
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.util.IProperty;
 import jsaf.intf.util.ISearchable;
-import jsaf.intf.system.ISession;
+import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.system.IEnvironment;
 import jsaf.util.StringTools;
 
@@ -68,14 +68,14 @@ public abstract class AbstractFilesystem implements IFilesystem {
 
     protected boolean autoExpand = true;
     protected IProperty props;
-    protected ISession session;
+    protected IComputerSystem session;
     protected IEnvironment env;
     protected LocLogger logger;
 
     protected final String ESCAPED_DELIM;
     protected final String DELIM;
 
-    protected AbstractFilesystem(ISession session, String delim, String dbkey) {
+    protected AbstractFilesystem(IComputerSystem session, String delim, String dbkey) {
 	ESCAPED_DELIM = Matcher.quoteReplacement(delim);
 	DELIM = delim;
 	this.session = session;
@@ -102,7 +102,7 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	this.autoExpand = autoExpand;
     }
 
-    public ISession getSession() {
+    public IComputerSystem getSession() {
 	return session;
     }
 

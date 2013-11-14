@@ -8,7 +8,7 @@ import java.util.List;
 
 import jsaf.Message;
 import jsaf.intf.unix.system.IUnixSession;
-import jsaf.provider.AbstractSession;
+import jsaf.provider.ComputerSystemSession;
 import jsaf.util.SafeCLI;
 
 /**
@@ -17,7 +17,7 @@ import jsaf.util.SafeCLI;
  * @author David A. Solin
  * @version %I% %G%
  */
-public abstract class BaseUnixSession extends AbstractSession implements IUnixSession {
+public abstract class BaseUnixSession extends ComputerSystemSession implements IUnixSession {
     protected Flavor flavor = Flavor.UNKNOWN;
 
     protected BaseUnixSession() {
@@ -49,6 +49,8 @@ public abstract class BaseUnixSession extends AbstractSession implements IUnixSe
     public Type getType() {
 	return Type.UNIX;
     }
+
+    // Implement IComputerSystem
 
     @Override
     public String getMachineName() {

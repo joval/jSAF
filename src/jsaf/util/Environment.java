@@ -3,12 +3,13 @@
 
 package jsaf.util;
 
+import java.util.Map;
 import java.util.Properties;
 
 import jsaf.intf.system.IEnvironment;
 
 /**
- * An IEnvironment implementation that can be initialized with java.util.Properties or another IEnvironment.
+ * An IEnvironment implementation that can be initialized with java.util.Map or another IEnvironment.
  *
  * @author David A. Solin
  * @version %I% %G%
@@ -17,13 +18,20 @@ public class Environment extends AbstractEnvironment {
     /**
      * Create from properties (case-sensitive).
      */
-    public Environment(Properties props) {
-	this(props, false);
+    public Environment(Map<String, String> map) {
+	this(map, false);
     }
 
-    public Environment(Properties props, boolean caseInsensitive) {
+    public Environment(Properties props) {
+	super(false);
+	for (String key : props.stringPropertyNames()) {
+	    map.put(key, props.getProperty(key));
+	}
+    }
+
+    public Environment(Map<String, String> map, boolean caseInsensitive) {
 	super(caseInsensitive);
-	this.props = props;
+	this.map = map;
     }
 
     /**
@@ -51,9 +59,9 @@ public class Environment extends AbstractEnvironment {
 	    }
 	}
 	if (value == null || "".equals(value)) {
-	    props.remove(variable);
+	    map.remove(variable);
 	} else {
-	    props.setProperty(variable, value);
+	    map.put(variable, value);
 	}
     }
 }

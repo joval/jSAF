@@ -23,10 +23,10 @@ public class Environment extends AbstractEnvironment {
 		String key = line.substring(0,ptr);
 		lastKey = key;
 		String val = line.substring(ptr+1);
-		props.setProperty(key, val);
+		map.put(key, val);
 	    } else if (lastKey != null) {
-		String val = new StringBuffer(props.getProperty(lastKey)).append(line).toString();
-		props.setProperty(lastKey, val);
+		String val = new StringBuffer(map.get(lastKey)).append(line).toString();
+		map.put(lastKey, val);
 	    }
 	}
     }

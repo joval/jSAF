@@ -3,7 +3,7 @@
 
 package jsaf.intf.windows.system;
 
-import jsaf.intf.system.ISession;
+import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.windows.identity.IDirectory;
 import jsaf.intf.windows.io.IWindowsFilesystem;
 import jsaf.intf.windows.powershell.IRunspacePool;
@@ -17,7 +17,7 @@ import jsaf.intf.windows.wmi.IWmiProvider;
  * @version %I% %G%
  * @since 1.0
  */
-public interface IWindowsSession extends ISession {
+public interface IWindowsSession extends IComputerSystem {
     /**
      * Name of the environment variable containing the processor architecture (when running in 32-bit mode on a 64-bit
      * machine, the value will actually be the emulated architecture).
@@ -85,8 +85,8 @@ public interface IWindowsSession extends ISession {
     boolean supports(View view);
 
     /**
-     * As an ISession, the getFilesystem() call always returns a non-redirected view, i.e., getFilesystem(getNativeView()).
-     * This method facilitates access to the 32-bit view on a 64-bit machine.
+     * As an IComputerSystem, the getFilesystem() call always returns a non-redirected view, i.e.,
+     * getFilesystem(getNativeView()). This method facilitates access to the 32-bit view on a 64-bit machine.
      *
      * @since 1.0
      */

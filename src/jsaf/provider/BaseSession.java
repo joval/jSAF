@@ -4,38 +4,32 @@
 package jsaf.provider;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Properties;
 
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
-import jsaf.intf.io.IFilesystem;
-import jsaf.intf.system.IEnvironment;
-import jsaf.intf.system.IProcess;
 import jsaf.intf.system.ISession;
-import jsaf.intf.unix.system.IUnixSession;
 import jsaf.intf.util.IProperty;
 import jsaf.intf.util.IConfigurable;
 import jsaf.util.PropertyUtil;
 
 /**
- * This is the base class for ALL the implementations of all the different types of jOVAL sessions:
- *
- * @see org.joval.os.unix.system.UnixSession
- * @see org.joval.os.windows.system.WindowsSession
+ * This is the base class for ALL the implementations of all the different types of jSAF sessions. A session has very
+ * limited capabilities -- properties, a hostname, a username, and the concept of a "connection". Extended interfaces
+ * expose more in-depth capabilities of (potentially) both physical and logical endpoints.
  *
  * @author David A. Solin
  * @version %I% %G%
  */
-public abstract class AbstractBaseSession implements IConfigurable, ISession {
+public abstract class BaseSession implements IConfigurable, ISession {
     protected File wsdir = null;
     protected LocLogger logger;
     protected InternalProperties internalProps;
     protected boolean connected = false;
 
-    protected AbstractBaseSession() {
+    protected BaseSession() {
 	logger = Message.getLogger();
 	internalProps = new InternalProperties();
 	Configurator.configure(this);
@@ -71,7 +65,15 @@ public abstract class AbstractBaseSession implements IConfigurable, ISession {
 	return internalProps;
     }
 
-    // Implement ISession (sparsely)
+    // Implement ISession
+
+    public String getHostname() {
+	return LOCALHOST;
+    }
+
+    public String getUsername() {
+	return null;
+    }
 
     public long getTimeout(Timeout to) {
 	switch(to) {
@@ -94,38 +96,20 @@ public abstract class AbstractBaseSession implements IConfigurable, ISession {
 	return wsdir;
     }
 
+    public boolean connect() {
+	return connected = true;
+    }
+
     public boolean isConnected() {
 	return connected;
     }
 
-    public String getUsername() {
-	return null;
+    public void disconnect() {
+	connected = false;
     }
 
     public void dispose() {
 	logger.info(Message.STATUS_SESSION_DISPOSE, getHostname());
-    }
-
-    public String getHostname() {
-	return LOCALHOST;
-    }
-
-    // All the unsupported-by-default methods
-
-    public String getMachineName() {
-	throw new UnsupportedOperationException();
-    }
-
-    public IEnvironment getEnvironment() {
-	throw new UnsupportedOperationException();
-    }
-
-    public String getTempDir() throws IOException {
-	throw new UnsupportedOperationException();
-    }
-
-    public IFilesystem getFilesystem() {
-	throw new UnsupportedOperationException();
     }
 
     // Private

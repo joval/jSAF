@@ -151,6 +151,13 @@ public interface ISession extends ILoggable {
     }
 
     /**
+     * A constant defining the String "localhost".
+     *
+     * @since 1.0
+     */
+    String LOCALHOST = "localhost";
+
+    /**
      * Property key used to define a "small" amount of time.
      *
      * @since 1.0
@@ -184,20 +191,6 @@ public interface ISession extends ILoggable {
      * @since 1.0
      */
     String PROP_DEBUG = "debug";
-
-    /**
-     * Property indicating the number of times to re-try running a command in the event of an unexpected disconnect.
-     *
-     * @since 1.0
-     */
-    String PROP_EXEC_RETRIES = "exec.retries";
-
-    /**
-     * A constant defining the String "localhost".
-     *
-     * @since 1.0
-     */
-    String LOCALHOST = "localhost";
 
     /**
      * Get the session type.
@@ -249,31 +242,6 @@ public interface ISession extends ILoggable {
     String getHostname();
 
     /**
-     * Get the machine's own impression of its name. This name might not be meaningful to DNS.
-     *
-     * @since 1.0
-     */
-    String getMachineName();
-
-    /**
-     * Get the number of milliseconds since midnight 1/1/70 UTC, on the system.
-     *
-     * @since 1.0
-     */
-    long getTime() throws Exception;
-
-    /**
-     * Create a process on the machine, with the specified environment variables.
-     *
-     * @param command the command string
-     * @param env Environment variables, each of the form "VARIABLE=VALUE" (can be null)
-     * @param dir the directory from which to launch the process (can be null)
-     *
-     * @since 1.0
-     */
-    IProcess createProcess(String command, String[] env, String dir) throws Exception;
-
-    /**
      * Get the directory in which state information for the session is stored.
      *
      * @return null if this is a stateless session.
@@ -283,32 +251,11 @@ public interface ISession extends ILoggable {
     File getWorkspace();
 
     /**
-     * Get the path to the system's "temp" directory.
-     *
-     * @since 1.0
-     */
-    public String getTempDir() throws IOException;
-
-    /**
-     * Get access to the machine filesystem.
-     *
-     * @since 1.0
-     */
-    public IFilesystem getFilesystem();
-
-    /**
      * Returns the account name used by this session, if any.
      *
      * @since 1.0
      */
     String getUsername();
-
-    /**
-     * Returns a copy of the user environment.
-     *
-     * @since 1.0
-     */
-    public IEnvironment getEnvironment();
 
     /**
      * When you're completely finished using the session, call this method to clean up caches and other resources.

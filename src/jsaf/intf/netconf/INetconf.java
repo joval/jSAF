@@ -10,11 +10,18 @@ import jsaf.intf.system.ISession;
 /**
  * An interface for a session that can perform NETCONF operations.
  *
+ * @see <a href="http://tools.ietf.org/html/rfc4742">RFC 4742</a>
+ *
  * @author David A. Solin
  * @version %I% %G%
  * @since 1.0
  */
 public interface INetconf extends ISession {
+    /**
+     * The IANA-assigned port number for NETCONF over SSH.
+     */
+    int SSH_PORT = 830;
+
     /**
      * Get an XML Document containing an unfiltered get-config reply.
      *

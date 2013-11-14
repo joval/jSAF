@@ -27,7 +27,7 @@ public interface ISession extends ILoggable {
     enum Type {
 	/**
 	 * An SSH-type session. This type is only intended to be a transition state used during a discovery process, that
-	 * will ultimately yield a type of UNIX, CISCO_IOS, JUNIPER_JUNOS or UNKNOWN.
+	 * will ultimately yield a type of UNIX, CISCO_IOS, JUNIPER_JUNOS, NETCONF or UNKNOWN.
 	 *
 	 * @since 1.0
 	 */
@@ -61,6 +61,15 @@ public interface ISession extends ILoggable {
 	JUNIPER_JUNOS("junos"),
 
 	/**
+	 * Indicates a session connected over SSH to port 830.
+	 *
+	 * @see jsaf.intf.netconf.INetconf
+	 *
+	 * @since 1.1
+	 */
+	NETCONF("netconf"),
+
+	/**
 	 * Indicates a session with a device running Apple iOS.
 	 *
 	 * @see jsaf.intf.apple.system.IiOSSession
@@ -77,6 +86,14 @@ public interface ISession extends ILoggable {
 	 * @since 1.0
 	 */
 	WINDOWS("windows"),
+
+	/**
+	 * Provides a mechanism for extended jSAF session types. The String value for the extended type
+	 * is supplied using the getTypeVal() method of the ISession.
+	 *
+	 * @since 1.1
+	 */
+	EXTENDED("extended"),
 
 	/**
 	 * Indicates that the session type cannot be determined.
@@ -198,6 +215,16 @@ public interface ISession extends ILoggable {
      * @since 1.0
      */
     Type getType();
+
+    /**
+     * A shortcut for getType().value(), except when type is Type.EXTENDED, in which case the desired value for the
+     * extended type should be returned.
+     *
+     * @see jsaf.intf.system.ISession.Type.value()
+     *
+     * @since 1.1
+     */
+    String getTypeVal();
 
     /**
      * Get the timeout value corresponding to the Timeout enumeration.

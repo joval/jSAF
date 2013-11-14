@@ -112,6 +112,13 @@ public abstract class BaseSession implements IConfigurable, ISession {
 	logger.info(Message.STATUS_SESSION_DISPOSE, getHostname());
     }
 
+    /**
+     * Extended ISession types (i.e., not defined in the ISession.Type enumeration) should override this method.
+     */
+    public String getTypeVal() {
+	return getType().value();
+    }
+
     // Private
 
     protected class InternalProperties implements IProperty {

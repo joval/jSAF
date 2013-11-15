@@ -235,6 +235,10 @@ public class Runspace implements IRunspace {
 	return view;
     }
 
+    public boolean isAlive() {
+	return p.isRunning();
+    }
+
     // Private
 
     /**

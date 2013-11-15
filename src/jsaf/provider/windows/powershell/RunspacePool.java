@@ -55,18 +55,19 @@ public class RunspacePool implements IRunspacePool {
 	Iterator<Runspace> iter = pool.values().iterator();
 	while(iter.hasNext()) {
 	    Runspace runspace = iter.next();
-	    try {
-		runspace.invoke("exit", 2000L);
-		IProcess p = runspace.getProcess();
-		if (p.isRunning()) {
-		    p.destroy();
+	    if (runspace.isAlive()) {
+		try {
+		    runspace.invoke("exit", 2000L);
+		    IProcess p = runspace.getProcess();
+		    if (p.isRunning()) {
+			p.destroy();
+		    }
+		    logger.debug(Message.STATUS_POWERSHELL_EXIT, runspace.getId(), p.exitValue());
+		} catch (Exception e) {
+		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		}
-		logger.debug(Message.STATUS_POWERSHELL_EXIT, runspace.getId(), p.exitValue());
-	    } catch (Exception e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    } finally {
-		iter.remove();
 	    }
+	    iter.remove();
 	}
     }
 
@@ -79,8 +80,14 @@ public class RunspacePool implements IRunspacePool {
 
     public synchronized Collection<IRunspace> enumerate() {
 	Collection<IRunspace> runspaces = new ArrayList<IRunspace>();
-	for (Runspace rs : pool.values()) {
-	    runspaces.add(rs);
+	Iterator<Runspace> iter = pool.values().iterator();
+	while(iter.hasNext()) {
+	    Runspace runspace = iter.next();
+	    if (runspace.isAlive()) {
+		runspaces.add(runspace);
+	    } else {
+		iter.remove();
+	    }
 	}
 	return runspaces;
     }

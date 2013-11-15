@@ -91,4 +91,11 @@ public interface IRunspace extends ILoggable {
      * @since 1.0
      */
     IWindowsSession.View getView();
+
+    /**
+     * Returns whether the runspace's process is still alive.
+     *
+     * @since 1.1
+     */
+    boolean isAlive();
 }

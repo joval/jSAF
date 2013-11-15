@@ -104,9 +104,13 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	    if (runspace == null) {
 		runspace = ((IWindowsSession)session).getRunspacePool().spawn(apparentView);
 	    }
-	    runspace.loadAssembly(getClass().getResourceAsStream("WindowsFilesystem.dll"));
-	    runspace.loadModule(getClass().getResourceAsStream("WindowsFilesystem.psm1"));
-	    runspace.loadModule(getClass().getResourceAsStream("WindowsFileSearcher.psm1"));
+
+	    //
+	    // NB: WindowsFilesystem.class, to allow subclasses to extend this method.
+	    //
+	    runspace.loadAssembly(WindowsFilesystem.class.getResourceAsStream("WindowsFilesystem.dll"));
+	    runspace.loadModule(WindowsFilesystem.class.getResourceAsStream("WindowsFilesystem.psm1"));
+	    runspace.loadModule(WindowsFilesystem.class.getResourceAsStream("WindowsFileSearcher.psm1"));
 	}
 	return runspace;
     }

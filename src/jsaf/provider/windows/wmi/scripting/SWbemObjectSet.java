@@ -23,15 +23,12 @@ public class SWbemObjectSet implements ISWbemObjectSet {
     Dispatch dispatch;
     ArrayList<ISWbemObject> objects;
 
-    public SWbemObjectSet(Dispatch dispatch) {
+    public SWbemObjectSet(Dispatch dispatch) throws Exception {
 	this.dispatch = dispatch;
 	EnumVariant enumVariant = new EnumVariant(dispatch);
 	objects = new ArrayList<ISWbemObject>();
-	try {
-	    while(enumVariant.hasMoreElements()) {
-		objects.add(new SWbemObject(enumVariant.nextElement().toDispatch()));
-	    }
-	} catch (Exception e) {
+	while(enumVariant.hasMoreElements()) {
+	    objects.add(new SWbemObject(enumVariant.nextElement().toDispatch()));
 	}
     }
 

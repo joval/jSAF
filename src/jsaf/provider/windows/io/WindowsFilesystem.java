@@ -63,25 +63,12 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
     private final IWindowsSession.View apparentView, accessorView;
     private Collection<IVolume> volumes;
     private String system32, sysWOW64, sysNative;
+    private IRunspace runspace;
 
-    protected IRunspace runspace;
-
-    public WindowsFilesystem(IWindowsSession session, IWindowsSession.View apparentView, IWindowsSession.View accessorView)
-		throws Exception {
-
+    public WindowsFilesystem(IWindowsSession session, IWindowsSession.View apparentView, IWindowsSession.View accessorView) {
 	super(session, DELIM_STR, IWindowsSession.View._32BIT == apparentView ? "fs32" : "fs");
 	this.apparentView = apparentView;
 	this.accessorView = accessorView;
-	for (IRunspace runspace : session.getRunspacePool().enumerate()) {
-	    if (runspace.getView() == apparentView) {
-		this.runspace = runspace;
-	    }
-	}
-	if (runspace == null) {
-	    runspace = session.getRunspacePool().spawn(apparentView);
-	}
-	runspace.loadAssembly(WindowsFilesystem.class.getResourceAsStream("WindowsFilesystem.dll"));
-	runspace.loadModule(WindowsFilesystem.class.getResourceAsStream("WindowsFilesystem.psm1"));
 	String sysRoot	= session.getEnvironment().getenv("SystemRoot");
 	system32	= sysRoot + DELIM_STR + "System32"  + DELIM_STR;
 	sysNative	= sysRoot + DELIM_STR + "Sysnative" + DELIM_STR;
@@ -107,10 +94,27 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	return path;
     }
 
+    protected IRunspace getRunspace() throws Exception {
+	if (runspace == null || !runspace.isAlive()) {
+	    for (IRunspace rs : ((IWindowsSession)session).getRunspacePool().enumerate()) {
+		if (rs.getView() == apparentView) {
+		    runspace = rs;
+		}
+	    }
+	    if (runspace == null) {
+		runspace = ((IWindowsSession)session).getRunspacePool().spawn(apparentView);
+	    }
+	    runspace.loadAssembly(getClass().getResourceAsStream("WindowsFilesystem.dll"));
+	    runspace.loadModule(getClass().getResourceAsStream("WindowsFilesystem.psm1"));
+	    runspace.loadModule(getClass().getResourceAsStream("WindowsFileSearcher.psm1"));
+	}
+	return runspace;
+    }
+
     public synchronized ISearchable<IFile> getSearcher() throws IOException {
 	if (searcher == null) {
 	    try {
-		searcher = new WindowsFileSearcher((IWindowsSession)session, runspace, getSearchCache());
+		searcher = new WindowsFileSearcher(this, getSearchCache());
 	    } catch (IOException e) {
 		throw e;
 	    } catch (Exception e) {

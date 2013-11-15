@@ -42,7 +42,6 @@ import jsaf.intf.windows.io.IWindowsFilesystem;
 import jsaf.intf.windows.powershell.IRunspace;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.io.StreamTool;
-import jsaf.io.fs.AbstractFilesystem;
 import jsaf.util.StringTools;
 
 /**
@@ -51,20 +50,15 @@ import jsaf.util.StringTools;
  * @author David A. Solin
  * @version %I% %G%
  */
-public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
-    private IWindowsSession session;
-    private AbstractFilesystem fs;
-    private IRunspace runspace;
+class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
+    private WindowsFilesystem fs;
     private LocLogger logger;
     private Map<String, String[]> cache;
 
-    public WindowsFileSearcher(IWindowsSession session, IRunspace runspace, Map<String, String[]> cache) throws Exception {
-	this.session = session;
-	logger = session.getLogger();
-	this.runspace = runspace;
-	runspace.loadModule(getClass().getResourceAsStream("WindowsFileSearcher.psm1"));
-	fs = (AbstractFilesystem)session.getFilesystem(runspace.getView());
+    WindowsFileSearcher(WindowsFilesystem fs, Map<String, String[]> cache) throws Exception {
+	this.fs = fs;
 	this.cache = cache;
+	logger = fs.getSession().getLogger();
     }
 
     // Implement ILogger
@@ -197,10 +191,11 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 		    // locally and read it.
 		    //
 		    remoteTemp = execToFile(cmd);
-		    if (session.getWorkspace() == null || ISession.LOCALHOST.equals(session.getHostname())) {
+		    File wsdir = fs.getSession().getWorkspace();
+		    if (wsdir == null || ISession.LOCALHOST.equals(fs.getSession().getHostname())) {
 			in = new GZIPInputStream(remoteTemp.getInputStream());
 		    } else {
-			localTemp = File.createTempFile("search", null, session.getWorkspace());
+			localTemp = File.createTempFile("search", null, wsdir);
 			StreamTool.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
 			in = new GZIPInputStream(new FileInputStream(localTemp));
 		    }
@@ -272,12 +267,12 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	    unique = Long.toString(System.currentTimeMillis());
 	    Thread.sleep(1);
 	}
-	String tempPath = session.getTempDir();
+	String tempPath = fs.getSession().getTempDir();
 	if (!tempPath.endsWith(IWindowsFilesystem.DELIM_STR)) {
 	    tempPath = tempPath + IWindowsFilesystem.DELIM_STR;
 	}
 	tempPath = tempPath + "find." + unique + ".out";
-	tempPath = session.getEnvironment().expand(tempPath);
+	tempPath = fs.getSession().getEnvironment().expand(tempPath);
 	logger.debug(Message.STATUS_FS_SEARCH_TEMP, tempPath);
 
 	String cmd = new StringBuffer(command).append(" | Out-File ").append(tempPath).toString();
@@ -285,11 +280,11 @@ public class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	FileWatcher fw = new FileWatcher(tempPath);
 	fw.start();
 	try {
-	    runspace.invoke(cmd, session.getTimeout(IWindowsSession.Timeout.XL));
+	    fs.getRunspace().invoke(cmd, fs.getSession().getTimeout(IWindowsSession.Timeout.XL));
 	} finally {
 	    fw.interrupt();
 	}
-	runspace.invoke("Gzip-File " + tempPath);
+	fs.getRunspace().invoke("Gzip-File " + tempPath);
 	return fs.getFile(tempPath + ".gz", IFile.Flags.READWRITE);
     }
 

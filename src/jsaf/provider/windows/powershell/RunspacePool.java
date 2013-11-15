@@ -86,6 +86,7 @@ public class RunspacePool implements IRunspacePool {
 	    if (runspace.isAlive()) {
 		runspaces.add(runspace);
 	    } else {
+		logger.warn(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, runspace.getProcess().exitValue()));
 		iter.remove();
 	    }
 	}

@@ -199,7 +199,7 @@ public class Runspace implements IRunspace {
 	}
     }
 
-    public synchronized String invoke(String command) throws IOException, PowershellException {
+    public String invoke(String command) throws IOException, PowershellException {
 	return invoke(command, timeout);
     }
 

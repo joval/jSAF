@@ -128,16 +128,11 @@ public class WindowsSession extends ComputerSystemSession implements IWindowsSes
 	    wmi = new WmiProvider(this, getProperties().getLongProperty(IWmiProvider.PROP_WMI_TIMEOUT));
 	}
 	if (fs == null) {
-	    try {
-		if (is64bit) {
-		    fs = new WindowsFilesystem(this, View._64BIT, accessorView);
-		} else {
-		    fs32 = new WindowsFilesystem(this, View._32BIT, accessorView);
-		    fs = fs32;
-		}
-	    } catch (Exception e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		return connected = false;
+	    if (is64bit) {
+		fs = new WindowsFilesystem(this, View._64BIT, accessorView);
+	    } else {
+		fs32 = new WindowsFilesystem(this, View._32BIT, accessorView);
+		fs = fs32;
 	    }
 	}
 	if (wmi.register()) {
@@ -243,11 +238,7 @@ public class WindowsSession extends ComputerSystemSession implements IWindowsSes
 		if (getNativeView() == View._32BIT) {
 		    fs32 = (IWindowsFilesystem)fs;
 		} else {
-		    try {
-			fs32 = new WindowsFilesystem(this, View._32BIT, accessorView);
-		    } catch (Exception e) {
-			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		    }
+		    fs32 = new WindowsFilesystem(this, View._32BIT, accessorView);
 		}
 	    }
 	    return fs32;

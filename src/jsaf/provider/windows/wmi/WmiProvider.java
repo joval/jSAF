@@ -29,9 +29,11 @@ public class WmiProvider implements IWmiProvider {
     private ActiveXComponent locator;
     private Hashtable <String, Dispatch>map;
     private LocLogger logger;
+    private long timeout;
 
-    public WmiProvider(ILoggable log) {
+    public WmiProvider(ILoggable log, long timeout) {
 	logger = log.getLogger();
+	this.timeout = timeout;
 	map = new Hashtable<String, Dispatch>();
     }
 
@@ -76,10 +78,75 @@ public class WmiProvider implements IWmiProvider {
 	    services = locator.invoke("ConnectServer", Variant.DEFAULT, new Variant(ns)).toDispatch();
 	    map.put(ns, services);
 	}
-	return new SWbemObjectSet(Dispatch.call(services, "ExecQuery", wql).toDispatch());
+	QueryRunner runner = new QueryRunner(services, wql);
+	if (timeout > 0) {
+	    runner.start();
+	    try {
+		runner.join(timeout);
+		if (runner.isAlive()) {
+		    runner.interrupt();
+		    logger.warn(Message.ERROR_WMI_TIMEOUT, wql);
+		}
+	    } catch (InterruptedException e) {
+		throw new WmiException(e);
+	    }
+	} else {
+	    runner.run();
+	}
+	return runner.result();
     }
 
     public ISWbemEventSource execNotificationQuery(String ns, String wql) throws WmiException {
 	throw new WmiException("unsupported");
+    }
+
+    // Private
+
+    class QueryRunner implements Runnable {
+	private Dispatch services;
+	private String wql;
+	private Thread thread;
+	private SWbemObjectSet result;
+	private WmiException error;
+
+	QueryRunner(Dispatch services, String wql) {
+	    this.services = services;
+	    this.wql = wql;
+	}
+
+	void start() {
+	    thread = new Thread(this);
+	    thread.start();
+	}
+
+	void join(long millis) throws InterruptedException {
+	    thread.join(millis);
+	}
+
+	boolean isAlive() {
+	    return thread.isAlive();
+	}
+
+	void interrupt() {
+	    thread.interrupt();
+	}
+
+	ISWbemObjectSet result() throws WmiException {
+	    if (error == null) {
+		return result;
+	    } else {
+		throw error;
+	    }
+	}
+
+	// Implement Runnable
+
+	public void run() {
+	    try {
+		result = new SWbemObjectSet(Dispatch.call(services, "ExecQuery", wql).toDispatch());
+	    } catch (Exception e) {
+		error = new WmiException(e);
+	    }
+	}
     }
 }

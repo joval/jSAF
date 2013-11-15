@@ -36,3 +36,27 @@ function Check-Privileged {
   $Principal = New-Object System.Security.Principal.WindowsPrincipal($Identity)
   $Principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)
 }
+
+function Safe-WmiQuery {
+  param(
+    [String]$Namespace = "root\cimv2",
+    [String]$Query = $(throw "Mandatory parameter -Query missing."),
+    [int]$Timeout = 0
+  )
+
+  if ($Timeout -eq 0) {
+    Get-WmiObject -Namespace $Namespace -Query $Query
+  } else {
+    $ConnectionOptions = New-Object System.Management.ConnectionOptions
+    $EnumerationOptions = New-Object System.Management.EnumerationOptions
+    $EnumerationOptions.set_timeout([System.TimeSpan]::FromMilliseconds($Timeout))
+    $Scope = New-Object System.Management.ManagementScope $Namespace, $ConnectionOptions
+    $Scope.Connect()
+    $Searcher = new-object System.Management.ManagementObjectSearcher
+    $Searcher.set_options($EnumerationOptions)
+    $Searcher.Query = new-object System.Management.ObjectQuery $Query
+    $Searcher.Scope = $Scope
+    trap { $_ } $Result = $Searcher.get()
+    return $Result
+  }
+}

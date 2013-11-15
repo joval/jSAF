@@ -125,7 +125,7 @@ public class WindowsSession extends ComputerSystemSession implements IWindowsSes
 	    if (!is64bit) reg32 = reg;
 	}
 	if (wmi == null) {
-	    wmi = new WmiProvider(this);
+	    wmi = new WmiProvider(this, getProperties().getLongProperty(IWmiProvider.PROP_WMI_TIMEOUT));
 	}
 	if (fs == null) {
 	    try {

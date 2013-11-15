@@ -17,6 +17,14 @@ import jsaf.provider.windows.wmi.WmiException;
  */
 public interface IWmiProvider extends ILoggable {
     /**
+     * Property indicating the number of milliseconds to wait for a WMI query to return, before quitting and throwing an
+     * exception.
+     *
+     * @since 1.1
+     */
+    String PROP_WMI_TIMEOUT = "wmi.timeout";
+
+    /**
      * The namespace for the CIMv2 model.
      *
      * @since 1.0

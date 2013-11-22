@@ -90,7 +90,7 @@ public class Configurator {
 		//
 		if (prop.getProperty(key) == null) {
 		    String value = config.getProperty(section, key);
-		    Message.getLogger().debug(Message.STATUS_CONFIG_SESSION, classname, key, value, clazz.getName());
+		    Message.getLogger().trace(Message.STATUS_CONFIG_SESSION, classname, key, value, clazz.getName());
 		    prop.setProperty(key, config.getProperty(section, key));
 		}
 	    }

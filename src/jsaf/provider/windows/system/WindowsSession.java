@@ -111,50 +111,17 @@ public class WindowsSession extends ComputerSystemSession implements IWindowsSes
 	    accessorView = View._32BIT;
 	    logger.trace(Message.STATUS_WINDOWS_BITNESS, "32");
 	}
-
-	if (runspaces == null) {
-	    runspaces = new RunspacePool(this, 100);
-	}
-	if (reg == null) {
-	    try {
-		reg = new Registry(this);
-	    } catch (Exception e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		return connected = false;
-	    }
-	    if (!is64bit) reg32 = reg;
-	}
-	if (wmi == null) {
-	    wmi = new WmiProvider(this, getProperties().getLongProperty(IWmiProvider.PROP_WMI_TIMEOUT));
-	}
-	if (fs == null) {
-	    if (is64bit) {
-		fs = new WindowsFilesystem(this, View._64BIT, accessorView);
-	    } else {
-		fs32 = new WindowsFilesystem(this, View._32BIT, accessorView);
-		fs = fs32;
-	    }
-	}
-	if (wmi.register()) {
-	    if (directory == null) {
-		try {
-		    directory = new Directory(this);
-		} catch (Exception e) {
-		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		    connected = false;
-		    return connected = false;
-		}
-	    }
-	    return true;
-	} else {
-	    return connected = false;
-	}
+	return connected = true;
     }
 
     @Override
     public void disconnect() {
-	runspaces.shutdown();
-	wmi.deregister();
+	if (runspaces != null) {
+	    runspaces.shutdown();
+	}
+	if (wmi != null) {
+	    wmi.deregister();
+	}
 	env = null;
 	connected = false;
     }
@@ -189,10 +156,20 @@ public class WindowsSession extends ComputerSystemSession implements IWindowsSes
     // Implement IWindowsSession
 
     public IRunspacePool getRunspacePool() {
+	if (runspaces == null) {
+	    runspaces = new RunspacePool(this, 100);
+	}
 	return runspaces;
     }
 
     public IDirectory getDirectory() {
+	if (directory == null) {
+	    try {
+	        directory = new Directory(this);
+	    } catch (Exception e) {
+	        logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
+	}
 	return directory;
     }
 
@@ -213,42 +190,65 @@ public class WindowsSession extends ComputerSystemSession implements IWindowsSes
     public IRegistry getRegistry(View view) {
 	switch(view) {
 	  case _32BIT:
-	    if (reg32 == null) {
-		if (getNativeView() == View._32BIT) {
-		    reg32 = reg;
-		} else {
-		    try {
-			reg32 = new Registry(this, View._32BIT);
-		    } catch (Exception e) {
-			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		    }
+	    if (reg32 != null) {
+		return reg32;
+	    } else if (is64bit) {
+		try {
+		    return reg32 = new Registry(this, View._32BIT);
+		} catch (Exception e) {
+		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		}
 	    }
-	    return reg32;
+	    // fall-thru
 
 	  default:
+	    if (reg == null) {
+		try {
+		    reg = new Registry(this);
+		    if (!is64bit) {
+			reg32 = reg;
+		    }
+		} catch (Exception e) {
+		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		}
+	    }
 	    return reg;
 	}
+    }
+
+    @Override
+    public IFilesystem getFilesystem() {
+	return getFilesystem(getNativeView());
     }
 
     public IWindowsFilesystem getFilesystem(View view) {
 	switch(view) {
 	  case _32BIT:
-	    if (fs32 == null) {
-		if (getNativeView() == View._32BIT) {
-		    fs32 = (IWindowsFilesystem)fs;
-		} else {
-		    fs32 = new WindowsFilesystem(this, View._32BIT, accessorView);
-		}
+	    if (fs32 != null) {
+		return fs32;
+	    } else if (is64bit) {
+		return fs32 = new WindowsFilesystem(this, View._32BIT, accessorView);
 	    }
-	    return fs32;
+	    // fall-thru
 
 	  default:
+	    if (fs == null) {
+		if (is64bit) {
+		    fs = new WindowsFilesystem(this, View._64BIT, accessorView);
+		} else {
+		    fs32 = new WindowsFilesystem(this, View._32BIT, accessorView);
+		    fs = fs32;
+		}
+	    }
 	    return (IWindowsFilesystem)fs;
 	}
     }
 
     public IWmiProvider getWmiProvider() {
+	if (wmi == null) {
+	    wmi = new WmiProvider(this, getProperties().getLongProperty(IWmiProvider.PROP_WMI_TIMEOUT));
+	    wmi.register();
+	}
 	return wmi;
     }
 }

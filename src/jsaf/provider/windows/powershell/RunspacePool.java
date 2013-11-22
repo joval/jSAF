@@ -113,11 +113,22 @@ public class RunspacePool implements IRunspacePool {
 	if (pool.size() < capacity()) {
 	    String id = Integer.toString(pool.size());
 	    Runspace runspace = new Runspace(id, session, view, encoding, buffered);
-	    logger.debug(Message.STATUS_POWERSHELL_SPAWN, id);
-	    pool.put(id, runspace);
-	    runspace.invoke("$host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(512,2000)");
-	    runspace.loadModule(RunspacePool.class.getResourceAsStream("Powershell.psm1"));
-	    return runspace;
+	    if (runspace.isAlive()) {
+	        logger.debug(Message.STATUS_POWERSHELL_SPAWN, id);
+	        pool.put(id, runspace);
+	        runspace.invoke("$host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(512,2000)");
+	        runspace.loadModule(RunspacePool.class.getResourceAsStream("Powershell.psm1"));
+	        return runspace;
+	    } else {
+		int code = runspace.getProcess().exitValue();
+		switch(code) {
+		  case 9009:
+		    throw new Exception(Message.getMessage(Message.ERROR_POWERSHELL_NOT_FOUND));
+		  default:
+		    String msg = Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, Integer.toString(code));
+		    throw new Exception(msg);
+		}
+	    }
 	} else {
 	    throw new IndexOutOfBoundsException(Integer.toString(pool.size() + 1));
 	}

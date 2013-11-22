@@ -211,7 +211,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	    }
 	    sb.append(" | Print-FileInfo | Transfer-Encode");
 	    long timeout = session.getTimeout(IWindowsSession.Timeout.M) + (30 * paths.length);
-	    String data = new String(Base64.decode(runspace.invoke(sb.toString(), timeout)), StringTools.UTF8);
+	    String data = new String(Base64.decode(getRunspace().invoke(sb.toString(), timeout)), StringTools.UTF8);
 	    Map<String, IFile> fileMap = new HashMap<String, IFile>();
 	    Iterator<String> iter = Arrays.asList(data.split("\r\n")).iterator();
 	    IWindowsFileInfo info = null;
@@ -246,7 +246,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	try {
 	    StringBuffer sb = new StringBuffer("Get-Item -literalPath '");
 	    sb.append(path).append("' | Print-FileInfo | Transfer-Encode");
-	    String data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.UTF8);
+	    String data = new String(Base64.decode(getRunspace().invoke(sb.toString())), StringTools.UTF8);
 	    return (WindowsFileInfo)nextFileInfo(StringTools.toList(data.split("\r\n")).iterator());
 	} catch (IOException e) {
 	    throw e;
@@ -360,7 +360,8 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
 	public int getFlags() throws IOException {
 	    if (flags == null) {
 		try {
-		    flags = new Integer(Integer.parseInt(runspace.invoke("Get-VolumeFlags -Path '" + path + "'").trim(), 16));
+		    String cmd = new StringBuffer("Get-VolumeFlags -Path '").append(path).append("'").toString();
+		    flags = new Integer(Integer.parseInt(getRunspace().invoke(cmd).trim(), 16));
 		} catch (Exception e) {
 		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		    throw new IOException(e.getMessage());

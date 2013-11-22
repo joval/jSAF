@@ -132,6 +132,7 @@ public abstract class BaseSession implements IConfigurable, ISession {
 
 	public void setProperty(String key, String value) {
 	    props.setProperty(key, value);
+	    logger.debug(Message.STATUS_CONFIG_PROP, BaseSession.this.getClass().getName(), key, value);
 	    handlePropertyChange(key, value);
 	}
 

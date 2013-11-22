@@ -122,7 +122,7 @@ public class RunspacePool implements IRunspacePool {
 	    } else {
 		int code = runspace.getProcess().exitValue();
 		switch(code) {
-		  case 9009:
+		  case 1: // INCORRECT_FUNCTION error code
 		    throw new Exception(Message.getMessage(Message.ERROR_POWERSHELL_NOT_FOUND));
 		  default:
 		    String msg = Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, Integer.toString(code));

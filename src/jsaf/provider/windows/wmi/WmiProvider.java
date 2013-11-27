@@ -128,6 +128,9 @@ public class WmiProvider implements IWmiProvider {
 	}
 
 	void interrupt() {
+	    if (error == null) {
+		error = new WmiException(Message.getMessage(Message.ERROR_WMI_TIMEOUT, wql));
+	    }
 	    thread.interrupt();
 	}
 

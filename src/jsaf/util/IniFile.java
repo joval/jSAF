@@ -98,9 +98,8 @@ public class IniFile {
      * @since 1.0
      */
     public void load(InputStream in, Charset encoding) throws IOException {
-	BufferedReader br = null;
 	try {
-	    br = new BufferedReader(new InputStreamReader(in, encoding));
+	    BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding));
 	    String line = null;
 	    IProperty section = null;
 	    String name = null;
@@ -152,9 +151,9 @@ public class IniFile {
 		}
 	    }
 	} finally {
-	    if (br != null) {
+	    if (in != null) {
 		try {
-		    br.close();
+		    in.close();
 		} catch (IOException e) {
 		}
 	    }

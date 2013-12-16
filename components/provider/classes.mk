@@ -2,7 +2,6 @@ CLASSES=\
 	jsaf.io.fs.AbstractFilesystem	\
 	jsaf.io.fs.DefaultMetadata	\
 	jsaf.io.fs.IAccessor	\
-	jsaf.io.StreamLogger	\
 	jsaf.provider.BaseSession	\
 	jsaf.provider.ComputerSystemSession	\
 	jsaf.provider.Configurator	\

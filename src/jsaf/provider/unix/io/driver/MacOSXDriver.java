@@ -75,12 +75,9 @@ public class MacOSXDriver extends AbstractDriver {
     // Implement IUnixFilesystemDriver
 
     public String getFindCommand(List<ISearchable.ICondition> conditions) {
-	String from = null;
-	boolean dirOnly = false;
-	boolean followLinks = false;
-	boolean xdev = false;
-	Pattern path = null, dirname = null, basename = null;
-	String literalBasename = null, antiBasename = null, fsType = null;
+	boolean dirOnly=false, xdev=false, followLinks = false;
+	Pattern path=null, dirname=null, basename=null;
+	String from=null, literalBasename=null, antiBasename=null, fsType=null;
 	int depth = ISearchable.DEPTH_UNLIMITED;
 
 	for (ISearchable.ICondition condition : conditions) {
@@ -143,32 +140,31 @@ public class MacOSXDriver extends AbstractDriver {
 	if (depth != ISearchable.DEPTH_UNLIMITED) {
 	    cmd.append(" -maxdepth ").append(Integer.toString(depth));
 	}
+
 	if (dirOnly) {
 	    cmd.append(" -type d");
 	    if (dirname != null && !dirname.pattern().equals(WILDCARD)) {
 		cmd.append(" -regex '").append(dirname.pattern()).append("'");
 	    }
-	} else {
-	    if (path != null && !path.pattern().equals(WILDCARD)) {
+	} else if (path != null) {
+	    if (!path.pattern().equals(WILDCARD)) {
 		cmd.append(" -regex '").append(path.pattern()).append("'");
-	    } else {
-		if (dirname != null) {
-		    cmd.append(" -type d");
-		    if (!dirname.pattern().equals(WILDCARD)) {
-			cmd.append(" -regex '").append(dirname.pattern()).append("'");
-		    }
-		    cmd.append(" -print0 | xargs -0 -I{} ").append(FIND).append(" '{}' -maxdepth 1");
-		}
-		cmd.append(" -type f");
-		if (basename != null) {
-		    cmd.append(" | awk -F/ '$NF ~ /");
-		    cmd.append(basename.pattern());
-		    cmd.append("/'");
-		} else if (antiBasename != null) {
-		    cmd.append(" ! -name '").append(antiBasename).append("'");
-		} else if (literalBasename != null) {
-		    cmd.append(" -name '").append(literalBasename).append("'");
-		}
+	    }
+	} else {
+	    if (dirname != null && !dirname.pattern().equals(WILDCARD)) {
+		cmd.append(" -type d");
+		cmd.append(" -regex '").append(dirname.pattern()).append("'");
+		cmd.append(" -print0 | xargs -0 -I{} ").append(FIND).append(" '{}' -maxdepth 1");
+	    }
+	    cmd.append(" -type f");
+	    if (basename != null) {
+		cmd.append(" | awk -F/ '$NF ~ /");
+		cmd.append(basename.pattern());
+		cmd.append("/'");
+	    } else if (antiBasename != null) {
+		cmd.append(" ! -name '").append(antiBasename).append("'");
+	    } else if (literalBasename != null) {
+		cmd.append(" -name '").append(literalBasename).append("'");
 	    }
 	}
 	cmd.append(" | xargs -I{} ").append(STAT).append(" '{}'");

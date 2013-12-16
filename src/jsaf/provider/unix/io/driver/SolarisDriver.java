@@ -65,12 +65,9 @@ public class SolarisDriver extends AbstractDriver {
     // Implement IUnixFilesystemDriver
 
     public String getFindCommand(List<ISearchable.ICondition> conditions) {
-	String from = null;
-	boolean dirOnly = false;
-	boolean followLinks = false;
-	boolean xdev = false;
-	Pattern path = null, dirname = null, basename = null;
-	String literalBasename = null, antiBasename = null, fsType = null;
+	boolean dirOnly=false, xdev=false, followLinks=false;
+	Pattern path=null, dirname=null, basename=null;
+	String from=null, literalBasename=null, antiBasename=null, fsType=null;
 	int depth = 1;
 
 	for (ISearchable.ICondition condition : conditions) {
@@ -163,7 +160,9 @@ public class SolarisDriver extends AbstractDriver {
 		}
 	    } else {
 		cmd.append(" -type d");
-		cmd.append(" | /usr/xpg4/bin/grep -E '").append(dirname.pattern()).append("'");
+		if (!dirname.pattern().equals(WILDCARD)) {
+		    cmd.append(" | /usr/xpg4/bin/grep -E '").append(dirname.pattern()).append("'");
+		}
 		if (!dirOnly) {
 		    cmd.append(" | xargs -I[] ").append(FIND).append(" '[]' -type f");
 		    if (antiBasename != null) {
@@ -184,7 +183,9 @@ public class SolarisDriver extends AbstractDriver {
 	    }
 	} else {
 	    cmd.append(" -type f");
-	    cmd.append(" | /usr/xpg4/bin/grep -E '").append(path.pattern()).append("'");
+	    if (!path.pattern().equals(WILDCARD)) {
+		cmd.append(" | /usr/xpg4/bin/grep -E '").append(path.pattern()).append("'");
+	    }
 	}
 	cmd.append(" | xargs -i ").append(STAT).append(" '{}'");
 	return cmd.toString();

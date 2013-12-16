@@ -74,12 +74,9 @@ public class AIXDriver extends AbstractDriver {
     // Implement IUnixFilesystemDriver
 
     public String getFindCommand(List<ISearchable.ICondition> conditions) {
-	String from = null;
-	boolean dirOnly = false;
-	boolean followLinks = false;
-	boolean xdev = false;
-	Pattern path = null, dirname = null, basename = null;
-	String literalBasename = null, antiBasename = null, fsType = null;
+	boolean dirOnly=false, xdev=false, followLinks=false;
+	Pattern path=null, dirname=null, basename=null;
+	String from=null, literalBasename=null, antiBasename=null, fsType=null;
 	int depth = ISearchable.DEPTH_UNLIMITED;
 
 	for (ISearchable.ICondition condition : conditions) {
@@ -172,7 +169,9 @@ public class AIXDriver extends AbstractDriver {
 		}
 	    } else {
 		cmd.append(" -type d");
-		cmd.append(" | grep -E '").append(dirname.pattern()).append("'");
+		if (!dirname.pattern().equals(WILDCARD)) {
+		    cmd.append(" | grep -E '").append(dirname.pattern()).append("'");
+		}
 		if (!dirOnly) {
 		    cmd.append(" | xargs -I[] ").append(FIND).append(" '[]' -type f");
 		    if (antiBasename != null) {
@@ -192,7 +191,9 @@ public class AIXDriver extends AbstractDriver {
 	    }
 	} else {
 	    cmd.append(" -type f");
-	    cmd.append(" | grep -E '").append(path.pattern()).append("'");
+	    if (!path.pattern().equals(WILDCARD)) {
+		cmd.append(" | grep -E '").append(path.pattern()).append("'");
+	    }
 	}
 	cmd.append(" | xargs -I{} ").append(STAT).append(" '{}'");
 	return cmd.toString();

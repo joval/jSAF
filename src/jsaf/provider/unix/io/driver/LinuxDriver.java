@@ -73,12 +73,9 @@ public class LinuxDriver extends AbstractDriver {
     // Implement IUnixFilesystemDriver
 
     public String getFindCommand(List<ISearchable.ICondition> conditions) {
-	String from = null;
-	boolean dirOnly = false;
-	boolean followLinks = false;
-	boolean xdev = false;
-	Pattern path = null, dirname = null, basename = null;
-	String literalBasename = null, antiBasename = null, fsType = null;
+	boolean dirOnly=false, xdev=false, followLinks=false;
+	Pattern path=null, dirname=null, basename=null;
+	String from=null, literalBasename=null, antiBasename=null, fsType=null;
 	int depth = ISearchable.DEPTH_UNLIMITED;
 
 	for (ISearchable.ICondition condition : conditions) {
@@ -147,33 +144,31 @@ public class LinuxDriver extends AbstractDriver {
 		cmd.append(" -regextype posix-egrep -regex '").append(dirname.pattern()).append("'");
 	    }
 	    cmd.append(printf);
+	} else if (path != null) {
+	    if (!path.pattern().equals(WILDCARD)) {
+		cmd.append(" -regextype posix-egrep -regex '").append(path.pattern()).append("'");
+	    }
+	    cmd.append(printf);
 	} else {
-	    if (path != null) {
-		if (!path.pattern().equals(WILDCARD)) {
-		    cmd.append(" -regextype posix-egrep -regex '").append(path.pattern()).append("'");
-		}
+	    if (dirname != null && !dirname.pattern().equals(WILDCARD)) {
+		cmd.append(" -type d");
+		cmd.append(" | grep -E '").append(dirname.pattern()).append("'");
+		cmd.append(" | xargs -I{} ").append(FIND).append(" '{}' -maxdepth 1");
+	    }
+	    cmd.append(" -type f");
+	    if (basename != null) {
 		cmd.append(printf);
-	    } else {
-		if (dirname != null) {
-		    cmd.append(" -type d");
-		    cmd.append(" | grep -E '").append(dirname.pattern()).append("'");
-		    cmd.append(" | xargs -I{} ").append(FIND).append(" '{}' -maxdepth 1");
+		if (!basename.pattern().equals(WILDCARD)) {
+		    cmd.append(" | awk --posix -F\\\\0 '{n=split($9,a,\"/\");if(match(a[n],\"");
+		    cmd.append(basename.pattern());
+		    cmd.append("\") > 0) print $0}'");
 		}
-		cmd.append(" -type f");
-		if (basename != null) {
-		    cmd.append(printf);
-		    if (!basename.pattern().equals(WILDCARD)) {
-			cmd.append(" | awk --posix -F\\\\0 '{n=split($9,a,\"/\");if(match(a[n],\"");
-			cmd.append(basename.pattern());
-			cmd.append("\") > 0) print $0}'");
-		    }
-		} else if (antiBasename != null) {
-		    cmd.append(" ! -name '").append(antiBasename).append("'");
-		    cmd.append(printf);
-		} else if (literalBasename != null) {
-		    cmd.append(" -name '").append(literalBasename).append("'");
-		    cmd.append(printf);
-		}
+	    } else if (antiBasename != null) {
+		cmd.append(" ! -name '").append(antiBasename).append("'");
+		cmd.append(printf);
+	    } else if (literalBasename != null) {
+		cmd.append(" -name '").append(literalBasename).append("'");
+		cmd.append(printf);
 	    }
 	}
 	return cmd.toString();

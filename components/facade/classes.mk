@@ -65,6 +65,7 @@ CLASSES=\
 	jsaf.intf.windows.wmi.IWmiProvider	\
 	jsaf.io.LittleEndian	\
 	jsaf.io.PerishableReader	\
+	jsaf.io.StreamLogger	\
 	jsaf.io.StreamTool	\
 	jsaf.protocol.zip.ZipURLConnection	\
 	jsaf.protocol.zip.ZipURLStreamHandler	\

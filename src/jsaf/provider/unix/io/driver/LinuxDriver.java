@@ -159,9 +159,9 @@ public class LinuxDriver extends AbstractDriver {
 	    if (basename != null) {
 		cmd.append(printf);
 		if (!basename.pattern().equals(WILDCARD)) {
-		    cmd.append(" | awk --posix -F\\\\0 '{n=split($9,a,\"/\");if(match(a[n],\"");
+		    cmd.append(" | awk --posix -F\\\\0 '{n=split($9,a,\"/\");if(match(a[n],/");
 		    cmd.append(basename.pattern());
-		    cmd.append("\") > 0) print $0}'");
+		    cmd.append("/) > 0) print $0}'");
 		}
 	    } else if (antiBasename != null) {
 		cmd.append(" ! -name '").append(antiBasename).append("'");

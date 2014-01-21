@@ -229,7 +229,7 @@ public abstract class AbstractFilesystem implements IFilesystem {
 			logger.trace(Message.STATUS_FS_SEARCH_GUESS, count, base.getPath(), pattern.pattern());
 			if (count == 0) {
 			    return new String[0];
-			} else if (count < MAX_GUESSES) {
+			} else if (count > MAX_GUESSES) {
 			    logger.debug(Message.STATUS_FS_SEARCH_GUESS_OVERFLOW, count, base.getPath(), pattern.pattern());
 			    List<String> result = new ArrayList<String>();
 			    for (IFile f : getFiles(candidates.toArray(new String[candidates.size()]))) {

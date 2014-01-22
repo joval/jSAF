@@ -11,10 +11,12 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.io.Serializable;
 import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,14 +30,8 @@ import java.util.regex.Pattern;
 
 import org.slf4j.cal10n.LocLogger;
 
-import jdbm.RecordManager;
-import jdbm.RecordManagerFactory;
-import jdbm.RecordManagerOptions;
-import jdbm.btree.BTree;
+import jdbm.MapFactory;
 import jdbm.helper.Serializer;
-import jdbm.helper.StringComparator;
-import jdbm.helper.Tuple;
-import jdbm.helper.TupleBrowser;
 
 import jsaf.Message;
 import jsaf.intf.io.IFile;
@@ -66,6 +62,15 @@ public abstract class AbstractFilesystem implements IFilesystem {
      */
     public static int MAX_GUESSES = 100;
 
+    private static final Comparator<String> STRING_COMPARATOR = new StrComp();
+    static class StrComp implements Comparator<String>, Serializable {
+	StrComp() {}
+
+	public int compare(String s1, String s2) {
+	    return s1.compareTo(s2);
+	}
+    }
+
     protected boolean autoExpand = true;
     protected IProperty props;
     protected IComputerSystem session;
@@ -85,8 +90,9 @@ public abstract class AbstractFilesystem implements IFilesystem {
 
 	if (session.getProperties().getBooleanProperty(IFilesystem.PROP_CACHE_JDBM)) {
 	    try {
-		fscache = new JDBMCache<IFile>(dbkey + "_files", 10000, getFileSerializer(this));
-		searchcache = new JDBMCache<String[]>(dbkey + "_searches", 5, null);
+		factory = MapFactory.newInstance(session.getWorkspace(), dbkey);
+		fscache = factory.<String, IFile>createMap(STRING_COMPARATOR, null, getFileSerializer(this), 10000);
+		searchcache = factory.<String, String[]>createMap(STRING_COMPARATOR, null, null, 5);
 	    } catch (IOException e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		fscache = new HashMap<String, IFile>();
@@ -107,21 +113,14 @@ public abstract class AbstractFilesystem implements IFilesystem {
     }
 
     public void dispose() {
-	if (fscache instanceof JDBMCache) {
+	if (factory != null) {
 	    try {
-		((JDBMCache)fscache).dispose();
+		factory.dispose();
 	    } catch (Exception e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
 	}
 	fscache = null;
-	if (searchcache instanceof JDBMCache) {
-	    try {
-		((JDBMCache)searchcache).dispose();
-	    } catch (Exception e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    }
-	}
 	searchcache = null;
     }
 
@@ -375,162 +374,6 @@ public abstract class AbstractFilesystem implements IFilesystem {
     }
 
     // Inner Classes
-
-    /**
-     * A JDBM-backed implementation of the cache Map.
-     */
-    public class JDBMCache<T> implements Map<String, T> {
-	private RecordManager recman;
-	private String dbkey;
-	private BTree tree;
-	private BTree index;
-	private int writes = 0;
-	private int commitThreshold = 1000;
-
-	JDBMCache(String dbkey, int commitThreshold, Serializer serializer) throws IOException {
-	    this.dbkey = dbkey;
-	    this.commitThreshold = commitThreshold;
-	    cleanFiles();
-	    String basename = new File(session.getWorkspace(), dbkey).toString();
-	    Properties props = new Properties();
-	    props.setProperty(RecordManagerOptions.CACHE_TYPE, RecordManagerOptions.NORMAL_CACHE);
-	    props.setProperty(RecordManagerOptions.DISABLE_TRANSACTIONS, "true");
-	    recman = RecordManagerFactory.createRecordManager(basename, props);
-	    tree = BTree.createInstance(recman, new StringComparator(), null, serializer);
-	    index = BTree.createInstance(recman, new StringComparator());
-	}
-
-	void dispose() throws IOException {
-	    recman.delete(tree.getRecid());
-	    recman.commit();
-	    recman.close();
-	    cleanFiles();
-	}
-
-	// Implement Map
-
-	public boolean containsKey(Object key) {
-	    try {
-		//
-		// Using a separate tree for the index prevents a deserialization infinite loop.
-		//
-		return index.find(key) != null;
-	    } catch (IOException e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    }
-	    return false;
-	}
-
-	public boolean containsValue(Object value) {
-	    try {
-		Tuple t = new Tuple();
-		TupleBrowser iter = tree.browse();
-		while(iter.getNext(t)) {
-		    if (t.getValue().equals(value)) {
-			return true;
-		    }
-		}
-	    } catch (IOException e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    }
-	    return false;
-	}
-
-	public T get(Object key) {
-	    try {
-		@SuppressWarnings("unchecked")
-		T result = (T)tree.find(key);
-		return result;
-	    } catch (IOException e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    }
-	    return null;
-	}
-
-	public boolean isEmpty() {
-	    return size() == 0;
-	}
-
-	public T put(String key, T value) {
-	    try {
-		@SuppressWarnings("unchecked")
-		T result = (T)tree.insert(key, value, true);
-		index.insert(key, "", false);
-		wrote();
-		return result;
-	    } catch (IOException e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    }
-	    return null;
-	}
-
-	public void putAll(Map<? extends String, ? extends T> m) {
-	    try {
-		for (Map.Entry<? extends String, ? extends T> entry : m.entrySet()) {
-		    tree.insert(entry.getKey(), entry.getValue(), true);
-		    index.insert(entry.getKey(), "", true);
-		}
-		wrote();
-	    } catch (IOException e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    }
-	}
-
-	public T remove(Object key) {
-	    try {
-		@SuppressWarnings("unchecked")
-		T result = (T)tree.remove(key);
-		index.remove(key);
-		wrote();
-		return result;
-	    } catch (IOException e) {
-		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    }
-	    return null;
-	}
-
-	public int size() {
-	    return index.size();
-	}
-
-	public void clear() {
-	    throw new UnsupportedOperationException();
-	}
-
-	public Set<Map.Entry<String, T>> entrySet() {
-	    throw new UnsupportedOperationException();
-	}
-
-	public Set<String> keySet() {
-	    throw new UnsupportedOperationException();
-	}
-
-	public Collection<T> values() {
-	    throw new UnsupportedOperationException();
-	}
-
-	// Private
-
-	private void cleanFiles() throws IOException {
-	    for (File f : session.getWorkspace().listFiles()) {
-		if (f.getName().startsWith(dbkey)) {
-		    if (!f.delete()) {
-			throw new IOException("Failed to delete " + f.toString());
-		    }
-		}
-	    }
-	}
-
-	/**
-	 * Register performance of a write operation to the cache.  This triggers the occasional commit to disk.
-	 */
-	private void wrote() throws IOException {
-	    if (++writes % commitThreshold == 0) {
-		recman.commit();
-		writes = 0;
-	    }
-	}
-    }
 
     /**
      * The default implementation of an IFile -- works with Java (local) Files.
@@ -951,6 +794,7 @@ public abstract class AbstractFilesystem implements IFilesystem {
 
     // Private
 
+    private MapFactory factory = null;
     private Map<String, IFile> fscache;
     private Map<String, String[]> searchcache;
 

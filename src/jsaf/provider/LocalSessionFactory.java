@@ -39,7 +39,16 @@ public class LocalSessionFactory extends SessionFactory {
 	File wsdir = null;
 	if (workspace != null) {
 	    wsdir = new File(workspace, ISession.LOCALHOST);
-	    if (!wsdir.exists()) {
+	    if (wsdir.exists()) {
+		for (File f : wsdir.listFiles()) {
+		    String fname = f.getName();
+		    if (fname.startsWith("cmd") && fname.endsWith(".tmp")) {
+			f.delete();
+		    } else if (fname.endsWith(".log")) {
+			f.delete();
+		    }
+		}
+	    } else {
 		wsdir.mkdirs();
 	    }
 	}

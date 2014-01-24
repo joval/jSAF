@@ -6,6 +6,7 @@ package jsaf.provider.windows.io;
 import java.io.BufferedReader;
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -212,11 +213,13 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 		    // Store results in the cache for future use; NB: Windows search command key is not case-sensitive.
 		    //
 		    cache.put(cmd.toUpperCase(), paths.toArray(new String[paths.size()]));
-		    logger.debug(Message.STATUS_FS_SEARCH_DONE, results.size(), cmd);
+		} catch (EOFException e) {
+		    logger.warn(Message.ERROR_EOF);
 		} catch (Exception e) {
 		    logger.warn(Message.ERROR_FS_SEARCH);
 		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		} finally {
+		    logger.debug(Message.STATUS_FS_SEARCH_DONE, results.size(), cmd);
 		    if (in != null) {
 			try {
 			    in.close();

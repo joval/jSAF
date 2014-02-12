@@ -166,7 +166,13 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 		command.append(" -LiteralFilename '").append(basename).append("'");
 	    }
 	    if (basenamePattern != null) {
-		command.append(" -Filename '").append(toString(basenamePattern)).append("'");
+		try {
+		    String glob = StringTools.toGlob(basenamePattern);
+		    logger.debug(Message.STATUS_FS_SEARCH_GLOB, basenamePattern.pattern(), glob);
+		    command.append(" -FilenameGlob '").append(glob).append("'");
+		} catch (IllegalArgumentException e) {
+		    command.append(" -Filename '").append(toString(basenamePattern)).append("'");
+		}
 	    }
 	}
 	command.append(" -Depth ").append(Integer.toString(maxDepth));
@@ -260,6 +266,8 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
     String toString(Pattern p) {
 	return StringTools.regexPosix2Powershell(p.pattern());
     }
+
+    // Private
 
     /**
      * Run the command, sending its output to a temporary file, and return the temporary file.

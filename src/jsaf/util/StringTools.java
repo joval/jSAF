@@ -382,6 +382,52 @@ public class StringTools {
 	return psExpression;
     }
 
+    /**
+     * Attempt to convert a regex Pattern into a glob.
+     *
+     * @throws IllegalArgumentException if the pattern cannot be converted to a glob
+     *
+     * @since 1.1.2
+     */
+    public static String toGlob(Pattern p) throws IllegalArgumentException {
+	String s = p.pattern();
+	if (s.startsWith("^")) {
+	    s = s.substring(1);
+	} else if (!s.startsWith(".*")) {
+	    throw new IllegalArgumentException();
+	}
+	if (s.endsWith("$")) {
+	    s = s.substring(0, s.length()-1);
+	} else if (!s.endsWith(".*")) {
+	    throw new IllegalArgumentException();
+	}
+	StringBuffer outerSb = new StringBuffer();
+	Iterator<String> outerIter = StringTools.tokenize(s, ".*", false);
+	for (int i=0; outerIter.hasNext(); i++) {
+	    if (i > 0) {
+		outerSb.append("*");
+	    }
+	    String outerFrag = outerIter.next();
+	    if (outerFrag.length() > 0) {
+		StringBuffer innerSb = new StringBuffer();
+		Iterator<String> innerIter = StringTools.tokenize(outerFrag, "\\.", false);
+		for (int j=0; innerIter.hasNext(); j++) {
+		    if (j > 0) {
+			innerSb.append(".");
+		    }
+		    String innerFrag = innerIter.next();
+		    if (StringTools.containsRegex(innerFrag)) {
+			throw new IllegalArgumentException();
+		    } else {
+			innerSb.append(innerFrag);
+		    }
+		}
+		outerSb.append(innerSb.toString());
+	    }
+	}
+	return outerSb.toString();
+    }
+
     // Private
 
     /**

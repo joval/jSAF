@@ -61,27 +61,23 @@ function Filter-KeyConditions {
           break
         }
       }
-    } else {
-      if ($WithValPattern -ne "") {
-        foreach ($ValName in $RegKey.GetValueNames()) {
-          if ($ValName -imatch $WithValPattern) {
-            $RegKey
-            break
-          }
-        }
-      } else {
-        if ($WithEncodedVal -ne "") {
-          $DecodedVal = [System.Convert]::FromBase64String($WithEncodedVal)
-          foreach ($ValName in $RegKey.GetValueNames()) {
-            if ($ValName -eq $DecodedVal) {
-              $RegKey
-              break
-            }
-          }
-        } else {
+    } elseif ($WithValPattern -ne "") {
+      foreach ($ValName in $RegKey.GetValueNames()) {
+        if ($ValName -imatch $WithValPattern) {
           $RegKey
+          break
         }
       }
+    } elseif ($WithEncodedVal -ne "") {
+      $DecodedVal = [System.Convert]::FromBase64String($WithEncodedVal)
+      foreach ($ValName in $RegKey.GetValueNames()) {
+        if ($ValName -eq $DecodedVal) {
+          $RegKey
+          break
+        }
+      }
+    } else {
+      $RegKey
     }
   }
 }

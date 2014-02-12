@@ -3,13 +3,13 @@
 #
 function Find-Directories {
   param(
-    [String]$Path = $PWD,
+    [String]$Path = $PWD.Path,
     [String]$Pattern = ".*",
     [int]$Depth = 1 
   )
 
   if (Test-Path -literalPath $Path) {
-    $CurrentItem = Get-Item -literalPath $Path -Force
+    $CurrentItem = Get-Item -LiteralPath $Path -Force
     if ($CurrentItem.PSIsContainer) {
       if ($Path -imatch $Pattern) {
         $CurrentItem
@@ -31,43 +31,71 @@ function Find-Directories {
 function Find-Files {
   [CmdletBinding(DefaultParameterSetName="Pattern")]param(
     [Parameter(ValueFromPipeline=$true)][PSObject]$CurrentItem,
-    [String]$Path = $PWD,
+    [String]$Path = $PWD.Path,
     [String]$Pattern = ".*",
     [int]$Depth = 1,
+    [Parameter(ParameterSetName="Glob")][String]$FilenameGlob = $null,
     [Parameter(ParameterSetName="Pattern")][String]$Filename = ".*",
     [Parameter(ParameterSetName="Literal")][String]$LiteralFilename = ".*"
   )
 
   PROCESS {
     if ($CurrentItem -eq $null) {
-      $CurrentItem = Get-Item -literalPath $Path -Force
+      $CurrentItem = Get-Item -LiteralPath $Path -Force
     } else {
       $Path = $CurrentItem.FullName
     }
     if ($Depth -eq -1) {
       [System.GC]::Collect()
-      if ($PsCmdlet.ParameterSetName -eq "Literal") {
-        $ErrorActionPreference = "SilentlyContinue"
-        Get-ChildItem $Path -Recurse -Force | Where-Object {$_.Name -eq $LiteralFilename}
-        $ErrorActionPreference = "Stop"
-      } else {
-        $ErrorActionPreference = "SilentlyContinue"
-        Get-ChildItem $Path -Recurse -Force | Where-Object {$_.Name -imatch $Filename -and $_.FullName -imatch $Pattern}
-        $ErrorActionPreference = "Stop"
+      $ErrorActionPreference = "SilentlyContinue"
+      switch($PsCmdlet.ParameterSetName) {
+        "Pattern" {
+          if ($Pattern -eq ".*") {
+            if ($Filename -eq ".*") {
+              Get-ChildItem $Path -Recurse -Force
+            } else {
+              Get-ChildItem $Path -Recurse -Force | Where-Object {$_.Name -imatch $Filename}
+            }
+          } else {
+            if ($Filename -eq ".*") {
+              Get-ChildItem $Path -Recurse -Force | Where-Object {$_.FullName -imatch $Pattern}
+            } else {
+              Get-ChildItem $Path -Recurse -Force | Where-Object {$_.Name -imatch $Filename -and $_.FullName -imatch $Pattern}
+            }
+          }
+        }
+        "Glob" {
+          Get-ChildItem $Path -Recurse -Force -Filter $FilenameGlob
+        }
+        default {
+          Get-ChildItem $Path -Recurse -Force -Filter $LiteralFilename
+        }
       }
+      $ErrorActionPreference = "Stop"
     } else {
       if ($Pattern -eq ".*") {
-        if ($PsCmdlet.ParameterSetName -eq "Pattern") {
-          if ($Filename -eq ".*") {
-            $CurrentItem
-          } else {
-            if (!$CurrentItem.PSIsContainer -and ($CurrentItem.Name -imatch $Filename)) {
+        switch($PsCmdlet.ParameterSetName) {
+          "Pattern" {
+            if ($Filename -eq ".*") {
+              $CurrentItem
+            } elseif (!$CurrentItem.PSIsContainer -and ($CurrentItem.Name -imatch $Filename)) {
               $CurrentItem
             }
           }
-        } else {
-          if (!$CurrentItem.PSIsContainer -and ($CurrentItem.Name -eq $LiteralFilename)) {
-            $CurrentItem
+          "Glob" {
+            if ($FilenameGlob -eq "*") {
+              $CurrentItem
+            } else {
+              $Glob = New-Object System.Management.Automation.WildcardPattern -ArgumentList $FilenameGlob
+              if (!$CurrentItem.PSIsContainer -and ($Glob.IsMatch($CurrentItem.Name))) {
+                $CurrentItem
+              }
+            }
+          }
+          default {
+            if (!$CurrentItem.PSIsContainer -and ($CurrentItem.Name -eq $LiteralFilename)) {
+              $CurrentItem
+            }
           }
         }
       } else {
@@ -78,18 +106,12 @@ function Find-Files {
       if ($CurrentItem.PSIsContainer -and ($Depth -ne 0)) {
         $NextDepth = $Depth - 1
         Get-ChildItem $CurrentItem -Force | %{
-          if ($Pattern -eq ".*") {
-            if ($PsCmdlet.ParameterSetName -eq "Pattern") {
-              if ($Filename -eq ".*") {
-                Find-Files -Path $_.FullName -Depth $NextDepth
-              } else {
-                Find-Files -Path $_.FullName -Filename $Filename -Depth $NextDepth
-              }
-            } else {
-              Find-Files -Path $_.FullName -LiteralFilename $LiteralFilename -Depth $NextDepth
-            }
+          if ($PsCmdlet.ParameterSetName -eq "Pattern") {
+            Find-Files -Path $_.FullName -Pattern $Pattern -Filename $Filename -Depth $NextDepth
+          } elseif ($PsCmdlet.ParameterSetName -eq "Glob") {
+            Find-Files -Path $_.FullName -FilenameGlob $FilenameGlob -Depth $NextDepth
           } else {
-            Find-Files -Path $_.FullName -Pattern $Pattern -Depth $NextDepth
+            Find-Files -Path $_.FullName -LiteralFilename $LiteralFilename -Depth $NextDepth
           }
         }
       }

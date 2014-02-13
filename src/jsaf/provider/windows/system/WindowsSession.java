@@ -116,11 +116,16 @@ public class WindowsSession extends ComputerSystemSession implements IWindowsSes
 
     @Override
     public void disconnect() {
+	if (!connected) {
+	    return;
+	}
 	if (runspaces != null) {
 	    runspaces.shutdown();
+	    runspaces = null;
 	}
 	if (wmi != null) {
 	    wmi.deregister();
+	    wmi = null;
 	}
 	env = null;
 	connected = false;
@@ -132,6 +137,7 @@ public class WindowsSession extends ComputerSystemSession implements IWindowsSes
 	if (fs32 instanceof AbstractFilesystem) {
 	    ((AbstractFilesystem)fs32).dispose();
 	}
+	disconnect();
     }
 
     public Type getType() {

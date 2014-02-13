@@ -15,6 +15,7 @@ import java.nio.charset.Charset;
 import java.util.StringTokenizer;
 import java.util.HashSet;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.cal10n.LocLogger;
 
@@ -50,6 +51,8 @@ public class Runspace implements IRunspace {
     private boolean buffered;
     private Character notBOM = null;
 
+    ReentrantLock lock;
+
     /**
      * Create a new Runspace, using the specified architecture (null for default) and encoding.
      */
@@ -78,6 +81,7 @@ public class Runspace implements IRunspace {
 	readBOM();
 	read(timeout);
 	notBOM = null;
+	lock = new ReentrantLock();
     }
 
     public IProcess getProcess() {
@@ -104,61 +108,66 @@ public class Runspace implements IRunspace {
 	loadModule(in, timeout);
     }
 
-    public synchronized void loadModule(InputStream in, long millis) throws IOException, PowershellException {
-	if (!p.isRunning()) {
-	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, p.exitValue()));
-	}
+    public void loadModule(InputStream in, long millis) throws IOException, PowershellException {
+	lock.lock();
 	try {
-	    ByteArrayOutputStream buff = new ByteArrayOutputStream();
-	    StreamLogger input = new StreamLogger(null, in, buff);
-	    String cs = Checksum.getChecksum(input, Checksum.Algorithm.MD5);
-	    input.close();
-	    in = null;
-	    if (modules.contains(cs)) {
-		logger.debug(Message.STATUS_POWERSHELL_MODULE_SKIP, cs);
-	    } else {
-		logger.debug(Message.STATUS_POWERSHELL_MODULE_LOAD, cs);
-		in = new ByteArrayInputStream(buff.toByteArray());
-		String line = null;
-		int lines = 0;
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding));
-		while((line = reader.readLine()) != null) {
-		    stdin.write(line.getBytes());
-		    stdin.write("\r\n".getBytes());
-		    if (!buffered) {
-			stdin.flush();
-			readPrompt(millis);
-		    }
-		    lines++;
-		}
-		if (buffered) {
-		    if (lines > 0) {
-			stdin.flush();
-		    }
-		    for (int i=0; i < lines; i++) {
-			readPrompt(millis);
-		    }
-		}
-		if (">> ".equals(getPrompt())) {
-		    invoke("");
-		}
-		// DAS: add only if there was no error?
-		modules.add(cs);
+	    if (!p.isRunning()) {
+		throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, p.exitValue()));
 	    }
-	} catch (TimeoutException e) {
-	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
+	    try {
+		ByteArrayOutputStream buff = new ByteArrayOutputStream();
+		StreamLogger input = new StreamLogger(null, in, buff);
+		String cs = Checksum.getChecksum(input, Checksum.Algorithm.MD5);
+		input.close();
+		in = null;
+		if (modules.contains(cs)) {
+		    logger.debug(Message.STATUS_POWERSHELL_MODULE_SKIP, cs);
+		} else {
+		    logger.debug(Message.STATUS_POWERSHELL_MODULE_LOAD, cs);
+		    in = new ByteArrayInputStream(buff.toByteArray());
+		    String line = null;
+		    int lines = 0;
+		    BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding));
+		    while((line = reader.readLine()) != null) {
+			stdin.write(line.getBytes());
+			stdin.write("\r\n".getBytes());
+			if (!buffered) {
+			    stdin.flush();
+			    readPrompt(millis);
+			}
+			lines++;
+		    }
+		    if (buffered) {
+			if (lines > 0) {
+			    stdin.flush();
+			}
+			for (int i=0; i < lines; i++) {
+			    readPrompt(millis);
+			}
+		    }
+		    if (">> ".equals(getPrompt())) {
+			invoke("");
+		    }
+		    // DAS: add only if there was no error?
+		    modules.add(cs);
+		}
+	    } catch (TimeoutException e) {
+		throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
+	    } finally {
+		if (in != null) {
+		    try {
+			in.close();
+		    } catch (IOException e) {
+		    }
+		}
+	    }
+	    if (err != null) {
+		String error = err.toString();
+		err = null;
+		throw new PowershellException(error);
+	    }
 	} finally {
-	    if (in != null) {
-		try {
-		    in.close();
-		} catch (IOException e) {
-		}
-	    }
-	}
-	if (err != null) {
-	    String error = err.toString();
-	    err = null;
-	    throw new PowershellException(error);
+	    lock.unlock();
 	}
     }
 
@@ -166,36 +175,41 @@ public class Runspace implements IRunspace {
 	loadAssembly(in, timeout);
     }
 
-    public synchronized void loadAssembly(InputStream in, long millis) throws IOException, PowershellException {
-	if (!p.isRunning()) {
-	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, p.exitValue()));
-	}
+    public void loadAssembly(InputStream in, long millis) throws IOException, PowershellException {
+	lock.lock();
 	try {
-	    ByteArrayOutputStream buff = new ByteArrayOutputStream();
-	    StreamLogger input = new StreamLogger(null, in, buff);
-	    String cs = Checksum.getChecksum(input, Checksum.Algorithm.MD5);
-	    input.close();
-	    in = null;
-	    if (assemblies.contains(cs)) {
-		logger.debug(Message.STATUS_POWERSHELL_ASSEMBLY_SKIP, cs);
-	    } else {
-		logger.debug(Message.STATUS_POWERSHELL_ASSEMBLY_LOAD, cs);
-		String data = Base64.encodeBytes(buff.toByteArray(), Base64.GZIP);
-		invoke("Load-Assembly -Data \"" + data + "\"");
-		assemblies.add(cs);
+	    if (!p.isRunning()) {
+		throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, p.exitValue()));
 	    }
-	} finally {
-	    if (in != null) {
-		try {
-		    in.close();
-		} catch (IOException e) {
+	    try {
+		ByteArrayOutputStream buff = new ByteArrayOutputStream();
+		StreamLogger input = new StreamLogger(null, in, buff);
+		String cs = Checksum.getChecksum(input, Checksum.Algorithm.MD5);
+		input.close();
+		in = null;
+		if (assemblies.contains(cs)) {
+		    logger.debug(Message.STATUS_POWERSHELL_ASSEMBLY_SKIP, cs);
+		} else {
+		    logger.debug(Message.STATUS_POWERSHELL_ASSEMBLY_LOAD, cs);
+		    String data = Base64.encodeBytes(buff.toByteArray(), Base64.GZIP);
+		    invoke("Load-Assembly -Data \"" + data + "\"");
+		    assemblies.add(cs);
+		}
+	    } finally {
+		if (in != null) {
+		    try {
+			in.close();
+		    } catch (IOException e) {
+		    }
 		}
 	    }
-	}
-	if (err != null) {
-	    String error = err.toString();
-	    err = null;
-	    throw new PowershellException(error);
+	    if (err != null) {
+		String error = err.toString();
+		err = null;
+		throw new PowershellException(error);
+	    }
+	} finally {
+	    lock.unlock();
 	}
     }
 
@@ -203,27 +217,31 @@ public class Runspace implements IRunspace {
 	return invoke(command, timeout);
     }
 
-    public synchronized String invoke(String command, long millis) throws IOException, PowershellException {
-	if (!p.isRunning()) {
-	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, p.exitValue()));
-	}
-
-	logger.debug(Message.STATUS_POWERSHELL_INVOKE, id, command);
-	byte[] bytes = command.trim().getBytes();
-	stdin.write(bytes);
-	stdin.write("\r\n".getBytes());
-	stdin.flush();
+    public String invoke(String command, long millis) throws IOException, PowershellException {
+	lock.lock();
 	try {
-	    String result = read(millis);
-	    if (err == null) {
-		return result;
-	    } else {
-		String error = err.toString();
-		err = null;
-		throw new PowershellException(error);
+	    if (!p.isRunning()) {
+		throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, p.exitValue()));
 	    }
-	} catch (TimeoutException e) {
-	    throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
+	    logger.debug(Message.STATUS_POWERSHELL_INVOKE, id, command);
+	    byte[] bytes = command.trim().getBytes();
+	    stdin.write(bytes);
+	    stdin.write("\r\n".getBytes());
+	    stdin.flush();
+	    try {
+		String result = read(millis);
+		if (err == null) {
+		    return result;
+		} else {
+		    String error = err.toString();
+		    err = null;
+		    throw new PowershellException(error);
+		}
+	    } catch (TimeoutException e) {
+		throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
+	    }
+	} finally {
+	    lock.unlock();
 	}
     }
 
@@ -341,43 +359,48 @@ public class Runspace implements IRunspace {
     /**
      * Read a prompt. There must be NO other output to stdout, or this call will time out. Error data is buffered to err.
      */
-    private synchronized void readPrompt(long millis) throws IOException, TimeoutException {
-	StringBuffer sb = new StringBuffer();
-	//
-	// Poll the streams for no more than timeout millis if there is no data.
-	//
-	int interval = 25;
-	int max_iterations = (int)(millis / interval);
-	for (int i=0; i < max_iterations; i++) {
-	    int avail = 0;
-	    if ((avail = stderr.available()) > 0) {
-		if (err == null) {
-		    err = new StringBuffer();
+    private void readPrompt(long millis) throws IOException, TimeoutException {
+	lock.lock();
+	try {
+	    StringBuffer sb = new StringBuffer();
+	    //
+	    // Poll the streams for no more than timeout millis if there is no data.
+	    //
+	    int interval = 25;
+	    int max_iterations = (int)(millis / interval);
+	    for (int i=0; i < max_iterations; i++) {
+		int avail = 0;
+		if ((avail = stderr.available()) > 0) {
+		    if (err == null) {
+			err = new StringBuffer();
+		    }
+		    byte[] buff = new byte[avail];
+		    stderr.read(buff);
+		    err.append(new String(buff, encoding));
 		}
-		byte[] buff = new byte[avail];
-		stderr.read(buff);
-		err.append(new String(buff, encoding));
-	    }
-	    if ((avail = stdout.available()) > 0) {
-		boolean cr = false;
-		while(avail-- > 0) {
-		    sb.append((char)(stdout.read() & 0xFF));
-		    if (isPrompt(sb.toString())) {
-			prompt = sb.toString();
-			return;
+		if ((avail = stdout.available()) > 0) {
+		    boolean cr = false;
+		    while(avail-- > 0) {
+			sb.append((char)(stdout.read() & 0xFF));
+			if (isPrompt(sb.toString())) {
+			    prompt = sb.toString();
+			    return;
+			}
+		    }
+		    i = 0; // reset the I/O timeout counter
+		}
+		if (p.isRunning()) {
+		    try {
+			Thread.sleep(interval);
+		    } catch (InterruptedException e) {
+			throw new IOException(e);
 		    }
 		}
-		i = 0; // reset the I/O timeout counter
 	    }
-	    if (p.isRunning()) {
-		try {
-		    Thread.sleep(interval);
-		} catch (InterruptedException e) {
-		    throw new IOException(e);
-		}
-	    }
+	    throw new TimeoutException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
+	} finally {
+	    lock.unlock();
 	}
-	throw new TimeoutException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
     }
 
     private boolean isPrompt(String str) {

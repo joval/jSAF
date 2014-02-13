@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.cal10n.LocLogger;
 
@@ -37,6 +38,7 @@ public class RunspacePool implements IRunspacePool {
     private boolean buffered;
     private HashMap<String, Runspace> pool;
     private int capacity;
+    private ReentrantLock lock;
 
     public RunspacePool(IWindowsSession session, int capacity) {
 	this(session, capacity, StringTools.ASCII, !PRE_17);
@@ -49,25 +51,37 @@ public class RunspacePool implements IRunspacePool {
 	this.encoding = encoding;
 	this.buffered = buffered;
 	pool = new HashMap<String, Runspace>();
+	lock = new ReentrantLock();
     }
 
-    public synchronized void shutdown() {
-	Iterator<Runspace> iter = pool.values().iterator();
-	while(iter.hasNext()) {
-	    Runspace runspace = iter.next();
-	    if (runspace.isAlive()) {
-		try {
-		    runspace.invoke("exit", 2000L);
-		    IProcess p = runspace.getProcess();
-		    if (p.isRunning()) {
-			p.destroy();
+    public void shutdown() {
+	lock.lock();
+	try {
+	    Iterator<Runspace> iter = pool.values().iterator();
+	    while(iter.hasNext()) {
+		Runspace runspace = iter.next();
+		if (runspace.isAlive()) {
+		    try {
+			if (runspace.lock.tryLock()) {
+			    try {
+				runspace.invoke("exit", 2000L);
+			    } finally {
+				runspace.lock.unlock();
+			    }
+			}
+			IProcess p = runspace.getProcess();
+			if (p.isRunning()) {
+			    p.destroy();
+			}
+			logger.debug(Message.STATUS_POWERSHELL_EXIT, runspace.getId(), p.exitValue());
+		    } catch (Exception e) {
+			logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		    }
-		    logger.debug(Message.STATUS_POWERSHELL_EXIT, runspace.getId(), p.exitValue());
-		} catch (Exception e) {
-		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		}
+		iter.remove();
 	    }
-	    iter.remove();
+	} finally {
+	    lock.unlock();
 	}
     }
 
@@ -78,19 +92,24 @@ public class RunspacePool implements IRunspacePool {
 
     // Implement IRunspacePool
 
-    public synchronized Collection<IRunspace> enumerate() {
-	Collection<IRunspace> runspaces = new ArrayList<IRunspace>();
-	Iterator<Runspace> iter = pool.values().iterator();
-	while(iter.hasNext()) {
-	    Runspace runspace = iter.next();
-	    if (runspace.isAlive()) {
-		runspaces.add(runspace);
-	    } else {
-		logger.warn(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, runspace.getProcess().exitValue()));
-		iter.remove();
+    public Collection<IRunspace> enumerate() {
+	lock.lock();
+	try {
+	    Collection<IRunspace> runspaces = new ArrayList<IRunspace>();
+	    Iterator<Runspace> iter = pool.values().iterator();
+	    while(iter.hasNext()) {
+		Runspace runspace = iter.next();
+		if (runspace.isAlive()) {
+		    runspaces.add(runspace);
+		} else {
+		    logger.warn(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, runspace.getProcess().exitValue()));
+		    iter.remove();
+		}
 	    }
+	    return runspaces;
+	} finally {
+	    lock.unlock();
 	}
-	return runspaces;
     }
 
     public int capacity() {
@@ -105,32 +124,37 @@ public class RunspacePool implements IRunspacePool {
 	}
     }
 
-    public synchronized IRunspace spawn() throws Exception {
+    public IRunspace spawn() throws Exception {
 	return spawn(session.getNativeView());
     }
 
-    public synchronized IRunspace spawn(IWindowsSession.View view) throws Exception {
-	if (pool.size() < capacity()) {
-	    String id = Integer.toString(pool.size());
-	    Runspace runspace = new Runspace(id, session, view, encoding, buffered);
-	    if (runspace.isAlive()) {
-	        logger.debug(Message.STATUS_POWERSHELL_SPAWN, id);
-	        pool.put(id, runspace);
-	        runspace.invoke("$host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(512,2000)");
-	        runspace.loadModule(RunspacePool.class.getResourceAsStream("Powershell.psm1"));
-	        return runspace;
-	    } else {
-		int code = runspace.getProcess().exitValue();
-		switch(code) {
-		  case 1: // INCORRECT_FUNCTION error code
-		    throw new Exception(Message.getMessage(Message.ERROR_POWERSHELL_NOT_FOUND));
-		  default:
-		    String msg = Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, Integer.toString(code));
-		    throw new Exception(msg);
+    public IRunspace spawn(IWindowsSession.View view) throws Exception {
+	lock.lock();
+	try {
+	    if (pool.size() < capacity()) {
+		String id = Integer.toString(pool.size());
+		Runspace runspace = new Runspace(id, session, view, encoding, buffered);
+		if (runspace.isAlive()) {
+		    logger.debug(Message.STATUS_POWERSHELL_SPAWN, id);
+		    pool.put(id, runspace);
+		    runspace.invoke("$host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(512,2000)");
+		    runspace.loadModule(RunspacePool.class.getResourceAsStream("Powershell.psm1"));
+		    return runspace;
+		} else {
+		    int code = runspace.getProcess().exitValue();
+		    switch(code) {
+		      case 1: // INCORRECT_FUNCTION error code
+			throw new Exception(Message.getMessage(Message.ERROR_POWERSHELL_NOT_FOUND));
+		      default:
+			String msg = Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, Integer.toString(code));
+			throw new Exception(msg);
+		    }
 		}
+	    } else {
+		throw new IndexOutOfBoundsException(Integer.toString(pool.size() + 1));
 	    }
-	} else {
-	    throw new IndexOutOfBoundsException(Integer.toString(pool.size() + 1));
+	} finally {
+	    lock.unlock();
 	}
     }
 }

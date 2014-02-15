@@ -32,7 +32,7 @@ public class JSAFSystem {
 	    File homeDir = new File(System.getProperty("user.home"));
 	    dataDir = new File(homeDir, ".jSAF");
 	}
-	timer = new Timer("jSAF system timer", true);
+	timer = new Timer("jSAF System Timer", true);
     }
 
     /**

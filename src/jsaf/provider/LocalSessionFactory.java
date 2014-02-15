@@ -42,7 +42,7 @@ public class LocalSessionFactory extends SessionFactory {
 	    if (wsdir.exists()) {
 		for (File f : wsdir.listFiles()) {
 		    String fname = f.getName();
-		    if (fname.startsWith("cmd") && fname.endsWith(".tmp")) {
+		    if (fname.endsWith(".tmp")) {
 			f.delete();
 		    } else if (fname.endsWith(".log")) {
 			f.delete();

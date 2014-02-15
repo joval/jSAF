@@ -406,12 +406,7 @@ public abstract class AbstractFilesystem implements IFilesystem {
 	    // Place in the cache if READONLY
 	    //
 	    if (flags == IFile.Flags.READONLY) {
-		try {
-		    putCache(this);
-		} catch (Exception e) {
-		    logger.error("Exception caching entry for " + toString());
-		    logger.error(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		}
+		putCache(this);
 	    }
 	}
 

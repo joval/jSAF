@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,6 +33,7 @@ import java.util.zip.GZIPInputStream;
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
+import jsaf.JSAFSystem;
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFileMetadata;
 import jsaf.intf.io.IFilesystem;
@@ -288,12 +290,13 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 
 	String cmd = new StringBuffer(command).append(" | Out-File ").append(tempPath).toString();
 
-	FileWatcher fw = new FileWatcher(tempPath);
-	fw.start();
+	FileMonitor mon = new FileMonitor(tempPath);
+	JSAFSystem.getTimer().schedule(mon, 15000, 15000);
 	try {
 	    fs.getRunspace().invoke(cmd, fs.getSession().getTimeout(IWindowsSession.Timeout.XL));
 	} finally {
-	    fw.interrupt();
+	    mon.cancel();
+	    JSAFSystem.getTimer().purge();
 	}
 	fs.getRunspace().invoke("Gzip-File " + tempPath);
 	return fs.getFile(tempPath + ".gz", IFile.Flags.READWRITE);
@@ -350,28 +353,12 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
      * Periodically checks the length of a file, in a background thread. This gives us a clue as to whether very long
      * searches are really doing anything, or if they've died.
      */
-    class FileWatcher implements Runnable {
+    class FileMonitor extends TimerTask {
 	private String path;
-	private Thread thread;
-	private boolean cancel = false;
 
-	FileWatcher(String path) {
+	FileMonitor(String path) {
 	    this.path = path;
 	}
-
-	void start() {
-	    thread = new Thread(this);
-	    thread.start();
-	}
-
-	void interrupt() {
-	    cancel = true;
-	    if (thread.isAlive()) {
-		thread.interrupt();
-	    }
-	}
-
-	// Implement Runnable
 
 	/**
 	 * NB: This runs asynchronously during a search which takes place in Powershell, so we need to be careful not
@@ -379,20 +366,12 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	 *     IFile.isDirectory).
 	 */
 	public void run() {
-	    while(!cancel) {
-		try {
-		    Thread.sleep(15000);
-		    IFile f = fs.getFile(path, IFile.Flags.READVOLATILE);
-		    if (f.exists()) {
-			logger.info(Message.STATUS_FS_SEARCH_PROGRESS, f.length());
-		    } else {
-			cancel = true;
-		    }
-		} catch (IOException e) {
-		    cancel = true;
-		} catch (InterruptedException e) {
-		    cancel = true;
+	    try {
+		IFile f = fs.getFile(path, IFile.Flags.READVOLATILE);
+		if (f.exists()) {
+		    logger.info(Message.STATUS_FS_SEARCH_PROGRESS, f.length());
 		}
+	    } catch (Exception e) {
 	    }
 	}
     }

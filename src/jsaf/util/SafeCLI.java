@@ -365,6 +365,8 @@ public class SafeCLI {
 
     // Private
 
+    private static int counter = 0;
+
     private String cmd, dir;
     private String[] env;
     private IComputerSystem sys;
@@ -391,16 +393,18 @@ public class SafeCLI {
 	for (int attempt=0; !success; attempt++) {
 	    IProcess p = null;
 	    PerishableReader reader = null;
+	    GobblerThread errThread = null;
 	    try {
 		p = sys.createProcess(cmd, env, dir);
 		p.start();
 		reader = PerishableReader.newInstance(p.getInputStream(), readTimeout);
 		reader.setLogger(sys.getLogger());
 		if (errorGobbler == null) {
-		    long timeout = sys.getTimeout(ISession.Timeout.XL);
-		    new GobblerThread(DevNull).start(PerishableReader.newInstance(p.getErrorStream(), timeout));
+		    errThread = new GobblerThread(DevNull, "pipe to /dev/null");
+		    errThread.start(PerishableReader.newInstance(p.getErrorStream(), sys.getTimeout(ISession.Timeout.XL)));
 		} else {
-		    new GobblerThread(errorGobbler).start(PerishableReader.newInstance(p.getErrorStream(), readTimeout));
+		    errThread = new GobblerThread(errorGobbler, "stderr reader");
+		    errThread.start(PerishableReader.newInstance(p.getErrorStream(), readTimeout));
 		}
 		outputGobbler.gobble(reader);
 		try {
@@ -408,6 +412,8 @@ public class SafeCLI {
 		    result.exitCode = p.exitValue();
 		    success = true;
 		} catch (InterruptedException e) {
+		    sys.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		    break;
 		}
 	    } catch (IOException e) {
 		if (e instanceof InterruptedIOException || e instanceof EOFException) {
@@ -438,17 +444,14 @@ public class SafeCLI {
 		    } catch (IOException e) {
 		    }
 		}
-		if (p != null) {
+		if (errThread != null) {
 		    try {
-			InputStream err = p.getErrorStream();
-			if (err != null) {
-			    err.close();
-			}
+			errThread.close();
 		    } catch (IOException e) {
 		    }
-		    if (p.isRunning()) {
-			p.destroy();
-		    }
+		}
+		if (p != null && p.isRunning()) {
+		    p.destroy();
 		}
 	    }
 	}
@@ -478,21 +481,30 @@ public class SafeCLI {
 
     class GobblerThread implements Runnable {
 	Thread thread;
+	String name;
 	IReader reader;
 	IReaderGobbler gobbler;
 
-	GobblerThread(IReaderGobbler gobbler) {
+	GobblerThread(IReaderGobbler gobbler, String name) {
 	    this.gobbler = gobbler;
+	    this.name = "Gobbler " + counter++ + ": " + name;
 	}
 
 	void start(IReader reader) throws IllegalStateException {
 	    if (thread == null || !thread.isAlive()) {
 		this.reader = reader;
-		thread = new Thread(this);
+		thread = new Thread(Thread.currentThread().getThreadGroup(), this, name);
 		thread.start();
 	    } else {
 		throw new IllegalStateException("running");
 	    }
+	}
+
+	void close() throws IOException {
+	    if (thread != null && thread.isAlive()) {
+		thread.interrupt();
+	    }
+	    reader.close();
 	}
 
 	// Implement Runnable

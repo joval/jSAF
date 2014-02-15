@@ -84,10 +84,10 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
     }
 
     @Override
-    public synchronized void close() throws IOException {
+    public void close() throws IOException {
 	if (!closed)  {
-	    defuse();
 	    in.close();
+	    defuse();
 	    closed = true;
 	}
     }

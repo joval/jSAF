@@ -342,7 +342,6 @@ public class Runspace implements IRunspace {
 		try {
 		    Thread.sleep(interval);
 		} catch (InterruptedException e) {
-		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		    throw new IOException(e);
 		}
 	    } else {

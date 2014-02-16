@@ -63,10 +63,11 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
     private final IWindowsSession.View apparentView, accessorView;
     private Collection<IVolume> volumes;
     private String system32, sysWOW64, sysNative;
-    private IRunspace runspace;
+    private HashSet<String> runspaceIds;
 
     public WindowsFilesystem(IWindowsSession session, IWindowsSession.View apparentView, IWindowsSession.View accessorView) {
 	super(session, DELIM_STR, IWindowsSession.View._32BIT == apparentView ? "fs32" : "fs");
+	runspaceIds = new HashSet<String>();
 	this.apparentView = apparentView;
 	this.accessorView = accessorView;
 	String sysRoot	= session.getEnvironment().getenv("SystemRoot");
@@ -95,22 +96,23 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
     }
 
     protected IRunspace getRunspace() throws Exception {
-	if (runspace == null || !runspace.isAlive()) {
-	    for (IRunspace rs : ((IWindowsSession)session).getRunspacePool().enumerate()) {
-		if (rs.getView() == apparentView) {
-		    runspace = rs;
-		}
+	IRunspace runspace = null;
+	for (IRunspace rs : ((IWindowsSession)session).getRunspacePool().enumerate()) {
+	    if (rs.isAlive() && !rs.isBusy() && rs.getView() == apparentView) {
+		runspace = rs;
 	    }
-	    if (runspace == null) {
-		runspace = ((IWindowsSession)session).getRunspacePool().spawn(apparentView);
-	    }
-
+	}
+	if (runspace == null) {
+	    runspace = ((IWindowsSession)session).getRunspacePool().spawn(apparentView);
+	}
+	if (!runspaceIds.contains(runspace.getId())) {
 	    //
 	    // NB: WindowsFilesystem.class, to allow subclasses to extend this method.
 	    //
 	    runspace.loadAssembly(WindowsFilesystem.class.getResourceAsStream("WindowsFilesystem.dll"));
 	    runspace.loadModule(WindowsFilesystem.class.getResourceAsStream("WindowsFilesystem.psm1"));
 	    runspace.loadModule(WindowsFilesystem.class.getResourceAsStream("WindowsFileSearcher.psm1"));
+	    runspaceIds.add(runspace.getId());
 	}
 	return runspace;
     }

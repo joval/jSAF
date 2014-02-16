@@ -98,4 +98,11 @@ public interface IRunspace extends ILoggable {
      * @since 1.1
      */
     boolean isAlive();
+
+    /**
+     * Returns whether this runspace is being used by any thread.
+     *
+     * @since 1.1.2
+     */
+    boolean isBusy();
 }

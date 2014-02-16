@@ -257,6 +257,10 @@ public class Runspace implements IRunspace {
 	return p.isRunning();
     }
 
+    public boolean isBusy() {
+	return lock.isLocked();
+    }
+
     // Private
 
     /**

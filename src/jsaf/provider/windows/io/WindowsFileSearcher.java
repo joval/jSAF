@@ -360,11 +360,6 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	    this.path = path;
 	}
 
-	/**
-	 * NB: This runs asynchronously during a search which takes place in Powershell, so we need to be careful not
-	 *     to perform a file operation that requires the parent filesystem's Powershell instance (such as
-	 *     IFile.isDirectory).
-	 */
 	public void run() {
 	    try {
 		IFile f = fs.getFile(path, IFile.Flags.READVOLATILE);

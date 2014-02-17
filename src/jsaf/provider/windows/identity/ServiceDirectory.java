@@ -26,7 +26,6 @@ class ServiceDirectory {
     private static final String WQL = "select name, startname from win32_service";
 
     private IWindowsSession session;
-    private IRunspace runspace;
     private Map<String, IUser> usersBySid, usersByName;
     private boolean initialized = false;
 
@@ -34,15 +33,6 @@ class ServiceDirectory {
 	this.session = session;
 	usersByName = new HashMap<String, IUser>();
 	usersBySid = new HashMap<String, IUser>();
-	for (IRunspace runspace : session.getRunspacePool().enumerate()) {
-	    if (runspace.getView() == session.getNativeView()) {
-		this.runspace = runspace;
-		break;
-	    }
-	}
-	if (runspace == null) {
-	    runspace = session.getRunspacePool().spawn(session.getNativeView());
-	}
     }
 
     boolean isServiceSid(String sid) {
@@ -93,6 +83,7 @@ class ServiceDirectory {
     private void load() {
 	if (initialized) return;
 	try {
+	    IRunspace runspace = session.getRunspacePool().getRunspace();
 	    runspace.loadModule(getClass().getResourceAsStream("Service.psm1"));
 	    String name=null, sid=null;
 	    String data = new String(Base64.decode(runspace.invoke("Get-ServiceSids | Transfer-Encode")), StringTools.UTF8);

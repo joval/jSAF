@@ -11,7 +11,7 @@ import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.provider.windows.powershell.PowershellException;
 
 /**
- * An interface to a Powershell 2.0 runspace.
+ * An interface to a Powershell runspace.
  *
  * @author David A. Solin
  * @version %I% %G%
@@ -19,11 +19,20 @@ import jsaf.provider.windows.powershell.PowershellException;
  */
 public interface IRunspace extends ILoggable {
     /**
-     * Get a unique identifier for this runspace.
+     * Get the identifier for this runspace, which is guaranteed to be unique for the containing IRunspacePool. This
+     * identifier can be used to track whether or not a runspace returned by the pool has already had an assembly
+     * or module loaded into it.
      *
      * @since 1.0
      */
     String getId();
+
+    /**
+     * Get the view for this runspace.
+     *
+     * @since 1.0
+     */
+    IWindowsSession.View getView();
 
     /**
      * Load a Powershell module into the runspace from a stream.
@@ -77,32 +86,4 @@ public interface IRunspace extends ILoggable {
      * @since 1.0
      */
     String invoke(String command, long timeout) throws IOException, PowershellException;
-
-    /**
-     * Get the current prompt String.
-     *
-     * @since 1.0
-     */
-    String getPrompt();
-
-    /**
-     * Get the view for this runspace.
-     *
-     * @since 1.0
-     */
-    IWindowsSession.View getView();
-
-    /**
-     * Returns whether the runspace's process is still alive.
-     *
-     * @since 1.1
-     */
-    boolean isAlive();
-
-    /**
-     * Returns whether this runspace is being used by any thread.
-     *
-     * @since 1.1.2
-     */
-    boolean isBusy();
 }

@@ -27,8 +27,7 @@ public class Powershell {
 
     public void test(String command) {
 	try {
-	    IRunspace rs = session.getRunspacePool().spawn();
-	    System.out.println("Powershell prompt: " + rs.getPrompt());
+	    IRunspace rs = session.getRunspacePool().getRunspace();
 	    System.out.println(rs.invoke(command));
 	} catch (Exception e) {
 	    e.printStackTrace();

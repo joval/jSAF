@@ -3,13 +3,10 @@
 
 package jsaf.intf.windows.powershell;
 
-import java.util.Collection;
-import java.util.NoSuchElementException;
-
 import jsaf.intf.windows.system.IWindowsSession;
 
 /**
- * An interface to a powershell runspace pool.
+ * An interface to a Powershell runspace pool.
  *
  * @author David A. Solin
  * @version %I% %G%
@@ -17,43 +14,22 @@ import jsaf.intf.windows.system.IWindowsSession;
  */
 public interface IRunspacePool {
     /**
-     * Returns all the currently open runspaces.
-     *
-     * @since 1.0
-     */
-    Collection<IRunspace> enumerate();
-
-    /**
-     * Returns the maximum number of runspaces that can live in the pool.
-     *
-     * @since 1.0
-     */
-    int capacity();
-
-    /**
-     * Get a specific runspace, given its ID.
-     *
-     * @throws NoSuchElementException if no runspace with the given ID was found in the pool.
-     *
-     * @since 1.0
-     */
-    IRunspace get(String id) throws NoSuchElementException;
-
-    /**
-     * Create (and return) a new Runspace in the pool (default architecture).
+     * Get an IRunspace from the pool, with the IWindowsSession's default architecture. If a lock cannot be obtained
+     * on an existing runspace, a new one will be spawned and returned.
      *
      * @throws IndexOutOfBoundsException if the pool is already at capacity.
      *
-     * @since 1.0
+     * @since 1.1.2
      */
-    IRunspace spawn() throws Exception;
+    IRunspace getRunspace() throws Exception;
 
     /**
-     * Create (and return) a new Runspace in the pool for the specified architecture.
+     * Get an IRunspace from the pool, with the specified architecture. If a lock cannot be obtained on an existing
+     * runspace, a new one will be spawned and returned.
      *
      * @throws IndexOutOfBoundsException if the pool is already at capacity.
      *
-     * @since 1.0
+     * @since 1.1.2
      */
-    IRunspace spawn(IWindowsSession.View view) throws Exception;
+    IRunspace getRunspace(IWindowsSession.View view) throws Exception;
 }

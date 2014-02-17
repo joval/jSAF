@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -33,16 +34,13 @@ import jsaf.util.StringTools;
  * @version %I% %G%
  */
 public class RegistrySearcher implements ISearchable<IKey> {
-    private IWindowsSession session;
-    private IRegistry registry;
-    private IRunspace runspace;
+    private Registry registry;
+    private HashSet<String> runspaceIds;
     private Map<String, List<String>> searchMap;
 
-    public RegistrySearcher(IWindowsSession session, IRunspace runspace) throws Exception {
-	this.session = session;
-	this.runspace = runspace;
-	this.registry = session.getRegistry(runspace.getView());
-	runspace.loadModule(getClass().getResourceAsStream("RegistrySearcher.psm1"));
+    public RegistrySearcher(Registry registry) throws Exception {
+	this.registry = registry;
+	runspaceIds = new HashSet<String>();
 	searchMap = new HashMap<String, List<String>>();
     }
 
@@ -145,7 +143,7 @@ public class RegistrySearcher implements ISearchable<IKey> {
 		    results.add(registry.getKey(fullPath));
 		}
 	    } else {
-		String paths = runspace.invoke(command, session.getTimeout(IWindowsSession.Timeout.XL));
+		String paths = getRunspace().invoke(command, registry.session.getTimeout(IWindowsSession.Timeout.XL));
 		if (paths == null) {
 		    searchMap.put(command, new ArrayList<String>());
 		} else {
@@ -231,7 +229,7 @@ public class RegistrySearcher implements ISearchable<IKey> {
 	    } catch (NoSuchElementException e) {
 		return new String[0];
 	    } catch (Exception e) {
-		session.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		registry.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
 
 	    return Arrays.asList(parent).toArray(new String[1]);
@@ -242,5 +240,16 @@ public class RegistrySearcher implements ISearchable<IKey> {
 
     String toString(Pattern p) {
 	return StringTools.regexPosix2Powershell(p.pattern());
+    }
+
+    // Private
+
+    private IRunspace getRunspace() throws Exception {
+	IRunspace runspace = registry.getRunspace();
+	if (!runspaceIds.contains(runspace.getId())) {
+	    runspace.loadModule(getClass().getResourceAsStream("RegistrySearcher.psm1"));
+	    runspaceIds.add(runspace.getId());
+	}
+	return runspace;
     }
 }

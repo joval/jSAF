@@ -39,6 +39,7 @@ public class RunspacePool implements IRunspacePool {
     private HashMap<String, Runspace> pool;
     private int capacity;
     private ReentrantLock lock;
+    private int counter = 0;
 
     public RunspacePool(IWindowsSession session, int capacity) {
 	this(session, capacity, StringTools.ASCII, !PRE_17);
@@ -60,13 +61,13 @@ public class RunspacePool implements IRunspacePool {
 	    Iterator<Runspace> iter = pool.values().iterator();
 	    while(iter.hasNext()) {
 		Runspace runspace = iter.next();
-		if (runspace.isAlive()) {
+		if (runspace.getProcess().isRunning()) {
 		    try {
-			if (runspace.lock.tryLock()) {
+			if (runspace.getLock().tryLock()) {
 			    try {
 				runspace.invoke("exit", 2000L);
 			    } finally {
-				runspace.lock.unlock();
+				runspace.getLock().unlock();
 			    }
 			}
 			IProcess p = runspace.getProcess();
@@ -92,49 +93,38 @@ public class RunspacePool implements IRunspacePool {
 
     // Implement IRunspacePool
 
-    public Collection<IRunspace> enumerate() {
+    public IRunspace getRunspace() throws Exception {
+	return getRunspace(session.getNativeView());
+    }
+
+    public IRunspace getRunspace(IWindowsSession.View view) throws Exception {
 	lock.lock();
 	try {
-	    Collection<IRunspace> runspaces = new ArrayList<IRunspace>();
 	    Iterator<Runspace> iter = pool.values().iterator();
 	    while(iter.hasNext()) {
 		Runspace runspace = iter.next();
-		if (runspace.isAlive()) {
-		    runspaces.add(runspace);
-		} else {
+		if (!runspace.getProcess().isRunning()) {
 		    logger.warn(Message.getMessage(Message.ERROR_POWERSHELL_STOPPED, runspace.getProcess().exitValue()));
 		    iter.remove();
+		} else if (!runspace.getLock().isLocked() && runspace.getView() == view) {	
+		    return runspace;
 		}
 	    }
-	    return runspaces;
+	    return spawn(view);
 	} finally {
 	    lock.unlock();
 	}
     }
 
-    public int capacity() {
-	return capacity;
-    }
+    // Private
 
-    public IRunspace get(String id) throws NoSuchElementException {
-	if (pool.containsKey(id)) {
-	    return pool.get(id);
-	} else {
-	    throw new NoSuchElementException(id);
-	}
-    }
-
-    public IRunspace spawn() throws Exception {
-	return spawn(session.getNativeView());
-    }
-
-    public IRunspace spawn(IWindowsSession.View view) throws Exception {
+    private IRunspace spawn(IWindowsSession.View view) throws Exception {
 	lock.lock();
 	try {
-	    if (pool.size() < capacity()) {
-		String id = Integer.toString(pool.size());
+	    if (pool.size() < capacity) {
+		String id = Integer.toString(counter++);
 		Runspace runspace = new Runspace(id, session, view, encoding, buffered);
-		if (runspace.isAlive()) {
+		if (runspace.getProcess().isRunning()) {
 		    logger.debug(Message.STATUS_POWERSHELL_SPAWN, id);
 		    pool.put(id, runspace);
 		    runspace.invoke("$host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(512,2000)");

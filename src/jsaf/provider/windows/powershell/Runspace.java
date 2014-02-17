@@ -50,8 +50,7 @@ public class Runspace implements IRunspace {
     private Charset encoding = null;
     private boolean buffered;
     private Character notBOM = null;
-
-    ReentrantLock lock;
+    private ReentrantLock lock;
 
     /**
      * Create a new Runspace, using the specified architecture (null for default) and encoding.
@@ -84,10 +83,6 @@ public class Runspace implements IRunspace {
 	lock = new ReentrantLock();
     }
 
-    public IProcess getProcess() {
-	return p;
-    }
-
     // Implement ILoggable
 
     public LocLogger getLogger() {
@@ -102,6 +97,10 @@ public class Runspace implements IRunspace {
 
     public String getId() {
 	return id;
+    }
+
+    public IWindowsSession.View getView() {
+	return view;
     }
 
     public void loadModule(InputStream in) throws IOException, PowershellException {
@@ -145,7 +144,7 @@ public class Runspace implements IRunspace {
 			    readPrompt(millis);
 			}
 		    }
-		    if (">> ".equals(getPrompt())) {
+		    if (">> ".equals(prompt)) {
 			invoke("");
 		    }
 		    // DAS: add only if there was no error?
@@ -245,20 +244,14 @@ public class Runspace implements IRunspace {
 	}
     }
 
-    public String getPrompt() {
-	return prompt;
+    // Internal
+
+    IProcess getProcess() {
+	return p;
     }
 
-    public IWindowsSession.View getView() {
-	return view;
-    }
-
-    public boolean isAlive() {
-	return p.isRunning();
-    }
-
-    public boolean isBusy() {
-	return lock.isLocked();
+    ReentrantLock getLock() {
+	return lock;
     }
 
     // Private

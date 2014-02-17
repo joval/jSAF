@@ -44,7 +44,7 @@ import jsaf.util.StringTools;
 public class Registry implements IRegistry {
     protected IWindowsSession.View view;
     protected IWindowsSession session;
-    protected IRunspace runspace;
+    protected HashSet<String> runspaceIds;
     protected RegistrySearcher searcher;
     protected LocLogger logger;
     protected IKey hklm, hku, hkcu, hkcr, hkcc;
@@ -65,18 +65,18 @@ public class Registry implements IRegistry {
 	this.session = session;
 	logger = session.getLogger();
 	this.view = view;
-	for (IRunspace runspace : session.getRunspacePool().enumerate()) {
-	    if (runspace.getView() == view) {
-		this.runspace = runspace;
-		break;
-	    }
-	}
-	if (runspace == null) {
-	    runspace = session.getRunspacePool().spawn(view);
-	}
-	runspace.loadModule(Registry.class.getResourceAsStream("Registry.psm1"));
+	runspaceIds = new HashSet<String>();
 	keyMap = new HashMap<String, IKey>();
 	valueMap = new HashMap<String, IValue[]>();
+    }
+
+    protected IRunspace getRunspace() throws Exception {
+	IRunspace runspace = session.getRunspacePool().getRunspace(view);
+	if (!runspaceIds.contains(runspace.getId())) {
+	    runspace.loadModule(Registry.class.getResourceAsStream("Registry.psm1"));
+	    runspaceIds.add(runspace.getId());
+	}
+	return runspace;
     }
 
     // Implement ILoggable
@@ -94,7 +94,7 @@ public class Registry implements IRegistry {
     public ISearchable<IKey> getSearcher() {
 	if (searcher == null) {
 	    try {
-		searcher = new RegistrySearcher(session, runspace);
+		searcher = new RegistrySearcher(this);
 	    } catch (Exception e) {
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
@@ -125,7 +125,7 @@ public class Registry implements IRegistry {
 	  case HKCR:
 	    if (hkcr == null) {
 		try {
-		    runspace.invoke("New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR");
+		    getRunspace().invoke("New-PSDrive -PSProvider registry -Root HKEY_CLASSES_ROOT -Name HKCR");
 		} catch (Exception e) {
 		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		}
@@ -136,7 +136,7 @@ public class Registry implements IRegistry {
 	  case HKCC:
 	    if (hkcc == null) {
 		try {
-		    runspace.invoke("New-PSDrive -PSProvider registry -Root HKEY_CURRENT_CONFIG -Name HKCC");
+		    getRunspace().invoke("New-PSDrive -PSProvider registry -Root HKEY_CURRENT_CONFIG -Name HKCC");
 		} catch (Exception e) {
 		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		}
@@ -170,7 +170,7 @@ public class Registry implements IRegistry {
 	getHive(hive); // idempotent hive initialization
 	String result = null;
 	try {
-	    result = runspace.invoke("Test-Path -LiteralPath " + getItemPath(key));
+	    result = getRunspace().invoke("Test-Path -LiteralPath " + getItemPath(key));
 	} catch (Exception e) {
 	    throw new RegistryException(e);
 	}
@@ -205,7 +205,7 @@ public class Registry implements IRegistry {
 	    }
 	    sb.append(" | %{Test-Path -LiteralPath $_} | Transfer-Encode");
 	    try {
-		String data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.UTF8);
+		String data = new String(Base64.decode(getRunspace().invoke(sb.toString())), StringTools.UTF8);
 		int i=0;
 		for (String result : data.split("\r\n")) {
 		    if ("true".equalsIgnoreCase(result)) {
@@ -230,7 +230,7 @@ public class Registry implements IRegistry {
 	try {
 	    StringBuffer sb = new StringBuffer("Get-Item -LiteralPath ").append(getItemPath(key));
 	    sb.append(" | %{$_.GetSubKeyNames()}");
-	    String data = runspace.invoke(sb.toString());
+	    String data = getRunspace().invoke(sb.toString());
 	    if (data == null) {
 		return new IKey[0];
 	    } else {
@@ -271,7 +271,7 @@ public class Registry implements IRegistry {
 	ArrayList<IValue> values = new ArrayList<IValue>();
 	String data = null;
 	try {
-	    data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.UTF8);
+	    data = new String(Base64.decode(getRunspace().invoke(sb.toString())), StringTools.UTF8);
 	} catch (Exception e) {
 	    throw new RegistryException(e);
 	}
@@ -319,7 +319,7 @@ public class Registry implements IRegistry {
 	    sb.append(" | Print-RegValues -Hive ").append(hive.getName()).append(" | Transfer-Encode");
 	    String data = null;
 	    try {
-		data = new String(Base64.decode(runspace.invoke(sb.toString())), StringTools.UTF8);
+		data = new String(Base64.decode(getRunspace().invoke(sb.toString())), StringTools.UTF8);
 	    } catch (Exception e) {
 		throw new RegistryException(e);
 	    }

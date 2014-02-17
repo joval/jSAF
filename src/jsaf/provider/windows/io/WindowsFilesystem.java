@@ -96,15 +96,7 @@ public class WindowsFilesystem extends AbstractFilesystem implements IWindowsFil
     }
 
     protected IRunspace getRunspace() throws Exception {
-	IRunspace runspace = null;
-	for (IRunspace rs : ((IWindowsSession)session).getRunspacePool().enumerate()) {
-	    if (rs.isAlive() && !rs.isBusy() && rs.getView() == apparentView) {
-		runspace = rs;
-	    }
-	}
-	if (runspace == null) {
-	    runspace = ((IWindowsSession)session).getRunspacePool().spawn(apparentView);
-	}
+	IRunspace runspace = ((IWindowsSession)session).getRunspacePool().getRunspace(apparentView);
 	if (!runspaceIds.contains(runspace.getId())) {
 	    //
 	    // NB: WindowsFilesystem.class, to allow subclasses to extend this method.

@@ -151,6 +151,7 @@ public class Runspace implements IRunspace {
 		    modules.add(cs);
 		}
 	    } catch (TimeoutException e) {
+		p.destroy();
 		throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
 	    } finally {
 		if (in != null) {
@@ -191,7 +192,7 @@ public class Runspace implements IRunspace {
 		} else {
 		    logger.debug(Message.STATUS_POWERSHELL_ASSEMBLY_LOAD, cs);
 		    String data = Base64.encodeBytes(buff.toByteArray(), Base64.GZIP);
-		    invoke("Load-Assembly -Data \"" + data + "\"");
+		    invoke("Load-Assembly -Data \"" + data + "\"", millis);
 		    assemblies.add(cs);
 		}
 	    } finally {
@@ -237,6 +238,7 @@ public class Runspace implements IRunspace {
 		    throw new PowershellException(error);
 		}
 	    } catch (TimeoutException e) {
+		p.destroy();
 		throw new PowershellException(Message.getMessage(Message.ERROR_POWERSHELL_TIMEOUT));
 	    }
 	} finally {

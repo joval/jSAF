@@ -79,6 +79,7 @@ public class FS {
 		} else if (f.isFile()) {
 		    in = f.getInputStream();
 		    String cs = Checksum.getChecksum(in, Checksum.Algorithm.MD5);
+		    in.close();
 		    System.out.println("Path:  " + path);
 		    System.out.println(" Size: " + f.length());
 		    System.out.println("  md5: " + cs);

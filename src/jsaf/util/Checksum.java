@@ -117,7 +117,6 @@ public class Checksum {
         while ((len = in.read(buff)) > 0) {
        	    digest.update(buff, 0, len);
         }
-        in.close();
         return digest.digest();
     }
 

@@ -87,15 +87,16 @@ public class UnixFileSearcher implements ISearchable<IFile>, ILoggable {
 		IFile file = null;
 		while ((file = createObject(iter)) != null) {
 		    String path = file.getPath();
-		    logger.debug(Message.STATUS_FS_SEARCH_MATCH, path);
+		    logger.trace(Message.STATUS_FS_SEARCH_MATCH, path);
 		    paths.add(path);
 		    results.add(file);
 		}
 		cache.put(cmd, paths.toArray(new String[paths.size()]));
-		logger.debug(Message.STATUS_FS_SEARCH_DONE, results.size(), cmd);
 	    } catch (Exception e) {
 		logger.warn(Message.ERROR_FS_SEARCH);
 		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    } finally {
+		logger.debug(Message.STATUS_FS_SEARCH_DONE, results.size(), cmd);
 	    }
 	}
 	return results;

@@ -63,27 +63,27 @@ abstract class AbstractDriver implements IUnixFilesystemDriver {
 	    getMounts();
 	}
 	if (typeFilter == null) {
-	    logger.debug(Message.STATUS_FS_MOUNT_FILTER, "[none]", "N/A");
+	    logger.trace(Message.STATUS_FS_MOUNT_FILTER, "[none]", "N/A");
 	    for (IFilesystem.IMount mount : mounts) {
-		logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+		logger.trace(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
 	    }
 	    return mounts;
 	} else {
-	    logger.debug(Message.STATUS_FS_MOUNT_FILTER, typeFilter.pattern(), Boolean.toString(include));
+	    logger.trace(Message.STATUS_FS_MOUNT_FILTER, typeFilter.pattern(), Boolean.toString(include));
 	    Collection<IFilesystem.IMount> results = new ArrayList<IFilesystem.IMount>();
 	    for (IFilesystem.IMount mount : mounts) {
 		if (typeFilter.matcher(mount.getType()).find()) {
 		    if (include) {
-			logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+			logger.trace(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
 			results.add(mount);
 		    } else {
-			logger.debug(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
+			logger.trace(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
 		    }
 		} else {
 		    if (include) {
-			logger.debug(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
+			logger.trace(Message.STATUS_FS_MOUNT_SKIP, mount.getPath(), mount.getType());
 		    } else {
-			logger.debug(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
+			logger.trace(Message.STATUS_FS_MOUNT_ADD, mount.getPath(), mount.getType());
 			results.add(mount);
 		    }
 		}

@@ -190,35 +190,43 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	} else {
 	    if (fs.getFile(from).isDirectory()) {
 		logger.debug(Message.STATUS_FS_SEARCH_START, cmd);
-		File localTemp = null;
-		IFile remoteTemp = null;
-		InputStream in = null;
 		Collection<String> paths = new ArrayList<String>();
 		try {
 		    //
 		    // Run the command on the remote host, storing the results in a temporary file, then tranfer the file
 		    // locally and read it.
 		    //
-		    remoteTemp = execToFile(cmd);
+		    IFile remoteTemp = execToFile(cmd);
 		    File wsdir = fs.getSession().getWorkspace();
+		    Iterator<String> iter = null;
 		    if (wsdir == null || ISession.LOCALHOST.equals(fs.getSession().getHostname())) {
-			in = new GZIPInputStream(remoteTemp.getInputStream());
+			iter = new ReaderIterator(new File(remoteTemp.getPath()));
 		    } else {
-			localTemp = File.createTempFile("search", null, wsdir);
+			File tempDir = null;
+			if (fs.getSession().getWorkspace() == null) {
+			    tempDir = new File(System.getProperty("user.home"));
+			} else {
+			    tempDir = fs.getSession().getWorkspace();
+			}
+			File localTemp = File.createTempFile("search", null, tempDir);
 			StreamTool.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
-			in = new GZIPInputStream(new FileInputStream(localTemp));
+			try {
+			    remoteTemp.delete();
+			} catch (IOException e) {
+			    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+			}
+			iter = new ReaderIterator(localTemp);
 		    }
-		    BufferedReader reader = new BufferedReader(new InputStreamReader(in, StreamTool.detectEncoding(in)));
-		    Iterator<String> iter = new ReaderIterator(reader);
 		    IFile file = null;
-		    while ((file = createObject(iter)) != null) {
+		    while((file = createObject(iter)) != null) {
 			String path = file.getPath();
-			logger.debug(Message.STATUS_FS_SEARCH_MATCH, path);
+			logger.trace(Message.STATUS_FS_SEARCH_MATCH, path);
 			results.add(file);
 			paths.add(path);
 		    }
 		    //
-		    // Store results in the cache for future use; NB: Windows search command key is not case-sensitive.
+		    // Store results in the cache for future use
+		    // NB: Windows search command key is not case-sensitive.
 		    //
 		    cache.put(cmd.toUpperCase(), paths.toArray(new String[paths.size()]));
 		} catch (EOFException e) {
@@ -228,22 +236,6 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 		    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		} finally {
 		    logger.debug(Message.STATUS_FS_SEARCH_DONE, results.size(), cmd);
-		    if (in != null) {
-			try {
-			    in.close();
-			} catch (IOException e) {
-			}
-		    }
-		    if (localTemp != null) {
-			localTemp.delete();
-		    }
-		    if (remoteTemp != null) {
-			try {
-			    remoteTemp.delete();
-			} catch (Exception e) {
-			    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-			}
-		    }
 		}
 	    }
 	}
@@ -303,11 +295,19 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
     }
 
     class ReaderIterator implements Iterator<String> {
+	File file;
 	BufferedReader reader;
 	String next = null;
 
-	ReaderIterator(BufferedReader reader) {
-	    this.reader = reader;
+	ReaderIterator(File file) throws IOException {
+	    this.file = file;
+	    try {
+		InputStream in = new GZIPInputStream(new FileInputStream(file));
+		reader = new BufferedReader(new InputStreamReader(in, StreamTool.detectEncoding(in)));
+	    } catch (IOException e) {
+		close();
+		throw e;
+	    }
 	}
 
 	// Implement Iterator<String>
@@ -318,6 +318,7 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 		    next = next();
 		    return true;
 		} catch (NoSuchElementException e) {
+		    close();
 		    return false;
 		}
 	    } else {
@@ -346,6 +347,17 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 
 	public void remove() {
 	    throw new UnsupportedOperationException();
+	}
+
+	// Private
+
+	/**
+	 * Clean up the remote or local file.
+	 */
+	private void close() {
+	    if (file != null) {
+		file.delete();
+	    }
 	}
     }
 

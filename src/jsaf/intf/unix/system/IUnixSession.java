@@ -64,6 +64,20 @@ public interface IUnixSession extends IComputerSystem {
 	AIX("AIX"),
 
 	/**
+	 * Flavor for VMWare ESX.
+	 *
+	 * @since 1.1.2
+	 */
+	ESX("VMkernel"),
+
+	/**
+	 * Flavor for HP-UX.
+	 *
+	 * @since 1.1.2
+	 */
+	HPUX("HP-UX"),
+
+	/**
 	 * Flavor for Linux.
 	 *
 	 * @since 1.0

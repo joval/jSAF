@@ -20,9 +20,11 @@ import java.util.regex.PatternSyntaxException;
 import jsaf.Message;
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.util.ISearchable;
+import jsaf.intf.util.ISearchable.Condition;
 import jsaf.intf.windows.powershell.IRunspace;
 import jsaf.intf.windows.registry.IKey;
 import jsaf.intf.windows.registry.IRegistry;
+import jsaf.intf.windows.registry.IRegistry.RegCondition;
 import jsaf.intf.windows.registry.IValue;
 import jsaf.intf.windows.system.IWindowsSession;
 import jsaf.util.StringTools;
@@ -46,54 +48,52 @@ public class RegistrySearcher implements ISearchable<IKey> {
 
     // Implement ISearchable<IKey>
  
-    public ISearchable.ICondition condition(int field, int type, Object value) {
-	return new GenericCondition(field, type, value);
-    }
-
-    public List<IKey> search(List<ISearchable.ICondition> conditions) throws Exception {
+    public List<IKey> search(List<ISearchable.Condition> conditions) throws Exception {
 	IRegistry.Hive hive = null;
 	String keyPath = null, fullKeyPath = null, valName = null, valNameB64 = null;
 	Pattern keyPattern = null, valPattern = null;
-	int maxDepth = DEPTH_UNLIMITED;
+	int maxDepth = RegCondition.DEPTH_UNLIMITED;
 	boolean keyOnly = false;
-	for (ISearchable.ICondition condition : conditions) {
+	for (Condition condition : conditions) {
 	    switch(condition.getField()) {
-	      case FIELD_DEPTH:
+	      case RegCondition.FIELD_DEPTH:
 		maxDepth = ((Integer)condition.getValue()).intValue();
 		break;
-	      case FIELD_FROM:
+	      case RegCondition.FIELD_FROM:
 		fullKeyPath = (String)condition.getValue();
 		break;
-	      case IRegistry.FIELD_HIVE:
+	      case RegCondition.FIELD_HIVE:
 		hive = (IRegistry.Hive)condition.getValue();
 		break;
-	      case IRegistry.FIELD_KEY:
+	      case RegCondition.FIELD_KEY:
 		switch(condition.getType()) {
-		  case TYPE_EQUALITY:
+		  case RegCondition.TYPE_EQUALITY:
 		    keyPath = (String)condition.getValue();
 		    break;
-		  case TYPE_PATTERN:
+		  case RegCondition.TYPE_PATTERN:
 		    keyPattern = (Pattern)condition.getValue();
 		    break;
 		}
 		break;
-	      case IRegistry.FIELD_VALUE:
+	      case RegCondition.FIELD_VALUE:
 		switch(condition.getType()) {
-		  case TYPE_EQUALITY:
+		  case RegCondition.TYPE_EQUALITY:
 		    valName = (String)condition.getValue();
 		    break;
-		  case TYPE_PATTERN:
+		  case RegCondition.TYPE_PATTERN:
 		    valPattern = (Pattern)condition.getValue();
 		    break;
 		}
 		break;
-	      case IRegistry.FIELD_VALUE_BASE64:
+	      case RegCondition.FIELD_VALUE_BASE64:
 		switch(condition.getType()) {
-		  case TYPE_EQUALITY:
+		  case RegCondition.TYPE_EQUALITY:
 		    valNameB64 = (String)condition.getValue();
 		    break;
 		}
 		break;
+	      default:
+		throw new IllegalArgumentException("Field value: " + condition.getField());
 	    }
 	}
 

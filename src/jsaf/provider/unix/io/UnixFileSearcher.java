@@ -18,6 +18,7 @@ import jsaf.intf.unix.io.IUnixFilesystemDriver;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.util.ISearchable;
+import jsaf.intf.util.ISearchable.Condition;
 import jsaf.io.fs.AbstractFilesystem;
 import jsaf.util.SafeCLI;
 
@@ -54,10 +55,6 @@ public class UnixFileSearcher implements ISearchable<IFile>, ILoggable {
 
     // Implement ISearchable<IFile>
 
-    public ICondition condition(int field, int type, Object value) {
-	return new GenericCondition(field, type, value);
-    }
-
     public String[] guessParent(Pattern p, Object... args) {
 	int index = 0;
 	for (Object arg : args) {
@@ -71,7 +68,7 @@ public class UnixFileSearcher implements ISearchable<IFile>, ILoggable {
 	return fs.guessParent(p, false);
     }
 
-    public Collection<IFile> search(List<ISearchable.ICondition> conditions) throws Exception {
+    public Collection<IFile> search(List<ISearchable.Condition> conditions) throws Exception {
 	String cmd = driver.getFindCommand(conditions);
 	Collection<IFile> results = new ArrayList<IFile>();
 	if (cache.containsKey(cmd)) {

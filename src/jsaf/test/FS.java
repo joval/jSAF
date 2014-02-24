@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFilesystem;
+import jsaf.intf.io.IFilesystem.FSCondition;
 import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.system.IEnvironment;
 import jsaf.intf.system.ISession;
@@ -50,9 +51,9 @@ public class FS {
 		    }
 		}
 		for (String s : from) {
-		    List<ISearchable.ICondition> conditions = new ArrayList<ISearchable.ICondition>();
-		    conditions.add(searcher.condition(ISearchable.FIELD_FROM, ISearchable.TYPE_EQUALITY, s));
-		    conditions.add(searcher.condition(IFilesystem.FIELD_PATH, ISearchable.TYPE_PATTERN, pattern));
+		    List<ISearchable.Condition> conditions = new ArrayList<ISearchable.Condition>();
+		    conditions.add(new FSCondition(FSCondition.FIELD_FROM, FSCondition.TYPE_EQUALITY, s));
+		    conditions.add(new FSCondition(FSCondition.FIELD_PATH, FSCondition.TYPE_PATTERN, pattern));
 		    conditions.add(ISearchable.RECURSE);
 		    list.addAll(searcher.search(conditions));
 		}

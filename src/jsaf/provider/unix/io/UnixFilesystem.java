@@ -151,6 +151,7 @@ public class UnixFilesystem extends AbstractFilesystem implements IUnixFilesyste
 	      case MACOSX:
 		driver = new MacOSXDriver(us);
 		break;
+	      case ESX:
 	      case LINUX:
 		driver = new LinuxDriver(us);
 		break;

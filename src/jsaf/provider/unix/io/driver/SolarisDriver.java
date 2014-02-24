@@ -22,6 +22,7 @@ import jsaf.intf.io.IFilesystem;
 import jsaf.intf.io.IReader;
 import jsaf.intf.unix.io.IUnixFileInfo;
 import jsaf.intf.unix.io.IUnixFilesystem;
+import jsaf.intf.unix.io.IUnixFilesystem.UnixFSCondition;
 import jsaf.intf.unix.io.IUnixFilesystemDriver;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.intf.util.ISearchable;
@@ -64,51 +65,51 @@ public class SolarisDriver extends AbstractDriver {
 
     // Implement IUnixFilesystemDriver
 
-    public String getFindCommand(List<ISearchable.ICondition> conditions) {
+    public String getFindCommand(List<ISearchable.Condition> conditions) {
 	boolean dirOnly=false, xdev=false, followLinks=false;
 	Pattern path=null, dirname=null, basename=null;
 	String from=null, literalBasename=null, antiBasename=null, fsType=null;
 	int depth = 1;
 
-	for (ISearchable.ICondition condition : conditions) {
+	for (ISearchable.Condition condition : conditions) {
 	    switch(condition.getField()) {
-	      case IUnixFilesystem.FIELD_FOLLOW_LINKS:
+	      case UnixFSCondition.FIELD_FOLLOW_LINKS:
 		followLinks = true;
 		break;
-	      case IUnixFilesystem.FIELD_XDEV:
+	      case UnixFSCondition.FIELD_XDEV:
 		xdev = true;
 		break;
-	      case IFilesystem.FIELD_FILETYPE:
+	      case UnixFSCondition.FIELD_FILETYPE:
 		if (IFilesystem.FILETYPE_DIR.equals(condition.getValue())) {
 		    dirOnly = true;
 		}
 		break;
-	      case IFilesystem.FIELD_PATH:
+	      case UnixFSCondition.FIELD_PATH:
 		path = (Pattern)condition.getValue();
 		break;
-	      case IFilesystem.FIELD_DIRNAME:
+	      case UnixFSCondition.FIELD_DIRNAME:
 		dirname = (Pattern)condition.getValue();
 		break;
-	      case IFilesystem.FIELD_BASENAME:
+	      case UnixFSCondition.FIELD_BASENAME:
 		switch(condition.getType()) {
-		  case ISearchable.TYPE_EQUALITY:
+		  case UnixFSCondition.TYPE_EQUALITY:
 		    literalBasename = (String)condition.getValue();
 		    break;
-		  case ISearchable.TYPE_INEQUALITY:
+		  case UnixFSCondition.TYPE_INEQUALITY:
 		    antiBasename = (String)condition.getValue();
 		    break;
-		  case ISearchable.TYPE_PATTERN:
+		  case UnixFSCondition.TYPE_PATTERN:
 		    basename = (Pattern)condition.getValue();
 		    break;
 		}
 		break;
-	      case IFilesystem.FIELD_FSTYPE:
+	      case UnixFSCondition.FIELD_FSTYPE:
 		fsType = (String)condition.getValue();
 		break;
-	      case ISearchable.FIELD_DEPTH:
+	      case UnixFSCondition.FIELD_DEPTH:
 		depth = ((Integer)condition.getValue()).intValue();
 		break;
-	      case ISearchable.FIELD_FROM:
+	      case UnixFSCondition.FIELD_FROM:
 		from = ((String)condition.getValue()).replace(" ", "\\ ");
 		break;
 	    }
@@ -128,7 +129,7 @@ public class SolarisDriver extends AbstractDriver {
 	}
 	if (path == null) {
 	    if (dirname == null) {
-		if (dirOnly && depth != ISearchable.DEPTH_UNLIMITED) {
+		if (dirOnly && depth != UnixFSCondition.DEPTH_UNLIMITED) {
 		    cmd.append(" -type d");
 		    cmd.append(" -print");
 		    if (depth == 1 && "/".equals(from)) {
@@ -145,7 +146,7 @@ public class SolarisDriver extends AbstractDriver {
 			cmd.append(" ! -name '").append(antiBasename).append("'");
 		    }
 		    cmd.append(" -print");
-		    if (depth != ISearchable.DEPTH_UNLIMITED) {
+		    if (depth != UnixFSCondition.DEPTH_UNLIMITED) {
 			cmd.append(" -o -type d");
 			if (depth == 1 && "/".equals(from)) {
 			    cmd.append(" ! -name /");
@@ -170,7 +171,7 @@ public class SolarisDriver extends AbstractDriver {
 		    } else if (literalBasename != null) {
 			cmd.append(" -name '").append(literalBasename).append("'");
 		    }
-		    if (depth != ISearchable.DEPTH_UNLIMITED) {
+		    if (depth != UnixFSCondition.DEPTH_UNLIMITED) {
 			// It's impossible for a filename to ever contain the \0 character, so that's our token
 			cmd.append(" -exec echo []\\0 {} \\; | awk -F\\0 'split($1,a,\"/\")+");
 			cmd.append(Integer.toString(depth));

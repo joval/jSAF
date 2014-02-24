@@ -37,6 +37,7 @@ import jsaf.JSAFSystem;
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFileMetadata;
 import jsaf.intf.io.IFilesystem;
+import jsaf.intf.io.IFilesystem.FSCondition;
 import jsaf.intf.system.ISession;
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.util.ISearchable;
@@ -76,10 +77,6 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 
     // Implement ISearchable<IFile>
 
-    public ICondition condition(int field, int type, Object value) {
-	return new GenericCondition(field, type, value);
-    }
-
     public String[] guessParent(Pattern p, Object... args) {
 	int index = 0;
 	for (Object arg : args) {
@@ -93,47 +90,49 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 	return fs.guessParent(p, false);
     }
 
-    public Collection<IFile> search(List<ISearchable.ICondition> conditions) throws Exception {
+    public Collection<IFile> search(List<ISearchable.Condition> conditions) throws Exception {
 	String from = null, basename = null, fsType = null;
 	Pattern pathPattern = null, dirPattern = null, basenamePattern = null;
-	int maxDepth = DEPTH_UNLIMITED;
+	int maxDepth = FSCondition.DEPTH_UNLIMITED;
 	boolean dirOnly = false;
-	for (ISearchable.ICondition condition : conditions) {
+	for (ISearchable.Condition condition : conditions) {
 	    switch(condition.getField()) {
-	      case FIELD_DEPTH:
+	      case FSCondition.FIELD_DEPTH:
 		maxDepth = ((Integer)condition.getValue()).intValue();
 		break;
-	      case FIELD_FROM:
+	      case FSCondition.FIELD_FROM:
 		from = (String)condition.getValue();
 		break;
-	      case IFilesystem.FIELD_PATH:
+	      case FSCondition.FIELD_PATH:
 		pathPattern = (Pattern)condition.getValue();
 		break;
-	      case IFilesystem.FIELD_DIRNAME:
+	      case FSCondition.FIELD_DIRNAME:
 		dirPattern = (Pattern)condition.getValue();
 		break;
-	      case IFilesystem.FIELD_BASENAME:
+	      case FSCondition.FIELD_BASENAME:
 		switch(condition.getType()) {
-		  case ISearchable.TYPE_INEQUALITY:
+		  case FSCondition.TYPE_INEQUALITY:
 		    String anti = Matcher.quoteReplacement((String)condition.getValue());
 		    basenamePattern = Pattern.compile("(?!^" + anti + "$)(^.*$)");
 		    break;
-		  case ISearchable.TYPE_EQUALITY:
+		  case FSCondition.TYPE_EQUALITY:
 		    basename = (String)condition.getValue();
 		    break;
-		  case ISearchable.TYPE_PATTERN:
+		  case FSCondition.TYPE_PATTERN:
 		    basenamePattern = (Pattern)condition.getValue();
 		    break;
 		}
 		break;
-	      case IFilesystem.FIELD_FILETYPE:
+	      case FSCondition.FIELD_FILETYPE:
 		if (IFilesystem.FILETYPE_DIR.equals(condition.getValue())) {
 		    dirOnly = true;
 		}
 		break;
-	      case IFilesystem.FIELD_FSTYPE:
+	      case FSCondition.FIELD_FSTYPE:
 		fsType = (String)condition.getValue();
 		break;
+	      default:
+		throw new IllegalArgumentException("Field value: " + condition.getField());
 	    }
 	}
 	if (fsType != null) {

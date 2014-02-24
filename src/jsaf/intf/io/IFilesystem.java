@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.util.ISearchable;
+import jsaf.intf.util.ISearchable.Condition;
 
 /**
  * A platform-independent abstraction of a server filesystem.
@@ -26,42 +27,6 @@ public interface IFilesystem extends ILoggable {
      * @since 1.0
      */
     String PROP_CACHE_JDBM = "fs.cache.useJDBM";
-
-    /**
-     * Condition field for a type (i.e., file/directory/link).
-     *
-     * @since 1.0
-     */
-    int FIELD_FILETYPE = 50;
-
-    /**
-     * Condition field for a file path pattern.
-     *
-     * @since 1.0
-     */
-    int FIELD_PATH = 51;
-
-    /**
-     * Condition field for a file dirname (directory path) pattern. For files of type FILETYPE_DIR, the dirname is
-     * the same as the path.
-     *
-     * @since 1.0
-     */
-    int FIELD_DIRNAME = 52;
-
-    /**
-     * Condition field for a file basename (filename) pattern. Files of type FILETYPE_DIR have no basename.
-     *
-     * @since 1.0
-     */
-    int FIELD_BASENAME = 53;
-
-    /**
-     * Condition field for a filesystem type.
-     *
-     * @since 1.0.1
-     */
-    int FIELD_FSTYPE = 54;
 
     /**
      * A condition value indicating a regular file, for conditions of type FIELD_FILETYPE.
@@ -85,29 +50,11 @@ public interface IFilesystem extends ILoggable {
     String FILETYPE_LINK = "l";
 
     /**
-     * A search condition for only matching directories.
-     *
-     * @since 1.0
-     */
-    ISearchable.ICondition DIRECTORIES = new ISearchable.ICondition() {
-	public int getType() { return ISearchable.TYPE_EQUALITY; }
-	public int getField() { return FIELD_FILETYPE; }
-	public Object getValue() { return FILETYPE_DIR; }
-    };
-
-    /**
      * Get the path delimiter character used by this filesystem.
      *
      * @since 1.0
      */
     String getDelimiter();
-
-    /**
-     * Access an ISearchable for the filesystem.
-     *
-     * @since 1.0
-     */
-    ISearchable<IFile> getSearcher() throws IOException;
 
     /**
      * Retrieve an IFile with default (IFile.READONLY) access.
@@ -217,5 +164,69 @@ public interface IFilesystem extends ILoggable {
 	 * @since 1.0
 	 */
 	String getType();
+    }
+
+    /**
+     * Access an ISearchable for the filesystem.
+     *
+     * @since 1.0
+     */
+    ISearchable<IFile> getSearcher() throws IOException;
+
+    /**
+     * A search condition for only matching directories.
+     *
+     * @since 1.2
+     */
+    FSCondition DIRECTORIES = new FSCondition(Condition.TYPE_EQUALITY, FSCondition.FIELD_FILETYPE, FILETYPE_DIR);
+
+    /**
+     * Base ISearchable.Condition subclass for IFilesystem search conditions.
+     *
+     * @since 1.2
+     */
+    public class FSCondition extends Condition {
+	/**
+	 * Create a Condition for searching a generic IFilesystem.
+	 */
+	public FSCondition(int type, int field, Object arg) {
+	    super(type, field, arg);
+	}
+
+	/**
+	 * Condition field for a type (i.e., file/directory/link).
+	 *
+	 * @since 1.0
+	 */
+	public static final int FIELD_FILETYPE = 50;
+
+	/**
+	 * Condition field for a file path pattern.
+	 *
+	 * @since 1.0
+	 */
+	public static final int FIELD_PATH = 51;
+
+	/**
+	 * Condition field for a file dirname (directory path) pattern. For files of type FILETYPE_DIR, the dirname is
+	 * the same as the path.
+	 *
+	 * @since 1.0
+	 */
+	public static final int FIELD_DIRNAME = 52;
+
+	/**
+	 * Condition field for a file basename (filename) pattern. Files of type FILETYPE_DIR have no basename.
+	 *
+	 * @since 1.0
+	 */
+	public static final int FIELD_BASENAME = 53;
+
+	/**
+	 * Condition field for a filesystem type.
+	 *
+	 * @since 1.0.1
+	 */
+	public static final int FIELD_FSTYPE = 54;
     }
 }

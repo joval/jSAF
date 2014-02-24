@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.util.ISearchable;
+import jsaf.intf.util.ISearchable.Condition;
 import jsaf.provider.windows.registry.RegistryException;
 
 /**
@@ -18,32 +19,25 @@ import jsaf.provider.windows.registry.RegistryException;
  */
 public interface IRegistry extends ILoggable {
     /**
-     * Search condition field for the hive.
+     * String delimiter for registry key paths.
      *
      * @since 1.0
      */
-    int FIELD_HIVE = 100;
+    String DELIM_STR = "\\";
 
     /**
-     * Search condition field for the key path or pattern.
+     * Character delimiter for registry key paths.
      *
      * @since 1.0
      */
-    int FIELD_KEY = 101;
+    char DELIM_CH = '\\';
 
     /**
-     * Search condition field for the value name or pattern.
+     * Escaped String delimiter for registry key paths.
      *
      * @since 1.0
      */
-    int FIELD_VALUE = 102;
-
-    /**
-     * Search condition field for a base-64 encoded value name.
-     *
-     * @since 1.0
-     */
-    int FIELD_VALUE_BASE64 = 103;
+    String ESCAPED_DELIM = "\\\\";
 
     /**
      * The path of the HKLM hive child key containing the computer name value.
@@ -149,34 +143,6 @@ public interface IRegistry extends ILoggable {
     }
 
     /**
-     * String delimiter for registry key paths.
-     *
-     * @since 1.0
-     */
-    String DELIM_STR = "\\";
-
-    /**
-     * Character delimiter for registry key paths.
-     *
-     * @since 1.0
-     */
-    char DELIM_CH = '\\';
-
-    /**
-     * Escaped String delimiter for registry key paths.
-     *
-     * @since 1.0
-     */
-    String ESCAPED_DELIM = "\\\\";
-
-    /**
-     * Get an ISearchable for the registry.
-     *
-     * @since 1.0
-     */
-    ISearchable<IKey> getSearcher();
-
-    /**
      * Get a particular hive.
      *
      * @since 1.0
@@ -241,4 +207,53 @@ public interface IRegistry extends ILoggable {
      * @since 1.0.1
      */
     String getStringValue(Hive hive, String subkey, String value) throws Exception;
+
+    /**
+     * Get an ISearchable for the registry.
+     *
+     * @since 1.0
+     */
+    ISearchable<IKey> getSearcher();
+
+    /**
+     * ISearchable.Condition subclass for IRegistry search conditions.
+     *
+     * @since 1.2
+     */
+    public class RegCondition extends Condition {
+	/**
+	 * Create a new Condition for an IRegistry search.
+	 */
+	public RegCondition(int type, int field, Object arg) {
+	    super(type, field, arg);
+	}
+
+	/**
+	 * Search condition field for the hive.
+	 *
+	 * @since 1.2
+	 */
+	public static final int FIELD_HIVE = 100;
+
+	/**
+	 * Search condition field for the key path or pattern.
+	 *
+	 * @since 1.2
+	 */
+	public static final int FIELD_KEY = 101;
+
+	/**
+	 * Search condition field for the value name or pattern.
+	 *
+	 * @since 1.2
+	 */
+	public static final int FIELD_VALUE = 102;
+
+	/**
+	 * Search condition field for a base-64 encoded value name.
+	 *
+	 * @since 1.2
+	 */
+	public static final int FIELD_VALUE_BASE64 = 103;
+    }
 }

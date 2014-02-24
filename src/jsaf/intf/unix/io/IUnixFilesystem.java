@@ -7,8 +7,7 @@ import java.io.IOException;
 
 import jsaf.intf.io.IFilesystem;
 import jsaf.intf.util.ISearchable;
-import jsaf.intf.util.ISearchable.GenericCondition;
-import jsaf.intf.util.ISearchable.ICondition;
+import jsaf.intf.util.ISearchable.Condition;
 
 /**
  * Defines extended attributes of a filesystem on Unix.
@@ -18,36 +17,6 @@ import jsaf.intf.util.ISearchable.ICondition;
  * @since 1.0
  */
 public interface IUnixFilesystem extends IFilesystem {
-    /**
-     * Condition field for the link-following flag.
-     *
-     * @since 1.0
-     */
-    int FIELD_FOLLOW_LINKS = 100;
-
-    /**
-     * The ICondition signifying that links should be followed in filesystem searches. The default behavior, if this
-     * condition is not present, is to not follow links.
-     *
-     * @since 1.0
-     */
-    ICondition FOLLOW_LINKS = new GenericCondition(FIELD_FOLLOW_LINKS, ISearchable.TYPE_EQUALITY, Boolean.TRUE);
-
-    /**
-     * Condition field for the xdev flag (remain on filesystem).
-     *
-     * @since 1.0
-     */
-    int FIELD_XDEV = 101;
-
-    /**
-     * The ICondition signifying that the search should be confined to the filesystem of the FROM condition. If this
-     * condition is not present, the search can include results that reside in linked filesystems.
-     *
-     * @since 1.0
-     */
-    ICondition XDEV = new GenericCondition(FIELD_XDEV, ISearchable.TYPE_EQUALITY, Boolean.TRUE);
-
     /**
      * String delimiter for Unix filesystem paths.
      *
@@ -70,4 +39,58 @@ public interface IUnixFilesystem extends IFilesystem {
      * @since 1.0
      */
     IUnixFilesystemDriver getDriver();
+
+    /**
+     * The Condition signifying that links should be followed in filesystem searches. The default behavior, if this
+     * condition is not present, is to not follow links.
+     *
+     * @since 1.2
+     */
+    UnixFSCondition FOLLOW_LINKS =
+	new UnixFSCondition(UnixFSCondition.FIELD_FOLLOW_LINKS, Condition.TYPE_EQUALITY, Boolean.TRUE);
+
+    /**
+     * The Condition signifying that the search should be confined to the filesystem of the FROM condition. If this
+     * condition is not present, the search can include results that reside in linked filesystems.
+     *
+     * @since 1.2
+     */
+    UnixFSCondition XDEV =
+	new UnixFSCondition(UnixFSCondition.FIELD_XDEV, Condition.TYPE_EQUALITY, Boolean.TRUE);
+
+    /**
+     * ISearchable.Condition subclass for IUnixFilesystem searches.
+     */
+    public class UnixFSCondition extends FSCondition {
+	/**
+	 * Create a Condition for searching an IUnixFilesystem.
+ 	 */
+	public UnixFSCondition(int type, int field, Object arg) {
+	    super(type, field, arg);
+	}
+
+	/**
+	 * Condition field for the link-following flag.
+	 *
+	 * @since 1.2
+	 */
+	public static final int FIELD_FOLLOW_LINKS = 100;
+
+	/**
+	 * Condition field for the xdev flag (remain on filesystem).
+	 *
+	 * @since 1.2
+	 */
+	public static final int FIELD_XDEV = 101;
+
+	/**
+	 * Condition field for Unix file permissions. The only valid TYPE_ value is Condition.TYPE_EQUALITY.
+	 * The value must be of the form "[u/g/o][+/-][r/w/x]" -- meaning that the condition makes an assertion
+	 * about the user owner/group owner/other (i.e., world) permission setting on files that will be returned
+	 * by the search.  Multuple non-conflicting permission assertions can be made for any given search.
+	 *
+	 * @since 1.2
+	 */
+	public static final int FIELD_PERM = 102;
+    }
 }

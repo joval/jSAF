@@ -132,5 +132,10 @@ public interface ISearchable<T> {
 	public final Object getValue() {
 	    return value;
 	}
+
+	@Override
+	public final String toString() {
+	    return "Condition: " + getClass().getName() + " type=" + type + ", field=" + field + ", value=" + value.toString();
+	}
     }
 }

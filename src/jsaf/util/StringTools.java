@@ -387,7 +387,7 @@ public class StringTools {
      *
      * @throws IllegalArgumentException if the pattern cannot be converted to a glob
      *
-     * @since 1.2
+     * @since 1.1.2
      */
     public static String toGlob(Pattern p) throws IllegalArgumentException {
 	String s = p.pattern();

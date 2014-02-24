@@ -44,9 +44,11 @@ public interface IUnixFilesystemDriver extends ILoggable {
      *
      * The resulting command will follow links, but restrict results to the originating filesystem.
      *
+     * @throws IllegalArgumentException if one or more conditions are not supported
+     *
      * @since 1.2
      */
-    public String getFindCommand(List<ISearchable.Condition> conditions);
+    public String getFindCommand(List<ISearchable.Condition> conditions) throws IllegalArgumentException;
 
     /**
      * Returns a command whose output can be fed into the nextFileInfo method, to return file information for the path.

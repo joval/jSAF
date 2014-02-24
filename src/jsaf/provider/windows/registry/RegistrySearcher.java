@@ -93,7 +93,7 @@ public class RegistrySearcher implements ISearchable<IKey> {
 		}
 		break;
 	      default:
-		throw new IllegalArgumentException("Field value: " + condition.getField());
+		throw new IllegalArgumentException(condition.toString());
 	    }
 	}
 

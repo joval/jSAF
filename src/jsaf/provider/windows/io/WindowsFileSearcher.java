@@ -132,7 +132,7 @@ class WindowsFileSearcher implements ISearchable<IFile>, ILoggable {
 		fsType = (String)condition.getValue();
 		break;
 	      default:
-		throw new IllegalArgumentException("Field value: " + condition.getField());
+		throw new IllegalArgumentException(condition.toString());
 	    }
 	}
 	if (fsType != null) {

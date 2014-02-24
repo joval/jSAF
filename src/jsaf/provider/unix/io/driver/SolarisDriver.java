@@ -65,7 +65,7 @@ public class SolarisDriver extends AbstractDriver {
 
     // Implement IUnixFilesystemDriver
 
-    public String getFindCommand(List<ISearchable.Condition> conditions) {
+    public String getFindCommand(List<ISearchable.Condition> conditions) throws IllegalArgumentException {
 	boolean dirOnly=false, xdev=false, followLinks=false;
 	Pattern path=null, dirname=null, basename=null;
 	String from=null, literalBasename=null, antiBasename=null, fsType=null;
@@ -112,6 +112,8 @@ public class SolarisDriver extends AbstractDriver {
 	      case UnixFSCondition.FIELD_FROM:
 		from = ((String)condition.getValue()).replace(" ", "\\ ");
 		break;
+	      default:
+		throw new IllegalArgumentException(condition.toString());
 	    }
 	}
 

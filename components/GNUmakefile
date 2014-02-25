@@ -7,12 +7,8 @@ include $(TOP)/common.mk
 
 all: _provider
 
-_provider: _facade
-	@$(MAKE) --keep-going --directory=provider all
-
 _facade:
 	@$(MAKE) --keep-going --directory=facade all
 
 clean:
-	@$(MAKE) --keep-going --directory=provider clean
 	@$(MAKE) --keep-going --directory=facade clean

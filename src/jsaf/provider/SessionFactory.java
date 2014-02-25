@@ -24,11 +24,25 @@ import jsaf.intf.util.ILoggable;
  */
 public abstract class SessionFactory implements ILoggable {
     /**
-     * The class name of the default factory implementation.
+     * The class name of the default (local) factory implementation.
      *
      * @since 1.0
      */
     public static final String DEFAULT_FACTORY = "jsaf.provider.LocalSessionFactory";
+
+    /**
+     * The class name of the default remote factory implementation.
+     *
+     * @since 1.2
+     */
+    public static final String REMOTE_FACTORY = "jsaf.provider.RemoteSessionFactory";
+
+    /**
+     * The class name of the default offline factory implementation.
+     *
+     * @since 1.2
+     */
+    public static final String OFFLINE_FACTORY = "jsaf.provider.OfflineSessionFactory";
 
     /**
      * Obtain a new instance of a SessionFactory, with no workspace directory. 

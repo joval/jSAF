@@ -87,7 +87,7 @@ public interface IUnixFilesystem extends IFilesystem {
 	 * Condition field for Unix file permissions. The only valid TYPE_ value is Condition.TYPE_EQUALITY.
 	 * The value must be of the form "[u/g/o][+/-][r/w/x]" -- meaning that the condition makes an assertion
 	 * about the user owner/group owner/other (i.e., world) permission setting on files that will be returned
-	 * by the search.  Multuple non-conflicting permission assertions can be made for any given search.
+	 * by the search.  Multiple non-conflicting permission assertions can be made for any given search.
 	 *
 	 * @since 1.2
 	 */

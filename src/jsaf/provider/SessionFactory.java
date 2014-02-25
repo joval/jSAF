@@ -61,14 +61,21 @@ public abstract class SessionFactory implements ILoggable {
      * @since 1.0
      */
     public static SessionFactory newInstance(File workspace) throws FactoryConfigurationError {
-	ClassLoader classLoader = SessionFactory.class.getClassLoader();
-	return newInstance(DEFAULT_FACTORY, classLoader, workspace);
+	return newInstance(DEFAULT_FACTORY, null, workspace);
     }
 
     /**
      * Obtain a new instance of a SessionFactory from class name. This function is useful when there are multiple
      * providers in the classpath, by giving control to the application to specify which provider should be
      * loaded.
+     *
+     * @param factoryClassName The class name of the desired factory implementation class.
+     *
+     * @param classLoader      The ClassLoader from which to load the factory. If null is specified, this will be the
+     *                         ClassLoader for the SessionFactory class.
+     *
+     * @param workspace        A directory in which jSAF sessions can create cache files. If null is specified, no caches
+     *                         will be created.
      *
      * @since 1.0
      */
@@ -77,6 +84,9 @@ public abstract class SessionFactory implements ILoggable {
 
 	if (factoryClassName == null) {
 	    throw new NullPointerException(Message.getMessage(Message.ERROR_FACTORY_CLASS));
+	}
+	if (classLoader == null) {
+	    classLoader = SessionFactory.class.getClassLoader();
 	}
 	try {
 	    Class<?> clazz = classLoader.loadClass(factoryClassName);

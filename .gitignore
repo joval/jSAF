@@ -1,6 +1,3 @@
 build/
 components/facade/jSAF.jar
 components/facade/docs/
-components/provider/jSAF-Provider.jar
-components/provider/rsrc/lib/slf4j-jdk14-1.6.2.jar
-components/provider/test.properties

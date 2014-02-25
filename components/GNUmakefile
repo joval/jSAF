@@ -5,7 +5,7 @@ TOP=..
 
 include $(TOP)/common.mk
 
-all: _provider
+all: _facade
 
 _facade:
 	@$(MAKE) --keep-going --directory=facade all

@@ -65,8 +65,8 @@ public interface IUnixFilesystem extends IFilesystem {
 	/**
 	 * Create a Condition for searching an IUnixFilesystem.
  	 */
-	public UnixFSCondition(int type, int field, Object arg) {
-	    super(type, field, arg);
+	public UnixFSCondition(int field, int type, Object arg) {
+	    super(field, type, arg);
 	}
 
 	/**

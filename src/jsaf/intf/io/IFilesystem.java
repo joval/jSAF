@@ -189,8 +189,8 @@ public interface IFilesystem extends ILoggable {
 	/**
 	 * Create a Condition for searching a generic IFilesystem.
 	 */
-	public FSCondition(int type, int field, Object arg) {
-	    super(type, field, arg);
+	public FSCondition(int field, int type, Object arg) {
+	    super(field, type, arg);
 	}
 
 	/**

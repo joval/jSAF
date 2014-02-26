@@ -178,7 +178,7 @@ public interface IFilesystem extends ILoggable {
      *
      * @since 1.2
      */
-    FSCondition DIRECTORIES = new FSCondition(Condition.TYPE_EQUALITY, FSCondition.FIELD_FILETYPE, FILETYPE_DIR);
+    FSCondition DIRECTORIES = new FSCondition(FSCondition.FIELD_FILETYPE, Condition.TYPE_EQUALITY, FILETYPE_DIR);
 
     /**
      * Base ISearchable.Condition subclass for IFilesystem search conditions.

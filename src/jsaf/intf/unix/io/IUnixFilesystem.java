@@ -96,7 +96,9 @@ public interface IUnixFilesystem extends IFilesystem {
 	/**
 	 * Condition field for Unix file user ownership. Valid TYPE_ values for this condition are:
 	 *   Condition.TYPE_EQUALITY - requires Integer value of the user ID
-	 *   Condition.TYPE_ANY_EQUALITY - requires Collection<Integer> value of possible user IDs
+	 *   Condition.TYPE_INEQUALITY - requires Integer value not matching the user ID
+	 *   Condition.TYPE_ANY - requires Collection<Integer> value of possible user IDs
+	 *   Condition.TYPE_NONE - requires Collection<Integer> value of excluded user IDs
 	 *
 	 * @since 1.2
 	 */
@@ -105,7 +107,9 @@ public interface IUnixFilesystem extends IFilesystem {
 	/**
 	 * Condition field for Unix file group ownership. Valid TYPE_ values for this condition are:
 	 *   Condition.TYPE_EQUALITY - requires Integer value of the group ID
-	 *   Condition.TYPE_ANY_EQUALITY - requires Collection<Integer> value of possible group IDs
+	 *   Condition.TYPE_INEQUALITY - requires Integer value not matching the group ID
+	 *   Condition.TYPE_ANY - requires Collection<Integer> value of possible group IDs
+	 *   Condition.TYPE_NONE - requires Collection<Integer> value of excluded group IDs
 	 *
 	 * @since 1.2
 	 */

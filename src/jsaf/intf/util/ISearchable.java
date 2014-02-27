@@ -74,7 +74,15 @@ public interface ISearchable<T> {
 	 *
 	 * @since 1.2
 	 */
-	public static final int TYPE_ANY_EQUALITY = 3;
+	public static final int TYPE_ANY = 3;
+
+	/**
+	 * Condition type used with array and collection values, indicating a search for something NOT matching any
+	 * (i.e., at least one) of the values.
+	 *
+	 * @since 1.2
+	 */
+	public static final int TYPE_NONE = 4;
 
 	/**
 	 * Depth condition field ID for recursive searches.

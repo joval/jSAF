@@ -28,10 +28,10 @@ public class WinExample {
 	    //
 	    Logger logger = Logger.getLogger(Message.getLogger().getName());
 	    logger.setUseParentHandlers(false);
-	    logger.setLevel(Level.FINEST);
+	    logger.setLevel(Level.INFO);
 	    Handler handler = new ConsoleHandler();
 	    handler.setFormatter(new SimpleFormatter());
-	    handler.setLevel(Level.FINEST);
+	    handler.setLevel(Level.INFO);
 	    logger.addHandler(handler);
 
 	    //

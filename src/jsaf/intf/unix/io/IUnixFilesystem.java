@@ -70,14 +70,14 @@ public interface IUnixFilesystem extends IFilesystem {
 	}
 
 	/**
-	 * Condition field for the link-following flag.
+	 * Condition field for the link-following flag. Condition type and value are ignored.
 	 *
 	 * @since 1.2
 	 */
 	public static final int FIELD_FOLLOW_LINKS = 100;
 
 	/**
-	 * Condition field for the xdev flag (remain on filesystem).
+	 * Condition field for the xdev flag (remain on filesystem). Condition type and value are ignored.
 	 *
 	 * @since 1.2
 	 */
@@ -92,5 +92,23 @@ public interface IUnixFilesystem extends IFilesystem {
 	 * @since 1.2
 	 */
 	public static final int FIELD_PERM = 102;
+
+	/**
+	 * Condition field for Unix file user ownership. Valid TYPE_ values for this condition are:
+	 *   Condition.TYPE_EQUALITY - requires Integer value of the user ID
+	 *   Condition.TYPE_ANY_EQUALITY - requires Collection<Integer> value of possible user IDs
+	 *
+	 * @since 1.2
+	 */
+	public static final int FIELD_USER = 103;
+
+	/**
+	 * Condition field for Unix file group ownership. Valid TYPE_ values for this condition are:
+	 *   Condition.TYPE_EQUALITY - requires Integer value of the group ID
+	 *   Condition.TYPE_ANY_EQUALITY - requires Collection<Integer> value of possible group IDs
+	 *
+	 * @since 1.2
+	 */
+	public static final int FIELD_GROUP = 104;
     }
 }

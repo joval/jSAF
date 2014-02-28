@@ -24,13 +24,35 @@ public interface ISearchable<T> {
     String[] guessParent(Pattern p, Object... args);
 
     /**
-     * Recursively search for elements matching the given pattern.
+     * Recursively search for elements matching the given pattern and return an IResult.
      *
-     * @param conditions a list of search conditions.
+     * @param conditions a list of search conditions
+     *
+     * @throws IllegalArgumentException if there is a problem with one or more search conditions
      *
      * @since 1.2
      */
-    Collection<T> search(List<Condition> conditions) throws Exception;
+    IResult<T> search(List<Condition> conditions) throws IllegalArgumentException;
+
+    /**
+     * An interface for search results.
+     */
+    public interface IResult<T> {
+	/**
+	 * Get the result items.
+	 */
+	Collection<T> get();
+
+	/**
+	 * Determine whether there was an error which could have truncated the search results, such as a timeout.
+	 */
+	boolean hasError();
+
+	/**
+	 * Get the error (if any);
+	 */
+	Exception getError();
+    }
 
     /**
      * A condition for unlimited recursion.

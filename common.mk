@@ -51,6 +51,3 @@ CSC=powershell.exe -File $(TOP)/tools/CSharpCompiler.ps1
 FACADE=$(COMPONENTS)/facade
 FACADE_LIB=$(FACADE)/jSAF.jar
 FACADE_DEPS=$(subst $(SPACE),$(CLN),$(filter %.jar %.zip, $(wildcard $(FACADE)/$(LIBDIR)/*)))
-PROVIDER=$(COMPONENTS)/provider
-PROVIDER_LIB=$(PROVIDER)/jSAF-Provider.jar
-PROVIDER_DEPS=$(subst $(SPACE),$(CLN),$(filter %.jar %.zip, $(wildcard $(PROVIDER)/$(LIBDIR)/*)))

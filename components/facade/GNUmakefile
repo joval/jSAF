@@ -18,7 +18,7 @@ all: $(FACADE_LIB)
 $(FACADE_LIB): classes resources
 	$(JAR) cvf $@ -C $(BUILD)/ .
 
-$(DOCS): $(GEN)
+$(DOCS):
 	$(JAVA_HOME)/bin/javadoc -J-Xmx512m -d $(DOCS) -classpath $(CLASSPATH) -subpackages jsaf
 
 clean:

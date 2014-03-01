@@ -19,6 +19,14 @@ import jsaf.intf.windows.wmi.IWmiProvider;
  */
 public interface IWindowsSession extends IComputerSystem {
     /**
+     * Property indicating the number of milliseconds to wait for a WMI query to return, before quitting and throwing an
+     * exception.
+     *
+     * @since 1.2
+     */
+    String PROP_WMI_TIMEOUT = "wmi.timeout";
+
+    /**
      * Name of the environment variable containing the processor architecture (when running in 32-bit mode on a 64-bit
      * machine, the value will actually be the emulated architecture).
      *

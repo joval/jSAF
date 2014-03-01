@@ -26,6 +26,13 @@ public interface IComputerSystem extends ISession {
     String PROP_EXEC_RETRIES = "exec.retries";
 
     /**
+     * Property governing whether the filesystem cache layer should be JDBM-backed (true) or memory-backed (false).
+     *
+     * @since 1.2
+     */
+    String PROP_CACHE_JDBM = "fs.cache.useJDBM";
+
+    /**
      * Get the machine's own impression of its name. This name might not be meaningful to DNS.
      *
      * @since 1.1

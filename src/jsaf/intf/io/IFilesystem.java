@@ -22,13 +22,6 @@ import jsaf.intf.util.ISearchable.Condition;
  */
 public interface IFilesystem extends ILoggable {
     /**
-     * Property governing whether the filesystem cache layer should be JDBM-backed (true) or memory-backed (false).
-     *
-     * @since 1.0
-     */
-    String PROP_CACHE_JDBM = "fs.cache.useJDBM";
-
-    /**
      * A condition value indicating a regular file, for conditions of type FIELD_FILETYPE.
      *
      * @since 1.0

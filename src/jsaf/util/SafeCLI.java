@@ -224,6 +224,12 @@ public class SafeCLI {
 	}
 	tempPath = new StringBuffer(tempPath).append("cmd.").append(unique).append(".out").toString();
 	tempPath = sys.getEnvironment().expand(tempPath);
+	if ((cmd.indexOf(";") != -1 || cmd.indexOf("&&") != -1) && !cmd.startsWith("(") && !cmd.endsWith(")")) {
+	    //
+	    // Multiple comands have to be grouped, or only the last one's output will be redirected.
+	    //
+	    cmd = new StringBuffer("(").append(cmd).append(")").toString();
+	}
 	cmd = new StringBuffer(cmd).append(" | gzip > ").append(tempPath).toString();
 
 	//

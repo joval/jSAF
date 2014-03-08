@@ -35,6 +35,17 @@ public interface ISearchable<T> {
     IResult<T> search(List<Condition> conditions) throws IllegalArgumentException;
 
     /**
+     * Perform multiple simultaneous searches.
+     *
+     * @param conditionLists a list of lists of search conditions
+     *
+     * @throws IllegalArgumentException if there is a problem with one or more search conditions in any list
+     *
+     * @since 1.2
+     */
+    List<IResult<T>> searches(List<List<Condition>> conditionLists) throws IllegalArgumentException;
+
+    /**
      * An interface for search results.
      */
     public interface IResult<T> {
@@ -113,12 +124,14 @@ public interface ISearchable<T> {
 	 */
 	public static final int FIELD_DEPTH = 0;
 
-	/**
-	 * Starting point condition field ID for recursive searches.
-	 *
-	 * @since 1.2
+        /**
+         * Condition field ID for identifying the starting point(s) of a search. Valid TYPE_ values for this condition are:
+         *   Condition.TYPE_EQUALITY - requires String value of the origin path
+         *   Condition.TYPE_ANY - requires Collection<String> values of possible origin paths
+         *
+         * @since 1.2
 	 */
-	public static final int FIELD_FROM = 1;
+	public static final int FIELD_ORIGIN = 1;
 
 	/**
 	 * Unlimited depth condition value for recursive searches.

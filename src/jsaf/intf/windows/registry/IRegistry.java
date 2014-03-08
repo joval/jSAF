@@ -229,14 +229,16 @@ public interface IRegistry extends ILoggable {
 	}
 
 	/**
-	 * Search condition field for the hive.
+	 * Search condition field for the hive. This field can be used in conjunction with FIELD_KEY, as an alternative
+	 * to specifying a full path via FIELD_ORIGIN.
 	 *
 	 * @since 1.2
 	 */
 	public static final int FIELD_HIVE = 100;
 
 	/**
-	 * Search condition field for the key path or pattern.
+	 * Search condition field for the key path or pattern. This field can be used in conjunction with FIELD_HIVE,
+	 * as an alternative to specifying a full path via FIELD_ORIGIN.
 	 *
 	 * @since 1.2
 	 */

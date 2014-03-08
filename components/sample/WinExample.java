@@ -25,6 +25,7 @@ public class WinExample {
 	try {
 	    //
 	    // Hook up java.util.logging to the SLF4J logger
+	    // For this to work, you must include slf4j-jdk14-1.6.2.jar in the classpath
 	    //
 	    Logger logger = Logger.getLogger(Message.getLogger().getName());
 	    logger.setUseParentHandlers(false);

@@ -1,9 +1,10 @@
 // Copyright (C) 2014 jOVAL.org.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
-import java.io.BufferedReader;
+import java.io.Console;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.Handler;
@@ -83,18 +84,17 @@ public class WinExample {
      * connect, including the credential required to connect to it.
      */
     static class InteractiveTargetSpec implements IConnectionSpecification, IWindowsCredential {
-	private String hostname, domain, username, password;
+	private String hostname, domain, username;
+	private char[] password;
 
 	/**
 	 * Create an IConnectionSpecification and IWindowsCredential simultaneously by
 	 * querying the user from the command-line.
 	 */
 	InteractiveTargetSpec() throws IOException {
-	    System.out.print("Hostname: ");
-	    BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-	    hostname = input.readLine();
-	    System.out.print("Username ([DOMAIN\\]NAME): ");
-	    String netbiosUser = input.readLine();
+	    Console console = System.console();
+	    hostname = console.readLine("Hostname: ");
+	    String netbiosUser = console.readLine("Username ([DOMAIN\\]NAME): ");
 	    int ptr = netbiosUser.indexOf("\\");
 	    if (ptr == -1) {
 		username = netbiosUser;
@@ -103,8 +103,7 @@ public class WinExample {
 		username = netbiosUser.substring(ptr+1);
 		domain = netbiosUser.substring(0,ptr);
 	    }
-	    System.out.print("Password: ");
-	    password = input.readLine();
+	    password = console.readPassword("Password: ");
 	}
 
 	// Implement ICredential (super-interface of IWindowsCredential
@@ -114,7 +113,7 @@ public class WinExample {
 	}
 
 	public char[] getPassword() {
-	    return password.toCharArray();
+	    return Arrays.copyOf(password, password.length);
 	}
 
 	// Implement IWindowsCredential

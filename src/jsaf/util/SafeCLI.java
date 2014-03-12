@@ -38,8 +38,7 @@ import jsaf.io.StreamTool;
 import jsaf.provider.SessionException;
 
 /**
- * A tool for attempting to run a command-line repeatedly until it spits out some results.  It can only be used for commands
- * that require no input from stdin.
+ * A utility that simplifyies the execution of simple command-lines.
  *
  * @author David A. Solin
  * @version %I% %G%
@@ -50,7 +49,7 @@ public class SafeCLI {
      * On occasion, it is necessary to incorporate a String that originates from an un-trusted source into a command-line
      * statement.  This method verifies that the untrusted string cannot have any unintended side-effects by injecting
      * additional commands into the statement (potentially maliciously). Primarily, this is accomplished by insuring that
-     * the string contains no quotes, so that it cannot terminate any enclosing quites and obtain access to the shell.
+     * the string contains no quotes, so that it cannot terminate any enclosing quotes thereby obtaining access to the shell.
      *
      * @returns the input String (if no exception is thrown)
      *
@@ -73,6 +72,34 @@ public class SafeCLI {
 	    break;
 	}
 	return arg;
+    }
+
+    /**
+     * Determine the maximum length of a command for the session (Windows and Unix session types only).
+     *
+     * @throws IllegalArgumentException if the session is not a Unix or Windows type
+     *
+     * @since 1.2
+     */
+    public static int maxCommandLength(IComputerSystem session) throws Exception {
+	switch(session.getType()) {
+	  case WINDOWS:
+	    //
+	    // See: http://support.microsoft.com/kb/830473
+	    //
+	    return 8191;
+
+	  case UNIX:
+	    //
+	    // ARG_MAX minus the character size of the environment
+	    //
+	    int envSize = Integer.parseInt(exec("env | wc -c", session, ISession.Timeout.S).trim());
+	    int maxSize = Integer.parseInt(exec("getconf ARG_MAX", session, ISession.Timeout.S).trim());
+	    return maxSize - envSize;
+
+	  default:
+	    throw new IllegalArgumentException(session.getType().toString());
+	}
     }
 
     /**

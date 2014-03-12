@@ -75,34 +75,6 @@ public class SafeCLI {
     }
 
     /**
-     * Determine the maximum length of a command for the session (Windows and Unix session types only).
-     *
-     * @throws IllegalArgumentException if the session is not a Unix or Windows type
-     *
-     * @since 1.2
-     */
-    public static int maxCommandLength(IComputerSystem session) throws Exception {
-	switch(session.getType()) {
-	  case WINDOWS:
-	    //
-	    // See: http://support.microsoft.com/kb/830473
-	    //
-	    return 8191;
-
-	  case UNIX:
-	    //
-	    // ARG_MAX minus the character size of the environment
-	    //
-	    int envSize = Integer.parseInt(exec("env | wc -c", session, ISession.Timeout.S).trim());
-	    int maxSize = Integer.parseInt(exec("getconf ARG_MAX", session, ISession.Timeout.S).trim());
-	    return maxSize - envSize;
-
-	  default:
-	    throw new IllegalArgumentException(session.getType().toString());
-	}
-    }
-
-    /**
      * Run a command and get the first (non-empty) line of output.
      *
      * @since 1.0

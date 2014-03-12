@@ -58,6 +58,13 @@ public interface IComputerSystem extends ISession {
     IProcess createProcess(String command, String[] env, String dir) throws Exception;
 
     /**
+     * Returns the maximum length of a command that should be used with createProcess.
+     *
+     * @since 1.2
+     */
+    int maxCommandLength();
+
+    /**
      * Get the path to the system's "temp" directory.
      *
      * @since 1.1

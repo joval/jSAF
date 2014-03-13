@@ -75,9 +75,10 @@ public interface IFilesystem extends ILoggable {
 
     /**
      * Retrieve multiple IFiles at once, all with the specified access. The order of the files corresponds to the
-     * order of the path argument array.
+     * order of the path argument array. Note that if the flag is IFile.Flags.READONLY, any path that doesn't exist will
+     * have a null entry in its place in the result.
      *
-     * @arg flags IFile.READONLY, IFile.READWRITE, IFile.READVOLATILE, IFile.NOCACHE
+     * @arg flags IFile.Flags.READONLY, IFile.Flags.READWRITE, IFile.Flags.READVOLATILE, IFile.Flags.NOCACHE
      *
      * @since 1.1
      */

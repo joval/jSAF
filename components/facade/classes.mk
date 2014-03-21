@@ -67,6 +67,8 @@ CLASSES=\
 	jsaf.io.PerishableReader	\
 	jsaf.io.StreamLogger	\
 	jsaf.io.StreamTool	\
+	jsaf.protocol.tftp.TftpURLConnection	\
+	jsaf.protocol.tftp.TftpURLStreamHandler	\
 	jsaf.protocol.zip.ZipURLConnection	\
 	jsaf.protocol.zip.ZipURLStreamHandler	\
 	jsaf.provider.SessionException	\

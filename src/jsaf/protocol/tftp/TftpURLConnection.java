@@ -23,7 +23,6 @@ import org.apache.commons.net.tftp.TFTPClient;
 
 import jsaf.Message;
 import jsaf.intf.util.ILoggable;
-import jsaf.io.StreamTool;
 
 /**
  * URLConnection subclass implementing RFC783 (TFTP protocol). Only supports read requests.

@@ -15,20 +15,20 @@ import java.util.HashSet;
 import java.util.Vector;
 
 import jsaf.Message;
-import jsaf.util.StringTools;
+import jsaf.util.Strings;
 
 /**
  * Some stream utilities.
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.0
+ * @since 1.2
  */
-public class StreamTool {
+public class Streams {
     /**
      * Useful in debugging...
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static final void hexDump(byte[] buff, PrintStream out) {
 	int numRows = buff.length / 16;
@@ -55,7 +55,7 @@ public class StreamTool {
     /**
      * Read from the stream until the buffer is full.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static final void readFully(InputStream in, byte[] buff) throws IOException {
 	int offset = 0;
@@ -75,7 +75,7 @@ public class StreamTool {
      *
      * @return the new Thread
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static Thread copyAsync(InputStream in, OutputStream out) {
 	Thread thread = new Thread(new Copier(in, out));
@@ -86,7 +86,7 @@ public class StreamTool {
     /**
      * Copy completely from in to out.  Closes the InputStream when done, but not the OutputStream.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static void copy(InputStream in, OutputStream out) {
 	copy(in, out, false);
@@ -95,7 +95,7 @@ public class StreamTool {
     /**
      * Copy completely from in to out.  Closes the InputStream when done.  Closes the OutputStream according to closeOut.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static void copy(InputStream in, OutputStream out, boolean closeOut) {
 	try {
@@ -113,23 +113,23 @@ public class StreamTool {
     /**
      * Read the BOM (Byte-Order marker) from a stream.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static Charset detectEncoding(InputStream in) throws IOException {
 	switch(in.read()) {
 	  case 0xEF:
 	    if (in.read() == 0xBB && in.read() == 0xBF) {
-		return StringTools.UTF8;
+		return Strings.UTF8;
 	    }
 	    break;
 	  case 0xFE:
 	    if (in.read() == 0xFF) {
-		return StringTools.UTF16;
+		return Strings.UTF16;
 	    }
 	    break;
 	  case 0xFF:
 	    if (in.read() == 0xFE) {
-		return StringTools.UTF16LE;
+		return Strings.UTF16LE;
 	    }
 	    break;
 	}

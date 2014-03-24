@@ -25,97 +25,97 @@ import jsaf.Message;
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.0
+ * @since 1.2
  */
-public class StringTools {
+public class Strings {
     /**
      * Escape character (as a String).
      *
-     * @since 1.1
+     * @since 1.2
      */
     public static final String ESCAPE = "\\";
 
     /**
      * Open curly-bracket. Declaring this as a constant makes it easier to use in code.
      *
-     * @since 1.1
+     * @since 1.2
      */
     public static final String OPEN = "{";
 
     /**
      * Close curly-bracket. Declaring this as a constant makes it easier to use in code.
      *
-     * @since 1.1
+     * @since 1.2
      */
     public static final String CLOSE = "}";
 
     /**
      * A regular expression pattern for a quantifier string (which would be enclosed by curly-brackets).
      *
-     * @since 1.1
+     * @since 1.2
      */
     public static final String QUALIFIER_PATTERN = "[0-9]+,{0,1}[0-9]*";
 
     /**
      * Array containing all the regex special characters.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static final char[] REGEX_CHARS = {'\\', '^', '.', '$', '|', '(', ')', '[', ']', '{', '}', '*', '+', '?'};
 
     /**
      * String equivalents of REGEX_CHARS.
      *
-     * @since 1.1
+     * @since 1.2
      */
     public static final String[] REGEX_STRS = {ESCAPE, "^", ".", "$", "|", "(", ")", "[", "]", OPEN, CLOSE, "*", "+", "?"};
 
     /**
      * An ascending Comparator for Strings.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static final Comparator<String> COMPARATOR = new StringComparator(true);
 
     /**
      * ASCII charset.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static final Charset ASCII = Charset.forName("US-ASCII");
 
     /**
      * UTF8 charset.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static final Charset UTF8 = Charset.forName("UTF-8");
 
     /**
      * UTF16 charset.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static final Charset UTF16 = Charset.forName("UTF-16");
 
     /**
      * UTF16 Little Endian charset.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static final Charset UTF16LE = Charset.forName("UTF-16LE");
 
     /**
      * The line separator on the local machine.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static final String LOCAL_CR = System.getProperty("line.separator");
 
     /**
      * Sort the array from A->Z (ascending ordering).
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static final String[] sort(String[] array) {
 	return sort(array, true);
@@ -126,7 +126,7 @@ public class StringTools {
      *
      * @param asc true for ascending (A->Z), false for descending (Z->A).
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static final String[] sort(String[] array, boolean asc) {
 	Arrays.sort(array, new StringComparator(asc));
@@ -137,7 +137,7 @@ public class StringTools {
      * A StringTokenizer operates on single-character tokens.  This acts on a delimiter that is a multi-character
      * String.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static Iterator<String> tokenize(String target, String delimiter) {
 	return new StringTokenIterator(target, delimiter);
@@ -147,7 +147,7 @@ public class StringTools {
      * Gives you an option to keep any zero-length tokens at the ends of the target, if it begins or ends with the delimiter.
      * This guarantees that you get one token for every time the delimiter appears in the target String.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static Iterator<String> tokenize(String target, String delimiter, boolean trim) {
 	return new StringTokenIterator(target, delimiter, trim);
@@ -156,7 +156,7 @@ public class StringTools {
     /**
      * Convert an Iterator of Strings to a List.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static List<String> toList(Iterator<String> iter) {
 	List<String> list = new Vector<String>();
@@ -169,7 +169,7 @@ public class StringTools {
     /**
      * Convert an array of Strings to a List.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static List<String> toList(String[] sa) {
 	List<String> list = new Vector<String>(sa.length);
@@ -182,7 +182,7 @@ public class StringTools {
     /**
      * Check for ASCII values between [A-Z] or [a-z].
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static boolean isLetter(int c) {
 	return (c >= 65 && c <= 90) || (c >= 97 && c <= 122);
@@ -191,7 +191,7 @@ public class StringTools {
     /**
      * Check for ASCII values between [0-9].
      *
-     * @since 1.1
+     * @since 1.2
      */
     public static boolean isNumber(int c) {
 	return c >= 48 && c <= 57;
@@ -200,7 +200,7 @@ public class StringTools {
     /**
      * Convert a char array to a byte array using UTF16 encoding.
      *
-     * @since 1.0.1
+     * @since 1.2
      */
     public static byte[] toBytes(char[] chars) {
 	return UTF16.encode(CharBuffer.wrap(chars)).array();
@@ -209,7 +209,7 @@ public class StringTools {
     /**
      * Convert a char array to a byte array using the specified encoding.
      *
-     * @since 1.0.1
+     * @since 1.2
      */
     public static byte[] toBytes(char[] chars, Charset charset) {
 	return charset.encode(CharBuffer.wrap(chars)).array();
@@ -218,7 +218,7 @@ public class StringTools {
     /**
      * Convert a byte array in the specified encoding to a char array.
      *
-     * @since 1.0.1
+     * @since 1.2
      */
     public static char[] toChars(byte[] bytes, Charset charset) {
 	return toChars(bytes, 0, bytes.length, charset);
@@ -227,7 +227,7 @@ public class StringTools {
     /**
      * Convert len bytes of the specified array in the specified encoding, starting from offset, to a char array.
      *
-     * @since 1.0.1
+     * @since 1.2
      */
     public static char[] toChars(byte[] bytes, int offset, int len, Charset charset) {
 	return charset.decode(ByteBuffer.wrap(bytes, offset, len)).array();
@@ -237,7 +237,7 @@ public class StringTools {
      * Escape any regular expression elements in the string.  This is different from Pattern.quote, which simply puts the
      * string inside of \Q...\E.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static String escapeRegex(String s) {
 	Stack<String> delims = new Stack<String>();
@@ -250,7 +250,7 @@ public class StringTools {
     /**
      * Returns true if the specified String contains any regular expression syntax.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static boolean containsRegex(String s) {
 	for (String ch : REGEX_STRS) {
@@ -264,7 +264,7 @@ public class StringTools {
     /**
      * Returns true if the specified String contains any regular expression syntax that is not escaped.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static boolean containsUnescapedRegex(String s) {
 	for (int i=1; i < REGEX_STRS.length; i++) { // skip ESCAPE
@@ -281,7 +281,7 @@ public class StringTools {
     /**
      * Compiles a Perl-style regular expression with POSIX-style character classes into a Java regular expression.
      *
-     * @since 1.0.1
+     * @since 1.2
      */
     public static Pattern pattern(String regex) throws PatternSyntaxException {
 	return pattern(regex, 0);
@@ -291,7 +291,7 @@ public class StringTools {
      * Compiles a Perl-style regular expression with POSIX-style character classes into a Java regular expression, with
      * the specified flags (from java.util.regex.Pattern).
      *
-     * @since 1.0.1
+     * @since 1.2
      */
     public static Pattern pattern(String regex, int flags) throws PatternSyntaxException {
 	return Pattern.compile(regexPosix2Java(regex), flags);
@@ -300,7 +300,7 @@ public class StringTools {
     /**
      * Perform a substitution of POSIX character classes to Java character classes.
      *
-     * @since 1.0
+     * @since 1.2
      */
     public static String regexPosix2Java(String pcre) {
 	//
@@ -363,7 +363,7 @@ public class StringTools {
     /**
      * Perform a substitution of POSIX character classes to Unicode character classes.
      *
-     * @since 1.0.1
+     * @since 1.2
      */
     public static String regexPosix2Powershell(String pcre) {
 	String psExpression = pcre;
@@ -387,7 +387,7 @@ public class StringTools {
      *
      * @throws IllegalArgumentException if the pattern cannot be converted to a glob
      *
-     * @since 1.1.2
+     * @since 1.2
      */
     public static String toGlob(Pattern p) throws IllegalArgumentException {
 	String s = p.pattern();
@@ -402,7 +402,7 @@ public class StringTools {
 	    throw new IllegalArgumentException();
 	}
 	StringBuffer outerSb = new StringBuffer();
-	Iterator<String> outerIter = StringTools.tokenize(s, ".*", false);
+	Iterator<String> outerIter = tokenize(s, ".*", false);
 	for (int i=0; outerIter.hasNext(); i++) {
 	    if (i > 0) {
 		outerSb.append("*");
@@ -410,13 +410,13 @@ public class StringTools {
 	    String outerFrag = outerIter.next();
 	    if (outerFrag.length() > 0) {
 		StringBuffer innerSb = new StringBuffer();
-		Iterator<String> innerIter = StringTools.tokenize(outerFrag, "\\.", false);
+		Iterator<String> innerIter = tokenize(outerFrag, "\\.", false);
 		for (int j=0; innerIter.hasNext(); j++) {
 		    if (j > 0) {
 			innerSb.append(".");
 		    }
 		    String innerFrag = innerIter.next();
-		    if (StringTools.containsRegex(innerFrag)) {
+		    if (containsRegex(innerFrag)) {
 			throw new IllegalArgumentException();
 		    } else {
 			innerSb.append(innerFrag);
@@ -504,7 +504,7 @@ public class StringTools {
 	    String delim = delims.pop();
 	    Stack<String> copy = new Stack<String>();
 	    copy.addAll(delims);
-	    List<String> list = StringTools.toList(StringTools.tokenize(s, delim, false));
+	    List<String> list = toList(tokenize(s, delim, false));
 	    int len = list.size();
 	    StringBuffer result = new StringBuffer();
 	    for (int i=0; i < len; i++) {

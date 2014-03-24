@@ -66,7 +66,7 @@ CLASSES=\
 	jsaf.io.LittleEndian	\
 	jsaf.io.PerishableReader	\
 	jsaf.io.StreamLogger	\
-	jsaf.io.StreamTool	\
+	jsaf.io.Streams	\
 	jsaf.protocol.tftp.TftpURLConnection	\
 	jsaf.protocol.tftp.TftpURLStreamHandler	\
 	jsaf.protocol.zip.ZipURLConnection	\
@@ -83,6 +83,7 @@ CLASSES=\
 	jsaf.util.ConnectionSpecification	\
 	jsaf.util.Environment	\
 	jsaf.util.IniFile	\
+	jsaf.util.LogMessageConveyor	\
 	jsaf.util.PropertyUtil	\
 	jsaf.util.SafeCLI	\
-	jsaf.util.StringTools
+	jsaf.util.Strings

@@ -26,7 +26,7 @@ import jsaf.JSAFSystem;
 import jsaf.Message;
 import jsaf.intf.io.IReader;
 import jsaf.intf.util.IPerishable;
-import jsaf.util.StringTools;
+import jsaf.util.Strings;
 
 /**
  * A PerishableReader is a class that implements both IReader and IPerishable, signifying input that has a potential to
@@ -121,7 +121,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
     }
 
     public synchronized String readLine() throws IOException {
-	return readLine(StringTools.ASCII);
+	return readLine(Strings.ASCII);
     }
 
     public synchronized String readLine(Charset charset) throws IOException {
@@ -370,7 +370,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 		//
 		StringBuffer sb = new StringBuffer();
 		for (int i=0; i < trace.length; i++) {
-		    sb.append(StringTools.LOCAL_CR);
+		    sb.append(Strings.LOCAL_CR);
 		    if (i > 0) {
 			sb.append("    at ");
 		    }

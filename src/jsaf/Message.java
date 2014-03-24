@@ -18,6 +18,8 @@ import ch.qos.cal10n.MessageParameterObj;
 import org.slf4j.cal10n.LocLogger;
 import org.slf4j.cal10n.LocLoggerFactory;
 
+import jsaf.util.LogMessageConveyor;
+
 /**
  * Uses cal10n to define localized messages for jSAF.
  *
@@ -51,7 +53,6 @@ public enum Message {
     ERROR_IO_NOT_FILE,
     ERROR_LINK_NOWHERE,
     ERROR_MACHINENAME,
-    ERROR_MESSAGE_CONVEYOR,
     ERROR_MISSING_RESOURCE,
     ERROR_POWERSHELL_NOT_FOUND,
     ERROR_POWERSHELL_STOPPED,
@@ -117,7 +118,7 @@ public enum Message {
     WARNING_UNIX_FLAVOR;
 
     private static IMessageConveyor baseConveyor;
-    private static MultiConveyor conveyor;
+    private static LogMessageConveyor conveyor;
     private static LocLoggerFactory loggerFactory;
     private static LocLogger sysLogger;
 
@@ -134,7 +135,8 @@ public enum Message {
 	    //
 	    baseConveyor = new MessageConveyor(java.util.Locale.ENGLISH);
 	}
-	conveyor = new MultiConveyor();
+	conveyor = new LogMessageConveyor();
+	conveyor.add(Message.class, baseConveyor);
 	loggerFactory = new LocLoggerFactory(conveyor);
 	sysLogger = loggerFactory.getLocLogger(Message.class);
     }
@@ -143,7 +145,7 @@ public enum Message {
      * Extend Message to be able to provide messages for the specified Enum class, using the specified IMessageConveyor.
      */
     public static void extend(Class<? extends Enum<?>> clazz, IMessageConveyor mc) {
-	conveyor.conveyors.put(clazz, mc);
+	conveyor.add(clazz, mc);
     }
 
     /**
@@ -161,33 +163,6 @@ public enum Message {
     }
 
     public static Set<Map.Entry<Class<? extends Enum<?>>, IMessageConveyor>> getConveyors() {
-	return conveyor.conveyors.entrySet();
-    }
-
-    // Internal
-
-    /**
-     * An IMessageConveyor that consolidates multiple IMessageConveyors.
-     */
-    static class MultiConveyor implements IMessageConveyor {
-	HashMap<Class<? extends Enum<?>>, IMessageConveyor> conveyors;
-
-	MultiConveyor() {
-	    conveyors = new HashMap<Class<? extends Enum<?>>, IMessageConveyor>();
-	    conveyors.put(Message.class, baseConveyor);
-	}
-
-	public <E extends Enum<?>>String getMessage(E key, Object... args) throws MessageConveyorException {
-	    IMessageConveyor mc = conveyors.get(key.getDeclaringClass());
-	    if (mc == null) {
-		throw new MessageConveyorException(baseConveyor.getMessage(ERROR_MESSAGE_CONVEYOR, key.getClass().getName()));
-	    } else {
-		return mc.getMessage(key, args);
-	    }
-	}
-
-	public String getMessage(MessageParameterObj mpo) throws MessageConveyorException {
-	    return getMessage(mpo.getKey(), mpo.getArgs());
-	}
+	return conveyor.getConveyors().entrySet();
     }
 }

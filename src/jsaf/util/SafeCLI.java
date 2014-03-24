@@ -34,7 +34,7 @@ import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.system.ISession;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.io.PerishableReader;
-import jsaf.io.StreamTool;
+import jsaf.io.Streams;
 import jsaf.provider.SessionException;
 
 /**
@@ -252,7 +252,7 @@ public class SafeCLI {
 	    IFile remoteTemp = fs.getFile(tempPath, IFile.Flags.READWRITE);
 	    File tempDir = sys.getWorkspace() == null ? new File(System.getProperty("user.home")) : sys.getWorkspace();
 	    File localTemp = File.createTempFile("cmd", null, tempDir);
-	    StreamTool.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
+	    Streams.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
 	    try {
 		remoteTemp.delete();
 	    } catch (IOException e) {
@@ -348,9 +348,9 @@ public class SafeCLI {
 	public List<String> getLines() throws IOException {
 	    ByteArrayInputStream in = new ByteArrayInputStream(data);
 	    in.mark(data.length);
-	    Charset encoding = StringTools.ASCII;
+	    Charset encoding = Strings.ASCII;
 	    try {
-		encoding = StreamTool.detectEncoding(in);
+		encoding = Streams.detectEncoding(in);
 	    } catch (IOException e) {
 		in.reset();
 	    }
@@ -567,7 +567,7 @@ public class SafeCLI {
 	    this.file = file;
 	    try {
 		InputStream in = new GZIPInputStream(new FileInputStream(file));
-		reader = new BufferedReader(new InputStreamReader(in, StringTools.UTF8));
+		reader = new BufferedReader(new InputStreamReader(in, Strings.UTF8));
 	    } catch (IOException e) {
 		close();
 		throw e;

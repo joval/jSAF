@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import jsaf.intf.io.IRandomAccess;
 
 import jsaf.Message;
-import jsaf.util.StringTools;
+import jsaf.util.Strings;
 
 /**
  * Utility class for reading/getting Little-Endian byte-ordered numbers from byte buffers and streams.
@@ -108,7 +108,7 @@ public class LittleEndian {
      */
     public static final short readShort(InputStream in) throws IOException {
 	byte[] buff = new byte[2];
-	StreamTool.readFully(in, buff);
+	Streams.readFully(in, buff);
 	return getShort(buff, 0);
     }
 
@@ -119,7 +119,7 @@ public class LittleEndian {
      */
     public static final short readUShort(InputStream in) throws IOException {
 	byte[] buff = new byte[2];
-	StreamTool.readFully(in, buff);
+	Streams.readFully(in, buff);
 	return getUShort(buff, 0);
     }
 
@@ -170,7 +170,7 @@ public class LittleEndian {
      */
     public static final int readInt(InputStream in) throws IOException {
 	byte[] buff = new byte[4];
-	StreamTool.readFully(in, buff);
+	Streams.readFully(in, buff);
 	return getInt(buff, 0);
     }
 
@@ -181,7 +181,7 @@ public class LittleEndian {
      */
     public static final int readUInt(InputStream in) throws IOException {
 	byte[] buff = new byte[4];
-	StreamTool.readFully(in, buff);
+	Streams.readFully(in, buff);
 	return getUInt(buff, 0);
     }
 
@@ -241,7 +241,7 @@ public class LittleEndian {
      */
     public static final long readLong(InputStream in) throws IOException {
 	byte[] buff = new byte[8];
-	StreamTool.readFully(in, buff);
+	Streams.readFully(in, buff);
 	return getLong(buff, 0);
     }
 
@@ -263,7 +263,7 @@ public class LittleEndian {
      */
     public static final long readULong(InputStream in) throws IOException {
 	byte[] buff = new byte[8];
-	StreamTool.readFully(in, buff);
+	Streams.readFully(in, buff);
 	return getULong(buff, 0);
     }
 
@@ -299,7 +299,7 @@ public class LittleEndian {
 		    }
 		}
 	    }
-	    return new String(buff, offset, len, StringTools.UTF16LE);
+	    return new String(buff, offset, len, Strings.UTF16LE);
 	} catch (IllegalArgumentException e) {
 	    e.printStackTrace();
 	}

@@ -16,14 +16,6 @@ import java.util.regex.Pattern;
  */
 public interface ISearchable<T> {
     /**
-     * Hazard a guess for the parent path of the specified pattern. Returns null if indeterminate. This method is
-     * useful when building "from" conditions.
-     *
-     * @since 1.0
-     */
-    String[] guessParent(Pattern p, Object... args);
-
-    /**
      * Recursively search for elements matching the given pattern and return an IResult.
      *
      * @param conditions a list of search conditions
@@ -35,9 +27,11 @@ public interface ISearchable<T> {
     IResult<T> search(List<Condition> conditions) throws IllegalArgumentException;
 
     /**
-     * Perform multiple simultaneous searches.
+     * Perform multiple searches in parallel.
      *
-     * @param conditionLists a list of lists of search conditions
+     * @param conditionLists a List of Lists of search conditions
+     *
+     * @return a List of results, whose order corresponds to the conditionLists
      *
      * @throws IllegalArgumentException if there is a problem with one or more search conditions in any list
      *
@@ -123,15 +117,6 @@ public interface ISearchable<T> {
 	 * @since 1.2
 	 */
 	public static final int FIELD_DEPTH = 0;
-
-        /**
-         * Condition field ID for identifying the starting point(s) of a search. Valid TYPE_ values for this condition are:
-         *   Condition.TYPE_EQUALITY - requires String value of the origin path
-         *   Condition.TYPE_ANY - requires Collection<String> values of possible origin paths
-         *
-         * @since 1.2
-	 */
-	public static final int FIELD_ORIGIN = 1;
 
 	/**
 	 * Unlimited depth condition value for recursive searches.

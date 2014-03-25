@@ -87,29 +87,29 @@ public interface IUnixFilesystem extends IFilesystem {
 	 * Condition field for Unix file permissions. The only valid TYPE_ value is Condition.TYPE_EQUALITY.
 	 * The value must be of the form "[u/g/o][+/-][r/w/x]" -- meaning that the condition makes an assertion
 	 * about the user owner/group owner/other (i.e., world) permission setting on files that will be returned
-	 * by the search.  Multiple non-conflicting permission assertions can be made for any given search.
+	 * by the search. Multiple non-conflicting permission assertions can be made for any given search.
 	 *
 	 * @since 1.2
 	 */
 	public static final int FIELD_PERM = 102;
 
 	/**
-	 * Condition field for Unix file user ownership. Valid TYPE_ values for this condition are:
-	 *   Condition.TYPE_EQUALITY - requires Integer value of the user ID
-	 *   Condition.TYPE_INEQUALITY - requires Integer value not matching the user ID
-	 *   Condition.TYPE_ANY - requires Collection<Integer> value of possible user IDs
-	 *   Condition.TYPE_NONE - requires Collection<Integer> value of excluded user IDs
+	 * Condition field for Unix file user ownership. Supports the following condition types:
+	 *   Condition.TYPE_EQUALITY - return files owned by the userID specified by the Integer value
+	 *   Condition.TYPE_INEQUALITY - return files owned by userIDs not specified by the Integer value
+	 *   Condition.TYPE_ANY - return files owned by any of the userIDs in the specified Collection<Integer> value
+	 *   Condition.TYPE_NONE - return files owned by userIDs not in the specified Collection<Integer> value
 	 *
 	 * @since 1.2
 	 */
 	public static final int FIELD_USER = 103;
 
 	/**
-	 * Condition field for Unix file group ownership. Valid TYPE_ values for this condition are:
-	 *   Condition.TYPE_EQUALITY - requires Integer value of the group ID
-	 *   Condition.TYPE_INEQUALITY - requires Integer value not matching the group ID
-	 *   Condition.TYPE_ANY - requires Collection<Integer> value of possible group IDs
-	 *   Condition.TYPE_NONE - requires Collection<Integer> value of excluded group IDs
+	 * Condition field for Unix file group ownership. Supports the following condition types:
+	 *   Condition.TYPE_EQUALITY - return files owned by the groupID specified by the Integer value
+	 *   Condition.TYPE_INEQUALITY - return files owned by groupIDs not specified by the Integer value
+	 *   Condition.TYPE_ANY - return files owned by any of the groupIDs in the specified Collection<Integer> value
+	 *   Condition.TYPE_NONE - return files owned by groupIDs not in the specified Collection<Integer> value
 	 *
 	 * @since 1.2
 	 */

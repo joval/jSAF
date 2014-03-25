@@ -188,14 +188,16 @@ public interface IFilesystem extends ILoggable {
 	}
 
 	/**
-	 * Condition field for a type (i.e., file/directory/link).
+	 * Condition field for a type (i.e., file/directory/link). Supports the following condition types:
+	 *  TYPE_EQUALITY - only return files of type specified by the String value
 	 *
 	 * @since 1.0
 	 */
 	public static final int FIELD_FILETYPE = 50;
 
 	/**
-	 * Condition field for a file path pattern.
+	 * Condition field for a file path pattern. Supports the following condition types:
+	 *  TYPE_PATTERN - all files matching the java.util.regex.Pattern value
 	 *
 	 * @since 1.0
 	 */
@@ -203,21 +205,29 @@ public interface IFilesystem extends ILoggable {
 
 	/**
 	 * Condition field for a file dirname (directory path) pattern. For files of type FILETYPE_DIR, the dirname is
-	 * the same as the path.
+	 * the same as the path. Supports the following condition types:
+	 *  TYPE_PATTERN - search directories matching the java.util.regex.Pattern value
+	 *  TYPE_EQUALITY - search the directory matching the String value
+	 *  TYPE_ANY - search all directories matching the java.util.List<String> value
 	 *
 	 * @since 1.0
 	 */
 	public static final int FIELD_DIRNAME = 52;
 
 	/**
-	 * Condition field for a file basename (filename) pattern. Files of type FILETYPE_DIR have no basename.
+	 * Condition field for a file basename (filename) pattern. Files of type FILETYPE_DIR have no basename. Supports
+	 * the following condition types:
+	 *  TYPE_PATTERN - search for files whose names match the java.util.regex.Pattern value
+	 *  TYPE_EQUALITY - search for files whose names match the String value
+	 *  TYPE_INEQUALITY - search for files whose names do not match the String value
 	 *
 	 * @since 1.0
 	 */
 	public static final int FIELD_BASENAME = 53;
 
 	/**
-	 * Condition field for a filesystem type.
+	 * Condition field for a filesystem type. Supports the following condition types:
+	 *  TYPE_EQUALITY - search only on filesystems matching the String value
 	 *
 	 * @since 1.0.1
 	 */

@@ -5,6 +5,7 @@ CLASSES=\
 	jsaf.intf.apple.system.IiOSSession	\
 	jsaf.intf.cisco.system.IIosSession	\
 	jsaf.intf.cisco.system.ITechSupport	\
+	jsaf.intf.database.IDatabase	\
 	jsaf.intf.identity.ICredential	\
 	jsaf.intf.identity.ICredentialStore	\
 	jsaf.intf.io.IFile	\

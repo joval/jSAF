@@ -70,6 +70,15 @@ public interface ISession extends ILoggable {
 	NETCONF("netconf"),
 
 	/**
+	 * Indicates a session connected via JDBC to a relational database management system.
+	 *
+	 * @see jsaf.intf.database.IDatabase
+	 *
+	 * @since 1.2
+	 */
+	RDBMS("rdbms"),
+
+	/**
 	 * Indicates a session with a device running Apple iOS.
 	 *
 	 * @see jsaf.intf.apple.system.IiOSSession

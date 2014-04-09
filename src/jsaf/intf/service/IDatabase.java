@@ -4,6 +4,7 @@
 package jsaf.intf.service;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import jsaf.intf.identity.ICredential;
 
@@ -41,5 +42,5 @@ public interface IDatabase {
      *
      * @since 1.0
      */
-    Connection getConnection(String name, ICredential cred) throws Exception;
+    Connection getConnection(String name, ICredential cred) throws SQLException;
 }

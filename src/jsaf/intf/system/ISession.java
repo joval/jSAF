@@ -11,6 +11,8 @@ import jsaf.intf.io.IFilesystem;
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.util.IProperty;
 
+import jsaf.service.UnsupportedServiceException;
+
 /**
  * A representation of a session.
  *
@@ -68,15 +70,6 @@ public interface ISession extends ILoggable {
 	 * @since 1.1
 	 */
 	NETCONF("netconf"),
-
-	/**
-	 * Indicates a session connected via JDBC to a relational database management system.
-	 *
-	 * @see jsaf.intf.database.IDatabase
-	 *
-	 * @since 1.2
-	 */
-	RDBMS("rdbms"),
 
 	/**
 	 * Indicates a session with a device running Apple iOS.
@@ -234,6 +227,16 @@ public interface ISession extends ILoggable {
      * @since 1.1
      */
     String getTypeVal();
+
+    /**
+     * Get a service from the underlying session.
+     *
+     * @throws UnsupportedServiceException if the session does not support the requested service type
+     * @throws IllegalArgumentException if there is a problem with the arguments supplied to obtain the service
+     *
+     * @since 1.2
+     */
+    <T> T getService(Class<T> serviceType, Object... args) throws UnsupportedServiceException, IllegalArgumentException;
 
     /**
      * Get the timeout value corresponding to the Timeout enumeration.

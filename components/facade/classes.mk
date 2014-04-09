@@ -5,7 +5,6 @@ CLASSES=\
 	jsaf.intf.apple.system.IiOSSession	\
 	jsaf.intf.cisco.system.IIosSession	\
 	jsaf.intf.cisco.system.ITechSupport	\
-	jsaf.intf.database.IDatabase	\
 	jsaf.intf.identity.ICredential	\
 	jsaf.intf.identity.ICredentialStore	\
 	jsaf.intf.io.IFile	\
@@ -20,6 +19,7 @@ CLASSES=\
 	jsaf.intf.netconf.INetconf	\
 	jsaf.intf.remote.IConnectionSpecification	\
 	jsaf.intf.remote.IConnectionSpecificationFactory	\
+	jsaf.intf.service.IDatabase	\
 	jsaf.intf.ssh.ISshTools	\
 	jsaf.intf.ssh.identity.ISshCredential	\
 	jsaf.intf.ssh.system.IShell	\
@@ -78,6 +78,7 @@ CLASSES=\
 	jsaf.provider.windows.powershell.PowershellException	\
 	jsaf.provider.windows.registry.RegistryException	\
 	jsaf.provider.windows.wmi.WmiException	\
+	jsaf.service.UnsupportedServiceException	\
 	jsaf.util.AbstractEnvironment	\
 	jsaf.util.Base64	\
 	jsaf.util.Checksum	\

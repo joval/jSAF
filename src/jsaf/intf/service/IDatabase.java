@@ -5,8 +5,10 @@ package jsaf.intf.service;
 
 import java.sql.Connection;
 
+import jsaf.intf.identity.ICredential;
+
 /**
- * A session service interface for a database.
+ * A session service interface for interacting with a relational database.
  *
  * @author David A. Solin
  * @version %I% %G%
@@ -14,21 +16,30 @@ import java.sql.Connection;
  */
 public interface IDatabase {
     /**
-     * The IANA-assigned port number for MS SQL Server.
+     * An enumeration of relational ratabase engines.
      */
-    int MSSQL_PORT = 1433;
+    enum Engine {
+	MSSQL(1433),
+	ORACLE(1521);
 
-    /**
-     * The default port number for an Oracle SQL*Net listener (NOTE: Not an IANA-assigned number).
-     */
-    int ORACLE_PORT = 1521;
+	private int port;
+
+	private Engine(int port) {
+	    this.port = port;
+	}
+
+	public int getDefaultPort() {
+	    return port;
+	}
+    }
 
     /**
      * Get a JDBC connection to the specified database.
      *
      * @param name Corresponds to the desired Oracle Service Name or MS SQL database instance name.
+     * @param cred The database login credential.
      *
      * @since 1.0
      */
-    Connection getConnection(String name) throws Exception;
+    Connection getConnection(String name, ICredential cred) throws Exception;
 }

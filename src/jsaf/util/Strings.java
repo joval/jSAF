@@ -18,8 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import jsaf.Message;
-
 /**
  * Apparently there are still a few things that haven't yet been packed into java.lang.String!
  *

@@ -5,6 +5,7 @@ package jsaf.intf.service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import jsaf.intf.identity.ICredential;
 
@@ -49,11 +50,11 @@ public interface IDatabase {
     /**
      * Get a JDBC connection to the specified database.
      *
-     * @param name Corresponds to the desired Oracle Service Name or DB2/MSSQL/MYSQL/PostgreSQL database instance name. To
-     *             specify a particular MSSQL Server instance, use the convention INSTANCENAME\\DATABASENAME.
-     * @param cred The database login credential.
+     * @param name  Corresponds to the desired Oracle Service Name or DB2/MSSQL/MYSQL/PostgreSQL database instance name.
+     * @param cred  The database login credential.
+     * @param props Arbitrary JDBC connection properties.
      *
      * @since 1.0
      */
-    Connection getConnection(String name, ICredential cred) throws SQLException;
+    Connection getConnection(String name, ICredential cred, Properties props) throws SQLException;
 }

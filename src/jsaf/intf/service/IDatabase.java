@@ -20,8 +20,11 @@ public interface IDatabase {
      * An enumeration of relational ratabase engines.
      */
     enum Engine {
+	DB2(50000),
 	MSSQL(1433),
-	ORACLE(1521);
+	MYSQL(3306),
+	ORACLE(1521),
+	POSTGRESQL(5432);
 
 	private int port;
 

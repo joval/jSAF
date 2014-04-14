@@ -18,14 +18,16 @@ import jsaf.intf.identity.ICredential;
  */
 public interface IDatabase {
     /**
-     * An enumeration of relational ratabase engines.
+     * An enumeration of relational ratabase engines. Supplies JDBC URL prefixes for vendor-supplied type-4 drivers,
+     * except for MS SQL Server and Sybase which assume use of the jTDS JDBC driver.
      */
     enum Engine {
 	DB2("jdbc:db2://", 50000),
-	MSSQL("jdbc:sqlserver://", 1433),
+	MSSQL("jdbc:jtds:sqlserver://", 1433),
 	MYSQL("jdbc:mysql://", 3306),
 	ORACLE("jdbc:oracle:thin:@//", 1521),
-	POSTGRESQL("jdbc:postgresql://", 5432);
+	POSTGRESQL("jdbc:postgresql://", 5432),
+	SYBASE("jdbc:jtds:sybase://", 7100);
 
 	private int port;
 	private String prefix;

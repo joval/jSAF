@@ -229,7 +229,14 @@ public class SafeCLI {
 	    //
 	    cmd = new StringBuffer("(").append(cmd).append(")").toString();
 	}
-	cmd = new StringBuffer(cmd).append(" | gzip > ").append(tempPath).toString();
+	switch(sys.getFlavor()) {
+	  case HPUX:
+	    cmd = new StringBuffer(cmd).append(" | /usr/contrib/bin/gzip > ").append(tempPath).toString();
+	    break;
+	  default:
+	    cmd = new StringBuffer(cmd).append(" | gzip > ").append(tempPath).toString();
+	    break;
+	}
 
 	//
 	// Execute the command, and monitor the size of the output file

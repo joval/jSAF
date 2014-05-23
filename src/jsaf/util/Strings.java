@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -157,7 +158,7 @@ public class Strings {
      * @since 1.2
      */
     public static List<String> toList(Iterator<String> iter) {
-	List<String> list = new Vector<String>();
+	List<String> list = new ArrayList<String>();
 	while (iter.hasNext()) {
 	    list.add(iter.next());
 	}
@@ -165,16 +166,26 @@ public class Strings {
     }
 
     /**
-     * Convert an array of Strings to a List.
+     * Convert an Iterator of Strings to a List.
      *
      * @since 1.2
+     * @deprecated in 1.2.1; use Arrays.asList instead.
      */
     public static List<String> toList(String[] sa) {
-	List<String> list = new Vector<String>(sa.length);
-	for (int i=0; i < sa.length; i++) {
-	    list.add(sa[i]);
-	}
-	return list;
+	return Arrays.asList(sa);
+    }
+
+    /**
+     * Wrap an Iterator in an Iterable.
+     *
+     * @since 1.2.1
+     */
+    public static Iterable<String> iterable(final Iterator<String> iterator) {
+	return new Iterable<String>() {
+	    public Iterator<String> iterator() {
+		return iterator;
+	    }
+	};
     }
 
     /**

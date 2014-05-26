@@ -60,6 +60,15 @@ public interface IUnixFilesystemDriver extends ILoggable {
     public String getStatCommand(String path);
 
     /**
+     * Like getStatCommand, except instead of returning a command to stat a single path, returns a command that can
+     * read multiple paths from the standard input, and return output lines that can be processed by the nextFileInfo
+     * method.
+     *
+     * @since 1.2.1
+     */
+    public String getStatCommandFromStdin();
+
+    /**
      * Generate a UnixFileInfo based on the output from the Stat command.  The lines iterator may contain output
      * representing one or more stat commands, but this method is expected to retrieve only the very next FileInfo.
      * If there are no more lines, this method should return null.

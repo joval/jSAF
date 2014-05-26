@@ -3,6 +3,8 @@
 
 package jsaf.intf.unix.io;
 
+import java.io.IOException;
+import java.util.Date;
 import java.util.NoSuchElementException;
 
 import jsaf.intf.io.IFileEx;
@@ -254,4 +256,11 @@ public interface IUnixFileInfo extends IFileEx {
      * @since 1.0
      */
     String getExtendedData(String key) throws NoSuchElementException;
+
+    /**
+     * Get the time the file's inode was last changed. Returns null if unknown.
+     *
+     * @since 1.2.1
+     */
+    public Date lastChanged() throws IOException;
 }

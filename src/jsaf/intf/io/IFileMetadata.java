@@ -88,6 +88,7 @@ public interface IFileMetadata {
      * Get the time the file was created. Returns null if unknown.
      *
      * @since 1.0.1
+     * @deprecated in 1.2.1, and moved to IWindowsFileInfo.
      */
     public Date getCreateTime() throws IOException;
 }

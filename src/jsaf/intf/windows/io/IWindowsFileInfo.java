@@ -4,6 +4,7 @@
 package jsaf.intf.windows.io;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 
 import jsaf.intf.io.IFileEx;
@@ -138,4 +139,11 @@ public interface IWindowsFileInfo extends IFileEx {
      * @since 1.0.1
      */
     Map<String, String> getPEHeaders() throws IOException;
+
+    /**
+     * Get the time the file was created. Returns null if unknown.
+     *
+     * @since 1.2.1
+     */
+    public Date getCreateTime() throws IOException;
 }

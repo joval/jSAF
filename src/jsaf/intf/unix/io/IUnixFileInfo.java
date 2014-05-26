@@ -262,5 +262,5 @@ public interface IUnixFileInfo extends IFileEx {
      *
      * @since 1.2.1
      */
-    public Date lastChanged() throws IOException;
+    public Date getLastChanged() throws IOException;
 }

@@ -88,7 +88,9 @@ public interface IFileMetadata {
      * Get the time the file was created. Returns null if unknown.
      *
      * @since 1.0.1
-     * @deprecated in 1.2.1, and moved to IWindowsFileInfo.
+     *
+     * @deprecated in 1.2.1, when it was moved to the IWindowsFileInfo interface. On Windows this method is now equivalent to
+     *             ((IWindowsFileInfo)getFileEx()).getCreateTime(), and on Unix it will throw an UnsupportedOperationException.
      */
     public Date getCreateTime() throws IOException;
 }

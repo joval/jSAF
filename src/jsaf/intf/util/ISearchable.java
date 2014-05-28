@@ -15,6 +15,18 @@ import java.util.regex.Pattern;
  * @since 1.0
  */
 public interface ISearchable<T> {
+    int UNLIMITED = 0;
+
+    /**
+     * Sets the maximum number of results that will be returned for any single List of search conditions. Any additional
+     * matches will be silently truncated.
+     *
+     * @param limit The desired limit. The default (if this method is never called) is 0, meaning there should be no limit.
+     *
+     * @since 1.2.1
+     */
+    void setResultLimit(int limit);
+
     /**
      * Recursively search for elements matching the given pattern and return an IResult.
      *

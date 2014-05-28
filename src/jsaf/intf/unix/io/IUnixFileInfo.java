@@ -18,14 +18,6 @@ import jsaf.intf.io.IFileEx;
  */
 public interface IUnixFileInfo extends IFileEx {
     /**
-     * Key for SELinux extended data. Data will be of the form "[user]:[role]:[type]:[level]".
-     * @see http://selinuxproject.org/page/SELinux_contexts
-     *
-     * @since 1.0
-     */
-    String SELINUX_DATA = "selinux";
-
-    /**
      * Native UNIX stat file type identifier for a directory.
      *
      * @since 1.0
@@ -242,20 +234,6 @@ public interface IUnixFileInfo extends IFileEx {
      * @since 1.0.1
      */
     Boolean hasPosixAcl();
-
-    /**
-     * Get all the keys for extended data about the file, or null if there is none.
-     *
-     * @since 1.0
-     */
-    String[] getExtendedKeys();
-
-    /**
-     * Get extended data about the file, given the specified key (such as SELINUX_DATA).
-     *
-     * @since 1.0
-     */
-    String getExtendedData(String key) throws NoSuchElementException;
 
     /**
      * Get the time the file's inode was last changed. Returns null if unknown.

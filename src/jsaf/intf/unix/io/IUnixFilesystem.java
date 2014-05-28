@@ -32,15 +32,6 @@ public interface IUnixFilesystem extends IFilesystem {
     char DELIM_CH = '/';
 
     /**
-     * Returns the platform-specific driver for this filesystem.
-     *
-     * @see org.joval.intf.unix.io.IUnixFilesystemDriver
-     *
-     * @since 1.0
-     */
-    IUnixFilesystemDriver getDriver();
-
-    /**
      * The Condition signifying that links should be followed in filesystem searches. The default behavior, if this
      * condition is not present, is to not follow links.
      *

@@ -31,7 +31,6 @@ CLASSES=\
 	jsaf.intf.system.ISession	\
 	jsaf.intf.unix.io.IUnixFileInfo	\
 	jsaf.intf.unix.io.IUnixFilesystem	\
-	jsaf.intf.unix.io.IUnixFilesystemDriver	\
 	jsaf.intf.unix.system.IUnixSession	\
 	jsaf.intf.util.IConfigurable	\
 	jsaf.intf.util.ILoggable	\

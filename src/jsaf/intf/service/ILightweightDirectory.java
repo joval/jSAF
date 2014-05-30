@@ -5,7 +5,6 @@ package jsaf.intf.service;
 
 import javax.naming.NamingException;
 import javax.naming.ldap.LdapContext;
-import javax.naming.ldap.InitialLdapContext;
 
 import jsaf.intf.identity.ICredential;
 
@@ -14,7 +13,7 @@ import jsaf.intf.identity.ICredential;
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.0
+ * @since 1.2.1
  */
 public interface ILightweightDirectory {
     /**

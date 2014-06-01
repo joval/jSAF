@@ -4,7 +4,7 @@
 package jsaf.intf.service;
 
 import javax.naming.NamingException;
-import javax.naming.ldap.LdapContext;
+import javax.naming.ldap.InitialLdapContext;
 
 import jsaf.intf.identity.ICredential;
 
@@ -16,6 +16,11 @@ import jsaf.intf.identity.ICredential;
  * @since 1.2.1
  */
 public interface ILightweightDirectory {
+    /**
+     * Property key for an ISession property, to indicate the maximum desired search time.
+     */
+    public static final String PROP_MAX_WAIT = "ldap.search.maxMillis";
+
     /**
      * An enumeration of protocol security options.
      */
@@ -36,12 +41,10 @@ public interface ILightweightDirectory {
     }
 
     /**
-     * Get an LdapContext to the specified LDAP server.
+     * Get a new InitialLdapContext for the LDAP server associated with this ILightweightDirectory interface.
      *
-     * @param uri    The base URI for the context
      * @param cred   The credential to use to bind to the LDAP server.
-     *
-     * @since 1.0
+     * @param baseDN The base DN for the context.
      */
-    LdapContext getContext(String uri, ICredential cred) throws NamingException;
+    InitialLdapContext getContext(ICredential cred, String baseDN) throws NamingException;
 }

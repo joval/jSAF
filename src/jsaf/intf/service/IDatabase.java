@@ -14,7 +14,7 @@ import jsaf.intf.identity.ICredential;
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.0
+ * @since 1.2
  */
 public interface IDatabase {
     /**
@@ -55,8 +55,6 @@ public interface IDatabase {
      * @param name  Corresponds to the desired Oracle Service Name or DB2/MSSQL/MYSQL/PostgreSQL database instance name.
      * @param cred  The database login credential.
      * @param props Arbitrary JDBC connection properties.
-     *
-     * @since 1.0
      */
     Connection getConnection(String name, ICredential cred, Properties props) throws SQLException;
 }

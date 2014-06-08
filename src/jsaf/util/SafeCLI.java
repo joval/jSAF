@@ -43,15 +43,32 @@ import jsaf.provider.SessionException;
  * @since 1.0
  */
 public class SafeCLI {
+    /**
+     * An interface for processing data from a process stream (stdout or stderr), used by the exec method.
+     *
+     * If the command hangs diring processing (signaled to SafeCLI by an InterruptedIOException or SessionException),
+     * the SafeCLI will kill the old command, start a new command instance (up the the session's configured number of
+     * retries), and call handler.handle again.
+     *
+     * Therefore, the handler should initialize itself completely when handle is invoked, and not perform permanent
+     * output processing until the reader has reached the end of the process output.
+     *
+     * @since 1.2.1
+     */
     public interface IReaderHandler {
 	/**
-	 * Handle data from the reader. No effort should be made to catch any IOException.
+	 * Handle data from the reader. Implementations must NEVER catch an IOException originating from the reader!
 	 *
 	 * @since 1.2.1
 	 */
 	public void handle(IReader reader) throws IOException;
     }
 
+    /**
+     * An IReaderHandler that does nothing with data read from the IReader.
+     *
+     * @since 1.2.1
+     */
     public static final IReaderHandler DevNull = new IReaderHandler() {
 	public void handle(IReader reader) throws IOException {
 	    String line;
@@ -313,16 +330,10 @@ public class SafeCLI {
     }
 
     /**
-     * Run a command, using the specified output processor ("handler").
+     * Run a command, using the specified output and error handlers.
      *
-     * When the command is run, an IReader to the output is passed to the handler using the handle method. If the command
-     * hangs (signaled to SafeCLI by an InterruptedIOException or SessionException), the SafeCLI will kill the old command,
-     * start a new command instance (up the the session's configured number of retries), and call handler.handle again.
-     *
-     * Hence, the handler should initialize itself completely when handle is invoked, and not perform permanent output
-     * processing until the reader has reached the end of the process output.
-     *
-     * @since 1.0
+     * @see IReaderHandler
+     * @since 1.2.1
      */
     public static final void exec(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout,
 				  IReaderHandler out, IReaderHandler err) throws Exception {

@@ -27,8 +27,6 @@ import jsaf.Message;
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFilesystem;
 import jsaf.intf.io.IReader;
-import jsaf.intf.io.IReaderGobbler;
-import static jsaf.intf.io.IReaderGobbler.DevNull;
 import jsaf.intf.system.IProcess;
 import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.system.ISession;
@@ -45,6 +43,23 @@ import jsaf.provider.SessionException;
  * @since 1.0
  */
 public class SafeCLI {
+    public interface IReaderHandler {
+	/**
+	 * Handle data from the reader. No effort should be made to catch any IOException.
+	 *
+	 * @since 1.2.1
+	 */
+	public void handle(IReader reader) throws IOException;
+    }
+
+    public static final IReaderHandler DevNull = new IReaderHandler() {
+	public void handle(IReader reader) throws IOException {
+	    String line;
+	    while ((line = reader.readLine()) != null) {
+	    }
+	}
+    };
+
     /**
      * On occasion, it is necessary to incorporate a String that originates from an un-trusted source into a command-line
      * statement.  This method verifies that the untrusted string cannot have any unintended side-effects by injecting
@@ -298,19 +313,19 @@ public class SafeCLI {
     }
 
     /**
-     * Run a command, using the specified output processor ("gobbler").
+     * Run a command, using the specified output processor ("handler").
      *
-     * When the command is run, an IReader to the output is passed to the gobbler using the gobble method. If the command
+     * When the command is run, an IReader to the output is passed to the handler using the handle method. If the command
      * hangs (signaled to SafeCLI by an InterruptedIOException or SessionException), the SafeCLI will kill the old command,
-     * start a new command instance (up the the session's configured number of retries), and call gobbler.gobble again.
+     * start a new command instance (up the the session's configured number of retries), and call handler.handle again.
      *
-     * Hence, the gobbler should initialize itself completely when gobble is invoked, and not perform permanent output
+     * Hence, the handler should initialize itself completely when handle is invoked, and not perform permanent output
      * processing until the reader has reached the end of the process output.
      *
      * @since 1.0
      */
     public static final void exec(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout,
-				  IReaderGobbler out, IReaderGobbler err) throws Exception {
+				  IReaderHandler out, IReaderHandler err) throws Exception {
 
 	new SafeCLI(cmd, env, dir, sys, readTimeout).exec(out, err);
     }
@@ -400,25 +415,25 @@ public class SafeCLI {
 	return result;
     }
 
-    private void exec(IReaderGobbler outputGobbler, IReaderGobbler errorGobbler) throws Exception {
+    private void exec(IReaderHandler outputHandler, IReaderHandler errorHandler) throws Exception {
 	boolean success = false;
 	for (int attempt=0; !success; attempt++) {
 	    IProcess p = null;
 	    PerishableReader reader = null;
-	    GobblerThread errThread = null;
+	    HandlerThread errThread = null;
 	    try {
 		p = sys.createProcess(cmd, env, dir);
 		p.start();
 		reader = PerishableReader.newInstance(p.getInputStream(), readTimeout);
 		reader.setLogger(sys.getLogger());
-		if (errorGobbler == null) {
-		    errThread = new GobblerThread(DevNull, "pipe to /dev/null");
+		if (errorHandler == null) {
+		    errThread = new HandlerThread(DevNull, "pipe to /dev/null");
 		    errThread.start(PerishableReader.newInstance(p.getErrorStream(), sys.getTimeout(ISession.Timeout.XL)));
 		} else {
-		    errThread = new GobblerThread(errorGobbler, "stderr reader");
+		    errThread = new HandlerThread(errorHandler, "stderr reader");
 		    errThread.start(PerishableReader.newInstance(p.getErrorStream(), readTimeout));
 		}
-		outputGobbler.gobble(reader);
+		outputHandler.handle(reader);
 		try {
 		    p.waitFor(sys.getTimeout(ISession.Timeout.M));
 		    result.exitCode = p.exitValue();
@@ -470,17 +485,17 @@ public class SafeCLI {
     }
 
     private void exec() throws Exception {
-	exec(new InnerGobbler(), null);
+	exec(new InnerHandler(), null);
     }
 
     /**
-     * An IReaderGobbler that reads data into an ExecData. This internal implementation sets the ExecData result for the
+     * An IReaderHandler that reads data into an ExecData. This internal implementation sets the ExecData result for the
      * class.
      */
-    class InnerGobbler implements IReaderGobbler {
-	InnerGobbler() {}
+    class InnerHandler implements IReaderHandler {
+	InnerHandler() {}
 
-	public void gobble(IReader reader) throws IOException {
+	public void handle(IReader reader) throws IOException {
 	    ByteArrayOutputStream out = new ByteArrayOutputStream();
 	    byte[] buff = new byte[512];
 	    int len = 0;
@@ -491,15 +506,15 @@ public class SafeCLI {
 	}
     }
 
-    class GobblerThread implements Runnable {
+    class HandlerThread implements Runnable {
 	Thread thread;
 	String name;
 	IReader reader;
-	IReaderGobbler gobbler;
+	IReaderHandler handler;
 
-	GobblerThread(IReaderGobbler gobbler, String name) {
-	    this.gobbler = gobbler;
-	    this.name = "Gobbler " + counter++ + ": " + name;
+	HandlerThread(IReaderHandler handler, String name) {
+	    this.handler = handler;
+	    this.name = "ReaderHandler " + counter++ + ": " + name;
 	}
 
 	void start(IReader reader) throws IllegalStateException {
@@ -523,22 +538,22 @@ public class SafeCLI {
 
 	public void run() {
 	    try {
-		gobbler.gobble(reader);
+		handler.handle(reader);
 	    } catch (IOException e) {
 	    }
 	}
     }
 
-    static class ErrorLogger implements IReaderGobbler {
+    static class ErrorLogger implements IReaderHandler {
 	private IComputerSystem sys;
 
 	ErrorLogger(IComputerSystem sys) {
 	    this.sys = sys;
 	}
 
-	// Implement IReaderGobbler
+	// Implement IReaderHandler
 
-	public void gobble(IReader reader) throws IOException {
+	public void handle(IReader reader) throws IOException {
 	    String line = null;
 	    while((line = reader.readLine()) != null) {
 		sys.getLogger().warn(Message.WARNING_COMMAND_OUTPUT, line);
@@ -579,6 +594,11 @@ public class SafeCLI {
 		close();
 		throw e;
 	    }
+	}
+
+	@Override
+	protected void finalize() {
+	    close();
 	}
 
 	// Implement Iterator<String>
@@ -627,7 +647,9 @@ public class SafeCLI {
 	 */
 	private void close() {
 	    if (file != null) {
-		file.delete();
+		if (file.delete()) {
+		    file = null;
+		}
 	    }
 	}
     }

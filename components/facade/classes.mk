@@ -13,7 +13,6 @@ CLASSES=\
 	jsaf.intf.io.IFilesystem	\
 	jsaf.intf.io.IRandomAccess	\
 	jsaf.intf.io.IReader	\
-	jsaf.intf.io.IReaderGobbler	\
 	jsaf.intf.juniper.system.IJunosSession	\
 	jsaf.intf.juniper.system.ISupportInformation	\
 	jsaf.intf.netconf.INetconf	\

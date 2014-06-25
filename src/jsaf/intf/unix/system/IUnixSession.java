@@ -71,6 +71,13 @@ public interface IUnixSession extends IComputerSystem {
 	ESX("VMkernel"),
 
 	/**
+	 * Flavor for FreeBSD.
+	 *
+	 * @since 1.2.1
+	 */
+	FREEBSD("FreeBSD"),
+
+	/**
 	 * Flavor for HP-UX.
 	 *
 	 * @since 1.2

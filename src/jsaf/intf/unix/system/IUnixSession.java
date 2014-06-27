@@ -5,6 +5,7 @@ package jsaf.intf.unix.system;
 
 import jsaf.Message;
 import jsaf.intf.system.IComputerSystem;
+import jsaf.intf.unix.identity.IDirectory;
 import jsaf.util.SafeCLI;
 
 /**
@@ -35,6 +36,13 @@ public interface IUnixSession extends IComputerSystem {
      * @since 1.0.1
      */
     String ROOT = "root";
+
+    /**
+     * Obtain the IDirectory for this machine.
+     *
+     * @since 1.3
+     */
+    IDirectory getDirectory();
 
     /**
      * Get the "Flavor" of the Unix session.
@@ -73,7 +81,7 @@ public interface IUnixSession extends IComputerSystem {
 	/**
 	 * Flavor for FreeBSD.
 	 *
-	 * @since 1.2.1
+	 * @since 1.3
 	 */
 	FREEBSD("FreeBSD"),
 

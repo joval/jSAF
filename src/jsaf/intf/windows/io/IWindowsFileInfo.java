@@ -19,53 +19,46 @@ import jsaf.intf.windows.identity.IUser;
  */
 public interface IWindowsFileInfo extends IFileEx {
     /**
-     * Either the type of the specified file is unknown, or the function failed.
+     * An enumeration of Windows file types.
      *
-     * @since 1.0
+     * @since 1.3
      */
-    int FILE_TYPE_UNKNOWN = 0x0000;
+    enum WindowsType {
+        FILE_TYPE_UNKNOWN(0x0000),
+        FILE_TYPE_DISK(0x0001),
+        FILE_TYPE_CHAR(0x0002),
+        FILE_TYPE_PIPE(0x0003),
+        FILE_TYPE_REMOTE(0x8000);
+
+ 	/**
+	 * Get the WindowsType corresponding to the specified value.
+	 */
+	public static WindowsType getWindowsType(int value) {
+	    for (WindowsType type : values()) {
+		if (value == type.value()) {
+		    return type;
+		}
+	    }
+	    throw new IllegalArgumentException(Integer.toString(value));
+	}
+
+	private int value;
+
+	private WindowsType(int value) {
+	    this.value = value;
+	}
+
+	public int value() {
+	    return value;
+	}
+    }
 
     /**
-     * The specified file is a disk file.
+     * Returns the file's WindowsType.
      *
-     * @since 1.0
+     * @since 1.3
      */
-    int FILE_TYPE_DISK = 0x0001;
-
-    /**
-     * The specified file is a character file, typically an LPT device or a console.
-     *
-     * @since 1.0
-     */
-    int FILE_TYPE_CHAR = 0x0002;
-
-    /**
-     * The specified file is a socket, a named pipe, or an anonymous pipe.
-     *
-     * @since 1.0
-     */
-    int FILE_TYPE_PIPE = 0x0003;
-
-    /**
-     * Unused.
-     *
-     * @since 1.0
-     */
-    int FILE_TYPE_REMOTE = 0x8000;
-
-    /**
-     * The handle that identifies a directory.
-     *
-     * @since 1.0
-     */
-    int FILE_ATTRIBUTE_DIRECTORY = 0x10;
-
-    /**
-     * Returns one of the FILE_TYPE_ constants.
-     *
-     * @since 1.0
-     */
-    int getWindowsFileType() throws IOException;
+    WindowsType getWindowsType() throws IOException;
 
     /**
      * @since 1.0.1
@@ -143,7 +136,7 @@ public interface IWindowsFileInfo extends IFileEx {
     /**
      * Get the time the file was created. Returns null if unknown.
      *
-     * @since 1.2.1
+     * @since 1.3
      */
     public Date getCreateTime() throws IOException;
 }

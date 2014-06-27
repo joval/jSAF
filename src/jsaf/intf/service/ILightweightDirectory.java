@@ -13,7 +13,7 @@ import jsaf.intf.identity.ICredential;
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.2.1
+ * @since 1.3
  */
 public interface ILightweightDirectory {
     /**

@@ -166,19 +166,9 @@ public class Strings {
     }
 
     /**
-     * Convert an Iterator of Strings to a List.
-     *
-     * @since 1.2
-     * @deprecated in 1.2.1; use Arrays.asList instead.
-     */
-    public static List<String> toList(String[] sa) {
-	return Arrays.asList(sa);
-    }
-
-    /**
      * Wrap an Iterator in an Iterable.
      *
-     * @since 1.2.1
+     * @since 1.3
      */
     public static Iterable<String> iterable(final Iterator<String> iterator) {
 	return new Iterable<String>() {

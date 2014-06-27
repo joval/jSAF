@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.NoSuchElementException;
 
 import jsaf.intf.io.IFileEx;
+import jsaf.intf.unix.identity.IGroup;
+import jsaf.intf.unix.identity.IUser;
 
 /**
  * Defines extended attributes about a file on Unix.
@@ -18,210 +20,133 @@ import jsaf.intf.io.IFileEx;
  */
 public interface IUnixFileInfo extends IFileEx {
     /**
-     * Native UNIX stat file type identifier for a directory.
+     * Enumeration of Unix file types.
      *
-     * @since 1.0
+     * @since 1.3
      */
-    char DIR_TYPE   = 'd';
+    enum UnixType {
+	DIR('d'),
+	FIFO('p'),
+	LINK('l'),
+	BLOCK('b'),
+	CHAR('c'),
+	SOCK('s'),
+	REGULAR('-');
+
+	/**
+	 * Get the UnixType corresponding to the specified stat char.
+	 */
+	public static UnixType getUnixType(char value) throws IllegalArgumentException {
+	    for (UnixType type : values()) {
+		if (type.value == value) {
+		    return type;
+		}
+	    }
+	    throw new IllegalArgumentException(new StringBuffer().append(value).toString());
+	}
+
+	/**
+	 * Get the character used to represent this type in a stat().
+	 */
+	public char value() {
+	    return value;
+	}
+
+	private char value;
+
+	private UnixType(char value) {
+	    this.value = value;
+	}
+    }
 
     /**
-     * Native UNIX stat file type identifier for a pipe.
+     * Returns the file's UnixType.
      *
-     * @since 1.0
+     * @since 1.3
      */
-    char FIFO_TYPE  = 'p';
+    UnixType getUnixType();
 
     /**
-     * Native UNIX stat file type identifier for a link.
+     * An interface to Unix file permissions.
      *
-     * @since 1.0
+     * @since 1.3
      */
-    char LINK_TYPE  = 'l';
+    interface Permissions {
+	/**
+	 * Interface for a Unix file permissions group.
+	 */
+	interface Group {
+	    boolean read();
+	    boolean write();
+	    boolean execute();
+	}
+
+	/**
+	 * Get the permissions group for the user owner.
+	 *
+	 * @since 1.3
+	 */
+	Group user();
+
+	/**
+	 * Get the permissions group for group owner.
+	 *
+	 * @since 1.3
+	 */
+	Group group();
+
+	/**
+	 * Get the permissions group for all other users.
+	 *
+	 * @since 1.3
+	 */
+	Group world();
+
+        /**
+         * Get the whole permissions string, e.g., "rwxrwxrwx".
+         *
+         * @since 1.3
+         */
+	String toString();
+    }
 
     /**
-     * Native UNIX stat file type identifier for a block.
+     * Access to file permissions.
      *
-     * @since 1.0
+     * @since 1.3
      */
-    char BLOCK_TYPE = 'b';
+    Permissions getPermissions();
 
     /**
-     * Native UNIX stat file type identifier for a char.
+     * Get the user owner of the file.
      *
-     * @since 1.0
+     * @since 1.3
      */
-    char CHAR_TYPE  = 'c';
+    IUser getUserOwner();
 
     /**
-     * Native UNIX stat file type identifier for a socket.
+     * Get the group owner of the file.
      *
-     * @since 1.0
+     * @since 1.3
      */
-    char SOCK_TYPE  = 's';
+    IGroup getGroupOwner();
 
     /**
-     * Native UNIX stat file type identifier for a regular file.
-     *
-     * @since 1.0
-     */
-    char FILE_TYPE  = '-';
-
-    /**
-     * UNIX file type string, returned by getUnixFileType(), for a directory.
-     *
-     * @since 1.0
-     */
-    String FILE_TYPE_DIR	= "directory";
-
-    /**
-     * UNIX file type string, returned by getUnixFileType(), for a pipe.
-     *
-     * @since 1.0
-     */
-    String FILE_TYPE_FIFO	= "fifo";
-
-    /**
-     * UNIX file type string, returned by getUnixFileType(), for a link.
-     *
-     * @since 1.0
-     */
-    String FILE_TYPE_LINK	= "symlink";
-
-    /**
-     * UNIX file type string, returned by getUnixFileType(), for a block.
-     *
-     * @since 1.0
-     */
-    String FILE_TYPE_BLOCK	= "block";
-
-    /**
-     * UNIX file type string, returned by getUnixFileType(), for a char.
-     *
-     * @since 1.0
-     */
-    String FILE_TYPE_CHAR	= "character";
-
-    /**
-     * UNIX file type string, returned by getUnixFileType(), for a socket.
-     *
-     * @since 1.0
-     */
-    String FILE_TYPE_SOCK	= "socket";
-
-    /**
-     * UNIX file type string, returned by getUnixFileType(), for a regular file.
-     *
-     * @since 1.0
-     */
-    String FILE_TYPE_REGULAR	= "regular";
-
-    /**
-     * Returns the FILE_TYPE_* String constant describing the type of the file.
-     *
-     * @since 1.0
-     */
-    String getUnixFileType();
-
-    /**
-     * Get the whole permissions string, e.g., "rwxrwxrwx".
-     *
-     * @since 1.0
-     */
-    String getPermissions();
-
-    /**
-     * Get the integer ID of the user who owns this file.
-     *
-     * @since 1.0
-     */
-    int getUserId();
-
-    /**
-     * Get the integer ID of the group that owns this file.
-     *
-     * @since 1.0
-     */
-    int getGroupId();
-
-    /**
-     * Test the owner-read permission.
-     *
-     * @since 1.0
-     */
-    boolean uRead();
-
-    /**
-     * Test the owner-write permission.
-     *
-     * @since 1.0
-     */
-    boolean uWrite();
-
-    /**
-     * Test the owner-execute permission.
-     *
-     * @since 1.0
-     */
-    boolean uExec();
-
-    /**
-     * Test the set-UserID permission.
+     * Test the set-UserID mode bit.
      *
      * @since 1.0
      */
     boolean sUid();
 
     /**
-     * Test the group read permission.
-     *
-     * @since 1.0
-     */
-    boolean gRead();
-
-    /**
-     * Test the group write permission.
-     *
-     * @since 1.0
-     */
-    boolean gWrite();
-
-    /**
-     * Test the group execution permission.
-     *
-     * @since 1.0
-     */
-    boolean gExec();
-
-    /**
-     * Test the set-GroupID permission.
+     * Test the set-GroupID mode bit.
      *
      * @since 1.0
      */
     boolean sGid();
 
     /**
-     * Test the anonymout read permission.
-     *
-     * @since 1.0
-     */
-    boolean oRead();
-
-    /**
-     * Test the anonymous write permission.
-     *
-     * @since 1.0
-     */
-    boolean oWrite();
-
-    /**
-     * Test the anonymous execution permission.
-     *
-     * @since 1.0
-     */
-    boolean oExec();
-
-    /**
-     * Test whether the file's mode bits are sticky.
+     * Test the file's sticky mode bit.
      *
      * @since 1.0
      */
@@ -238,7 +163,7 @@ public interface IUnixFileInfo extends IFileEx {
     /**
      * Get the time the file's inode was last changed. Returns null if unknown.
      *
-     * @since 1.2.1
+     * @since 1.3
      */
     public Date getLastChanged() throws IOException;
 }

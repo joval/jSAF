@@ -28,6 +28,9 @@ CLASSES=\
 	jsaf.intf.system.IEnvironment	\
 	jsaf.intf.system.IProcess	\
 	jsaf.intf.system.ISession	\
+	jsaf.intf.unix.identity.IDirectory	\
+	jsaf.intf.unix.identity.IGroup	\
+	jsaf.intf.unix.identity.IUser	\
 	jsaf.intf.unix.io.IUnixFileInfo	\
 	jsaf.intf.unix.io.IUnixFilesystem	\
 	jsaf.intf.unix.system.IUnixSession	\

@@ -8,11 +8,6 @@ import java.util.NoSuchElementException;
 
 import jsaf.identity.IdentityException;
 import jsaf.intf.util.ILoggable;
-import jsaf.intf.windows.identity.IACE;
-import jsaf.intf.windows.identity.IDirectory;
-import jsaf.intf.windows.identity.IGroup;
-import jsaf.intf.windows.identity.IPrincipal;
-import jsaf.intf.windows.identity.IUser;
 
 /**
  * Representation of a Windows user/group store.
@@ -22,11 +17,6 @@ import jsaf.intf.windows.identity.IUser;
  * @since 1.0
  */
 public interface IDirectory extends ILoggable {
-    /**
-     * Returns the name of the machine for which this instance provides identity information.
-     */
-    public String getMachineName();
-
     /**
      * Returns the user corresponding to the specified SID.
      *

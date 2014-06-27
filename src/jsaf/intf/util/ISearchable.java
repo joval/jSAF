@@ -23,7 +23,7 @@ public interface ISearchable<T> {
      *
      * @param limit The desired limit. The default (if this method is never called) is 0, meaning there should be no limit.
      *
-     * @since 1.2.1
+     * @since 1.3
      */
     void setResultLimit(int limit);
 

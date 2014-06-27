@@ -53,13 +53,13 @@ public class SafeCLI {
      * Therefore, the handler should initialize itself completely when handle is invoked, and not perform permanent
      * output processing until the reader has reached the end of the process output.
      *
-     * @since 1.2.1
+     * @since 1.3
      */
     public interface IReaderHandler {
 	/**
 	 * Handle data from the reader. Implementations must NEVER catch an IOException originating from the reader!
 	 *
-	 * @since 1.2.1
+	 * @since 1.3
 	 */
 	public void handle(IReader reader) throws IOException;
     }
@@ -67,7 +67,7 @@ public class SafeCLI {
     /**
      * An IReaderHandler that does nothing with data read from the IReader.
      *
-     * @since 1.2.1
+     * @since 1.3
      */
     public static final IReaderHandler DevNull = new IReaderHandler() {
 	public void handle(IReader reader) throws IOException {
@@ -333,7 +333,7 @@ public class SafeCLI {
      * Run a command, using the specified output and error handlers.
      *
      * @see IReaderHandler
-     * @since 1.2.1
+     * @since 1.3
      */
     public static final void exec(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout,
 				  IReaderHandler out, IReaderHandler err) throws Exception {

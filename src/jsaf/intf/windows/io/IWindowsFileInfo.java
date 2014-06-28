@@ -54,7 +54,7 @@ public interface IWindowsFileInfo extends IFileEx {
     }
 
     /**
-     * Returns the file's WindowsType.
+     * Returns the file's WindowsType, or null if the file is a directory.
      *
      * @since 1.3
      */

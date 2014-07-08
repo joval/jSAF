@@ -179,6 +179,18 @@ public class Strings {
     }
 
     /**
+     * Strip quotes from a quoted String. If the string is not quoted, the original is returned.
+     *
+     * @since 1.3
+     */
+    public static String unquote(String s) {
+	if (s.startsWith("\"") && s.endsWith("\"")) {
+	    s = s.substring(1,s.length()-1);
+	}
+	return s;
+    }
+
+    /**
      * Check for ASCII values between [A-Z] or [a-z].
      *
      * @since 1.2

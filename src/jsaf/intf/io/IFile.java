@@ -151,6 +151,13 @@ public interface IFile extends IFileMetadata {
     public IFile getChild(String name) throws IOException;
 
     /**
+     * Get the IFile whose path is the canonical path of this file.
+     *
+     * @since 1.3
+     */
+    public IFile getCanonicalFile() throws IOException;
+
+    /**
      * Delete the file.
      *
      * @since 1.0

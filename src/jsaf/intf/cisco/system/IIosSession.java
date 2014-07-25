@@ -79,6 +79,13 @@ public interface IIosSession extends IComputerSystem {
     }
 
     /**
+     * Determine whether this session has access to level 15 privileges.
+     *
+     * @since 1.3
+     */
+    boolean privileged();
+
+    /**
      * Retrieve "show tech-support" data from the device.
      *
      * @since 1.0

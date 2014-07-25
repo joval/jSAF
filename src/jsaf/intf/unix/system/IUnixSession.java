@@ -163,4 +163,11 @@ public interface IUnixSession extends IComputerSystem {
 	    return Flavor.UNKNOWN;
 	}
     }
+
+    /**
+     * Test whether the session has the ability to run commands as root.
+     *
+     * @since 1.3
+     */
+    boolean privileged();
 }

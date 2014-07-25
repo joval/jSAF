@@ -93,6 +93,13 @@ public interface IWindowsSession extends IComputerSystem {
     boolean supports(View view);
 
     /**
+     * Test whether the session has the ability to run commands requiring UAC privileges.
+     *
+     * @since 1.3
+     */
+    boolean privileged();
+
+    /**
      * As an IComputerSystem, the getFilesystem() call always returns a non-redirected view, i.e.,
      * getFilesystem(getNativeView()). This method facilitates access to the 32-bit view on a 64-bit machine.
      *

@@ -32,6 +32,7 @@ import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.system.ISession;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.io.PerishableReader;
+import jsaf.io.SimpleReader;
 import jsaf.io.Streams;
 import jsaf.provider.SessionException;
 
@@ -240,6 +241,17 @@ public class SafeCLI {
      * @since 1.0.1
      */
     public static final Iterator<String> manyLines(String cmd, String[] env, IUnixSession sys) throws Exception {
+	return manyLines(cmd, env, new ErrorLogger(sys), sys);
+    }
+
+    /**
+     * Pass in a custom error stream handler to the manyLines command.
+     *
+     * @since 1.3
+     */
+    public static final Iterator<String> manyLines(String cmd, String[] env, IReaderHandler errHandler, IUnixSession sys)
+		throws Exception {
+
 	//
 	// Modify the command to redirect output to a temp file (compressed)
 	//
@@ -276,7 +288,20 @@ public class SafeCLI {
 	FileMonitor mon = new FileMonitor(fs, tempPath);
 	JSAFSystem.getTimer().schedule(mon, 15000, 15000);
 	try {
-	    exec(cmd, null, null, sys, sys.getTimeout(ISession.Timeout.XL), DevNull, new ErrorLogger(sys));
+	    BufferHandler out = new BufferHandler();
+	    BufferHandler err = new BufferHandler();
+	    exec(cmd, null, null, sys, sys.getTimeout(ISession.Timeout.XL), out, err);
+	    byte[] buff = err.getData();
+	    if (buff.length > 0) {
+		errHandler.handle(new SimpleReader(new ByteArrayInputStream(buff), sys.getLogger()));
+	    } else {
+		//
+		// Since stdout has been redirected to a file, and we've already attempted to process the buffered
+		// output from stderr, any data contained by the output buffer must be stderr output that's been
+		// directed for whatever reason to the stdout stream.
+		//
+		errHandler.handle(new SimpleReader(new ByteArrayInputStream(out.getData()), sys.getLogger()));
+	    }
 	} finally {
 	    mon.cancel();
 	    JSAFSystem.getTimer().purge();
@@ -348,11 +373,12 @@ public class SafeCLI {
      */
     public class ExecData {
 	int exitCode;
-	byte[] data;
+	byte[] data, err;
 
 	ExecData() {
 	    exitCode = -1;
 	    data = null;
+	    err = null;
 	}
 
 	/**
@@ -371,6 +397,15 @@ public class SafeCLI {
 	 */
 	public byte[] getData() {
 	    return data;
+	}
+
+	/**
+	 * Get the raw data collected from the process stderr.
+	 *
+	 * @since 1.3
+	 */
+	public byte[] getError() {
+	    return err;
 	}
 
 	/**
@@ -445,14 +480,9 @@ public class SafeCLI {
 		    errThread.start(PerishableReader.newInstance(p.getErrorStream(), readTimeout));
 		}
 		outputHandler.handle(reader);
-		try {
-		    p.waitFor(sys.getTimeout(ISession.Timeout.M));
-		    result.exitCode = p.exitValue();
-		    success = true;
-		} catch (InterruptedException e) {
-		    sys.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-		    break;
-		}
+		p.waitFor(sys.getTimeout(ISession.Timeout.M));
+		result.exitCode = p.exitValue();
+		success = true;
 	    } catch (IOException e) {
 		if (e instanceof InterruptedIOException || e instanceof EOFException) {
 		    if (attempt > execRetries) {
@@ -476,44 +506,62 @@ public class SafeCLI {
 		    sys.disconnect();
 		}
 	    } finally {
-		if (reader != null) {
-		    try {
-			reader.close();
-		    } catch (IOException e) {
-		    }
-		}
-		if (errThread != null) {
-		    try {
-			errThread.close();
-		    } catch (IOException e) {
-		    }
-		}
 		if (p != null && p.isRunning()) {
 		    p.destroy();
+		} else {
+		    if (reader != null) {
+			try {
+			    reader.close();
+			} catch (IOException e) {
+			}
+		    }
+		    if (errThread != null) {
+			try {
+			    errThread.close();
+			} catch (IOException e) {
+			}
+		    }
+		}
+		if (errThread != null && errThread.isAlive()) {
+		    try {
+			errThread.join(sys.getTimeout(ISession.Timeout.S));
+		    } catch (InterruptedException e) {
+		    }
 		}
 	    }
 	}
     }
 
     private void exec() throws Exception {
-	exec(new InnerHandler(), null);
+	BufferHandler out = new BufferHandler();
+	BufferHandler err = new BufferHandler();
+	exec(out, err);
+	result.data = out.getData();
+	result.err = err.getData();
     }
 
     /**
-     * An IReaderHandler that reads data into an ExecData. This internal implementation sets the ExecData result for the
-     * class.
+     * An IReaderHandler that simply buffers data.
      */
-    class InnerHandler implements IReaderHandler {
-	InnerHandler() {}
+    static class BufferHandler implements IReaderHandler {
+	private ByteArrayOutputStream buff;
+
+	byte[] getData() {
+	    if (buff == null) {
+		return null;
+	    } else {
+		return buff.toByteArray();
+	    }
+	}
 
 	public void handle(IReader reader) throws IOException {
-	    ByteArrayOutputStream out = new ByteArrayOutputStream();
-	    byte[] buff = new byte[512];
+	    buff = new ByteArrayOutputStream();
+	    byte[] b = new byte[512];
 	    int len = 0;
-	    while((len = reader.getStream().read(buff)) > 0) {
-		out.write(buff, 0, len);
+	    while((len = reader.getStream().read(b)) > 0) {
+		buff.write(b, 0, len);
 	    }
-	    result.data = out.toByteArray();
+	    buff.close();
 	}
     }
 
@@ -545,6 +593,18 @@ public class SafeCLI {
 	    reader.close();
 	}
 
+	boolean isAlive() {
+	    return thread.isAlive();
+	}
+
+	void join() throws InterruptedException {
+	    join(0L);
+	}
+
+	void join(long millis) throws InterruptedException {
+	    thread.join(millis);
+	}
+
 	// Implement Runnable
 
 	public void run() {
@@ -567,7 +627,9 @@ public class SafeCLI {
 	public void handle(IReader reader) throws IOException {
 	    String line = null;
 	    while((line = reader.readLine()) != null) {
-		sys.getLogger().warn(Message.WARNING_COMMAND_OUTPUT, line);
+		if (line.length() > 0) {
+		    sys.getLogger().warn(Message.WARNING_COMMAND_OUTPUT, line);
+		}
 	    }
 	}
     }

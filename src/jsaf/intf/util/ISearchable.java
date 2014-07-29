@@ -53,6 +53,8 @@ public interface ISearchable<T> {
 
     /**
      * An interface for search results.
+     *
+     * @since 1.2
      */
     public interface IResult<T> {
 	/**
@@ -61,14 +63,18 @@ public interface ISearchable<T> {
 	Collection<T> get();
 
 	/**
-	 * Determine whether there was an error which could have truncated the search results, such as a timeout.
+	 * Determine whether there were errors which could have truncated the search results, such as a timeout.
+         *
+         * @since 1.3
 	 */
-	boolean hasError();
+	boolean hasErrors();
 
 	/**
-	 * Get the error (if any);
+	 * Get the errors (if any);
+         *
+         * @since 1.3
 	 */
-	Exception getError();
+	Collection<String> getErrors();
     }
 
     /**

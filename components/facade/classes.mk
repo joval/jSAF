@@ -68,6 +68,7 @@ CLASSES=\
 	jsaf.intf.windows.wmi.IWmiProvider	\
 	jsaf.io.LittleEndian	\
 	jsaf.io.PerishableReader	\
+	jsaf.io.SimpleReader	\
 	jsaf.io.StreamLogger	\
 	jsaf.io.Streams	\
 	jsaf.protocol.tftp.TftpURLConnection	\

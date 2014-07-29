@@ -25,20 +25,6 @@ public interface IReader extends ILoggable {
     int read() throws IOException;
 
     /**
-     * Read bytes.
-     *
-     * @since 1.3
-     */
-    int read(byte[] buff) throws IOException;
-
-    /**
-     * Read bytes.
-     *
-     * @since 1.3
-     */
-    int read(byte[] buff, int offset, int len) throws IOException;
-
-    /**
      * Get the underlying InputStream.
      *
      * @since 1.0

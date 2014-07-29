@@ -4,6 +4,7 @@
 package jsaf.intf.unix.identity;
 
 import java.math.BigInteger;
+import java.util.Collection;
 
 import jsaf.identity.IdentityException;
 
@@ -28,4 +29,11 @@ public interface IUser {
      * @since 1.3
      */
     public String getName() throws IdentityException;
+
+    /**
+     * Get the groups of which the user is a member.
+     *
+     * @since 1.3
+     */
+    public Collection<IGroup> getGroups() throws IdentityException;
 }

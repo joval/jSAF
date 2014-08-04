@@ -10,13 +10,21 @@ package jsaf.provider;
  * @version %I% %G%
  * @since 1.0
  */
-public class SessionException extends Exception {
+public class SessionException extends RuntimeException {
+    public SessionException() {
+	super();
+    }
+
     public SessionException(String message) {
 	super(message);
     }
 
-    public SessionException(Exception e) {
-	super(e);
+    public SessionException(Throwable cause) {
+	super(cause);
+    }
+
+    public SessionException(String message, Throwable cause) {
+	super(message, cause);
     }
 
     @Override

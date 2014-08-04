@@ -4,7 +4,6 @@
 package jsaf.provider;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 
 import org.slf4j.cal10n.LocLogger;
@@ -135,7 +134,7 @@ public abstract class SessionFactory implements ILoggable {
      *
      * @since 1.0
      */
-    public abstract ISession createSession() throws IOException;
+    public abstract ISession createSession() throws SessionException;
 
     /**
      * Creates a session for the specified target. Interpretation of the target string is performed by the
@@ -143,5 +142,5 @@ public abstract class SessionFactory implements ILoggable {
      *
      * @since 1.1
      */
-    public abstract ISession createSession(IConnectionSpecification spec) throws IOException;
+    public abstract ISession createSession(IConnectionSpecification spec) throws SessionException;
 }

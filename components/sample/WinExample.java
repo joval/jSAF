@@ -18,6 +18,7 @@ import jsaf.intf.remote.IConnectionSpecification;
 import jsaf.intf.system.ISession;
 import jsaf.intf.windows.identity.IWindowsCredential;
 import jsaf.intf.windows.system.IWindowsSession;
+import jsaf.provider.SessionException;
 import jsaf.provider.SessionFactory;
 
 public class WinExample {
@@ -44,7 +45,8 @@ public class WinExample {
 	    switch(session.getType()) {
 	      case WINDOWS:
 		IWindowsSession ws = (IWindowsSession)session;
-		if (ws.connect()) {
+		try {
+		    ws.connect();
 		    //
 		    // We're connected! Let's check out the Windows Update log.
 		    //
@@ -57,8 +59,8 @@ public class WinExample {
 			System.out.println("File not found: " + wuLog.getPath());
 		    }
 		    ws.disconnect();
-		} else {
-		    System.out.println("Failed to connect!");
+		} catch (SessionException e) {
+		    System.out.println("Failed to connect: " + e.getMessage());
 		}
 		break;
 
@@ -68,7 +70,6 @@ public class WinExample {
 		//
 		throw new Exception("Not a Windows session!");
 	    }
-
 	} catch (Exception e) {
 	    e.printStackTrace();
 	} finally {

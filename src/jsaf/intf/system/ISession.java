@@ -11,6 +11,7 @@ import jsaf.intf.io.IFilesystem;
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.util.IProperty;
 
+import jsaf.provider.SessionException;
 import jsaf.service.UnsupportedServiceException;
 
 /**
@@ -214,13 +215,15 @@ public interface ISession extends ILoggable {
     /**
      * Get the session type.
      *
+     * @throws SessionException if an error is encountered attempting to determine the type.
+     *
      * @since 1.0
      */
-    Type getType();
+    Type getType() throws SessionException;
 
     /**
      * A shortcut for getType().value(), except when type is Type.EXTENDED, in which case the desired value for the
-     * extended type should be returned.
+     * extended type is returned.
      *
      * @see jsaf.intf.system.ISession.Type.value()
      *
@@ -239,7 +242,7 @@ public interface ISession extends ILoggable {
     <T> T getService(Class<T> serviceType, Object... args) throws UnsupportedServiceException, IllegalArgumentException;
 
     /**
-     * Get the timeout value corresponding to the Timeout enumeration.
+     * Get the session's timeout value (in milliseconds) corresponding to the specidied Timeout enum member.
      *
      * @since 1.0
      */
@@ -255,9 +258,11 @@ public interface ISession extends ILoggable {
     /**
      * Connect the session.
      *
-     * @since 1.0
+     * @throws SessionException if unable to connect for any reason.
+     *
+     * @since 1.3
      */
-    boolean connect();
+    void connect() throws SessionException;
 
     /**
      * Disconnect the session.

@@ -66,8 +66,9 @@ public interface IFilesystem extends ILoggable {
     IFile getFile(String path, IFile.Flags flags) throws IOException;
 
     /**
-     * Retrieve multiple IFiles at once, all with default (IFile.READONLY) access. The order of the files corresponds to the
-     * order of the path argument array.
+     * Retrieve multiple IFiles at once, all with default (IFile.READONLY) access. The order of the files corresponds to
+     * the order of the path argument array. Note that any path that doesn't exist will have a null entry in its place in
+     * the result.
      *
      * @since 1.0.1
      */

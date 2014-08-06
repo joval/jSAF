@@ -3,6 +3,8 @@
 
 package jsaf.intf.windows.registry;
 
+import jsaf.provider.windows.registry.RegistryException;
+
 /**
  * Interface to an abstract Windows registry value.
  *
@@ -136,7 +138,7 @@ public interface IValue {
      *
      * @since 1.0
      */
-    Type getType();
+    Type getType() throws RegistryException;
 
     /**
      * Return the Key under which this Value lies.
@@ -150,7 +152,7 @@ public interface IValue {
      *
      * @since 1.0
      */
-    String getName();
+    String getName() throws RegistryException;
 
     /**
      * Returns a String suitable for logging about the Value.

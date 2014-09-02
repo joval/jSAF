@@ -463,7 +463,7 @@ public class SafeCLI {
 
     private void exec(IReaderHandler outputHandler, IReaderHandler errorHandler) throws Exception {
 	boolean success = false;
-	for (int attempt=0; !success; attempt++) {
+	for (int attempt=1; !success; attempt++) {
 	    IProcess p = null;
 	    PerishableReader reader = null;
 	    HandlerThread errThread = null;

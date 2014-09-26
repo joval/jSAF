@@ -38,7 +38,10 @@ public class TruncatedInputStream extends FilterInputStream {
     }
 
     /**
-     * Truncate the wrapped InputStream at limit bytes.
+     * Truncate the wrapped InputStream at limit bytes. Once limit bytes have been read from the stream, the next
+     * call to one of the read methods will throw a TruncatedIOException.  Note that if the stream ends after
+     * exactly limit bytes, this class will still throw an exception at the end.  This is useful when reading from
+     * a stream whose source has already been truncated.
      */
     public TruncatedInputStream(InputStream in, long limit) {
 	super(in);
@@ -53,7 +56,7 @@ public class TruncatedInputStream extends FilterInputStream {
 
     @Override
     public int read() throws IOException {
-	if ((pointer + 1L) < limit) {
+	if (pointer < limit) {
 	    int ch = in.read();
 	    if (ch != -1) {
 		pointer++;
@@ -71,16 +74,10 @@ public class TruncatedInputStream extends FilterInputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-	if ((pointer + 1L) < limit) {
-	    int i = len;
-	    while ((pointer + (long)i) > limit) {
-		i--;
-	    }
-	    int r = in.read(b, off, i);
-	    if (r > 0) {
-		pointer += (long)r;
-	    }
-	    return r;
+	if (pointer < limit) {
+	    int i = in.read(b, off, (int)Math.min((long)len, limit - pointer));
+	    pointer += (long)i;
+	    return i;
 	} else {
 	    throw new TruncatedIOException(Message.getMessage(Message.ERROR_TRUNCATE, Long.toString(limit)));
 	}
@@ -99,8 +96,10 @@ public class TruncatedInputStream extends FilterInputStream {
 
     @Override
     public void mark(int readlimit) {
-	mark = pointer;
-	in.mark(readlimit);
+	if (in.markSupported()) {
+	    mark = pointer;
+	    in.mark(readlimit);
+	}
     }
 
     @Override

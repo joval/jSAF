@@ -111,6 +111,15 @@ public class Streams {
     }
 
     /**
+     * Get an OutputStream to nowhere.
+     *
+     * @since 1.3
+     */
+    public static OutputStream devNull() {
+	return DEVNULL;
+    }
+
+    /**
      * Read the BOM (Byte-Order marker) from a stream.
      *
      * @since 1.2
@@ -163,6 +172,22 @@ public class Streams {
 		} catch (IOException e) {
 		}
 	    }
+	}
+    }
+
+    private static final OutputStream DEVNULL = new DevNull();
+
+    private static class DevNull extends OutputStream {
+	private DevNull() {
+	}
+
+	public void write(int b) {
+	}
+
+	public void write(byte[] b) {
+	}
+
+	public void write(byte[] b, int offset, int len) {
 	}
     }
 }

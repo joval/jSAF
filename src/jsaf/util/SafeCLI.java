@@ -108,7 +108,7 @@ public class SafeCLI {
 		  case 0x201c:	// Unicode double left quote
 		  case 0x201d:	// Unicode double right quote
 		  case 0x201e:	// Unicode double low quote
-		    throw new IllegalArgumentException(arg);
+		    throw new IllegalArgumentException(Message.getMessage(Message.WARNING_UNSAFE_CHARS, arg));
 		  default:
 		    break;
 		}
@@ -121,7 +121,7 @@ public class SafeCLI {
 		  case 0x22:	// ASCII double quote
 		  case 0x27:	// ASCII single quote
 		  case 0x60:	// ASCII back-tick
-		    throw new IllegalArgumentException(arg);
+		    throw new IllegalArgumentException(Message.getMessage(Message.WARNING_UNSAFE_CHARS, arg));
 		  default:
 		    break;
 		}

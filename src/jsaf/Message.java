@@ -51,6 +51,7 @@ public enum Message {
     WARNING_COMMAND_OUTPUT,
     WARNING_MISSING_OUTPUT,
     WARNING_PERISHABLEIO_INTERRUPT,
+    WARNING_UNSAFE_CHARS,
     WARNING_UNIX_FLAVOR;
 
     private static IMessageConveyor baseConveyor;

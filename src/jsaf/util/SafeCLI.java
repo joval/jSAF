@@ -91,16 +91,40 @@ public class SafeCLI {
      * @since 1.0
      */
     public static String checkArgument(String arg, IComputerSystem sys) throws IllegalArgumentException {
+	char[] chars = arg.toCharArray();
 	switch(sys.getType()) {
 	  case WINDOWS:
-	    if (arg.indexOf("'") != -1 || arg.indexOf("\"") != -1) {
-		throw new IllegalArgumentException(arg);
+	    for (int i=0; i < chars.length; i++) {
+		//
+		// Powershell automatically converts 'smart-quotes' into regular quotes, so we have to specifically
+		// check for them.
+		//
+		switch((int)chars[i]) {
+	  	  case 0x22:	// ASCII double quote
+		  case 0x27:	// ASCII single quote
+		  case 0x2018:	// Unicode single left quote
+		  case 0x2019:	// Unicode single right quote
+		  case 0x201a:	// Unicode single low quote
+		  case 0x201c:	// Unicode double left quote
+		  case 0x201d:	// Unicode double right quote
+		  case 0x201e:	// Unicode double low quote
+		    throw new IllegalArgumentException(arg);
+		  default:
+		    break;
+		}
 	    }
 	    break;
 
 	  case UNIX:
-	    if (arg.indexOf("'") != -1 || arg.indexOf("\"") != -1 || arg.indexOf("`") != -1) {
-		throw new IllegalArgumentException(arg);
+	    for (int i=0; i < chars.length; i++) {
+		switch((int)chars[i]) {
+		  case 0x22:	// ASCII double quote
+		  case 0x27:	// ASCII single quote
+		  case 0x60:	// ASCII back-tick
+		    throw new IllegalArgumentException(arg);
+		  default:
+		    break;
+		}
 	    }
 	    break;
 	}

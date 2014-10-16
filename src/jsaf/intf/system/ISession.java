@@ -8,7 +8,7 @@ import java.io.IOException;
 
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFilesystem;
-import jsaf.intf.util.ILoggable;
+import jsaf.intf.util.IDisposable;
 import jsaf.intf.util.IProperty;
 
 import jsaf.provider.SessionException;
@@ -21,7 +21,7 @@ import jsaf.service.UnsupportedServiceException;
  * @version %I% %G%
  * @since 1.0
  */
-public interface ISession extends ILoggable {
+public interface ISession extends IDisposable {
     /**
      * An enumeration of possible session types.
      *
@@ -300,11 +300,4 @@ public interface ISession extends ILoggable {
      * @since 1.0
      */
     String getUsername();
-
-    /**
-     * When you're completely finished using the session, call this method to clean up caches and other resources.
-     *
-     * @since 1.0
-     */
-    void dispose();
 }

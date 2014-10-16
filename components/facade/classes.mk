@@ -35,6 +35,7 @@ CLASSES=\
 	jsaf.intf.unix.io.IUnixFilesystem	\
 	jsaf.intf.unix.system.IUnixSession	\
 	jsaf.intf.util.IConfigurable	\
+	jsaf.intf.util.IDisposable	\
 	jsaf.intf.util.ILoggable	\
 	jsaf.intf.util.IPerishable	\
 	jsaf.intf.util.IProperty	\

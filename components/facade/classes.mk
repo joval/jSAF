@@ -5,6 +5,7 @@ CLASSES=\
 	jsaf.intf.apple.system.IiOSSession	\
 	jsaf.intf.cisco.system.IIosSession	\
 	jsaf.intf.cisco.system.ITechSupport	\
+	jsaf.intf.discovery.IDiscoveryService	\
 	jsaf.intf.identity.ICredential	\
 	jsaf.intf.identity.ICredentialStore	\
 	jsaf.intf.io.IFile	\
@@ -86,6 +87,8 @@ CLASSES=\
 	jsaf.service.UnsupportedServiceException	\
 	jsaf.util.AbstractEnvironment	\
 	jsaf.util.Base64	\
+	jsaf.util.BoundaryIterator	\
+	jsaf.util.BoundaryReaderHandler	\
 	jsaf.util.Checksum	\
 	jsaf.util.ConnectionSpecification	\
 	jsaf.util.Environment	\

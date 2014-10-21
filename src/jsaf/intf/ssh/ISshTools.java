@@ -24,7 +24,8 @@ public interface ISshTools extends ILoggable {
     byte[] getPrivateKey(byte[] encrypted, byte[] passphrase) throws Exception;
 
     /**
-     * Discover the public key of the specified target machine.
+     * Discover the fingerprint of the specified target machine's public key.
+     * @since 1.3
      */
-    String getPublicKey(IConnectionSpecification target) throws Exception;
+    String getFingerprint(IConnectionSpecification target) throws Exception;
 }

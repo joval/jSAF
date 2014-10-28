@@ -21,7 +21,6 @@ CLASSES=\
 	jsaf.intf.remote.IConnectionSpecificationFactory	\
 	jsaf.intf.service.IDatabase	\
 	jsaf.intf.service.ILightweightDirectory	\
-	jsaf.intf.ssh.ISshTools	\
 	jsaf.intf.ssh.identity.ISshCredential	\
 	jsaf.intf.ssh.system.IShell	\
 	jsaf.intf.ssh.system.ISshProcess	\

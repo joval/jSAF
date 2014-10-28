@@ -93,6 +93,15 @@ public enum Message {
     }
 
     /**
+     * Retrieve the default localized system logger used by the jSAF library.
+     *
+     * @since 1.3
+     */
+    public static LocLogger getLogger(String name) {
+	return loggerFactory.getLocLogger(name);
+    }
+
+    /**
      * Retrieve a localized String, given the key and substitution arguments.
      */
     public static String getMessage(Enum<?> key, Object... args) {

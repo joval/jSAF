@@ -32,4 +32,20 @@ public interface IRunspacePool {
      * @since 1.1.2
      */
     IRunspace getRunspace(IWindowsSession.View view) throws Exception;
+
+    /**
+     * Add an IRunspacePool.Initializer, which will be invoked for every new Runspace spawned in the pool.
+     *
+     * @since 1.3
+     */
+    void setInitializer(Initializer initializer);
+
+    /**
+     * A sub-interface defining an initialization callback.
+     *
+     * @since 1.3
+     */
+    interface Initializer {
+	void configure(IRunspace runspace) throws Exception;
+    }
 }

@@ -92,6 +92,7 @@ CLASSES=\
 	jsaf.util.ConnectionSpecification	\
 	jsaf.util.Environment	\
 	jsaf.util.IniFile	\
+	jsaf.util.LogCensor	\
 	jsaf.util.LogMessageConveyor	\
 	jsaf.util.PropertyUtil	\
 	jsaf.util.SafeCLI	\

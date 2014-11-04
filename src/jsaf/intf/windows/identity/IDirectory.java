@@ -104,28 +104,14 @@ public interface IDirectory extends ILoggable {
      *
      * @since 1.0
      */
-    public boolean isLocalSid(String sid);
+    public boolean isLocalSid(String sid) throws IdentityException;
 
     /**
-     * Does the machine's domain server recognize this principal?
+     * Returns the SID for the local machine.
      *
-     * @since 1.0
+     * @since 1.3
      */
-    public boolean isDomainMember(String netbiosName);
-
-    /**
-     * Does the machine's domain server recognize this SID?
-     *
-     * @since 1.0
-     */
-    public boolean isDomainSid(String sid);
-
-    /**
-     * Fills in the domain with the local hostname if it is not specified in the argument.
-     *
-     * @since 1.0
-     */
-    public String getQualifiedNetbiosName(String netbiosName);
+    public String getComputerSid() throws IdentityException;
 
     /**
      * Get the members of the principal, if it's a group.

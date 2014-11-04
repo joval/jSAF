@@ -62,14 +62,4 @@ public interface IPrincipal {
      * @since 1.0
      */
     Type getType();
-
-    /**
-     * Is the SID well-known?
-     *
-     * @see <a href="http://support.microsoft.com/kb/243330?wa=wsignin1.0">KB243330</a>
-     * @see <a href="http://msdn.microsoft.com/en-us/library/cc980032%28v=prot.20%29.aspx">Well-Known SID Structures</a>
-     *
-     * @since 1.0
-     */
-    boolean isBuiltin();
 }

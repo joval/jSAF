@@ -17,4 +17,8 @@ public class PowershellException extends Exception {
     public PowershellException(Throwable cause) {
 	super(cause);
     }
+
+    public PowershellException(String message, Throwable cause) {
+	super(message, cause);
+    }
 }

@@ -157,6 +157,14 @@ public interface IRegistry extends ILoggable {
     IKey getKey(String fullPath) throws NoSuchElementException, RegistryException;
 
     /**
+     * Return multiple subkeys from a hive all at once. Results will be in the same order as the paths argument. Non-existent
+     * paths will be reflected by null entries in the results.
+     *
+     * @since 1.3
+     */
+    IKey[] getKeys(String[] fullPaths) throws RegistryException;
+
+    /**
      * Return a key from a hive.
      *
      * @since 1.0

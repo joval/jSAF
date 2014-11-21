@@ -91,6 +91,14 @@ public interface ISession extends IDisposable {
 	WINDOWS("windows"),
 
 	/**
+	 * A WS-Management-type session. This type is only intended to be a transition state used during a discovery process,
+	 * that will ultimately yield a type of WINDOWS or UNKNOWN.
+	 *
+	 * @since 1.3
+	 */
+	WS_MAN("WS-Management"),
+
+	/**
 	 * Provides a mechanism for extended jSAF session types. The String value for the extended type
 	 * is supplied using the getTypeVal() method of the ISession.
 	 *

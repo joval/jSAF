@@ -23,7 +23,7 @@ public interface IConnectionSpecification {
 	SOCKS_PROXY(1080),
 	HTTP_PROXY(8080),
 	SSH(22),
-	WINDOWS(5985),
+	WS_MAN(5985),
 	UNKNOWN(-1);
 
 	Type(int port) {
@@ -82,36 +82,32 @@ public interface IConnectionSpecification {
      * A convenience IConnectionSpecification for the local machine.
      */
     IConnectionSpecification LOCALHOST = new IConnectionSpecification() {
-        public Type getType() {
-            if (System.getProperty("os.name").startsWith("Windows")) {
-                return Type.WINDOWS;
-            } else {
-                return Type.UNKNOWN;
-            }
-        }
+	public Type getType() {
+	    return Type.UNKNOWN;
+	}
 
-        public String getIdentifier() {
-            return ISession.LOCALHOST;
-        }
+	public String getIdentifier() {
+	    return ISession.LOCALHOST;
+	}
 
-        public String getHostname() {
-            return ISession.LOCALHOST;
-        }
+	public String getHostname() {
+	    return ISession.LOCALHOST;
+	}
 
-        public int getPort() {
-            return 0;
-        }
+	public int getPort() {
+	    return 0;
+	}
 
-        public String getFingerprint() {
-            return null;
-        }
+	public String getFingerprint() {
+	    return null;
+	}
 
-        public ICredential getCredential() {
-            return null;
-        }
+	public ICredential getCredential() {
+	    return null;
+	}
 
-        public IConnectionSpecification getGateway() {
-            return null;
-        }
+	public IConnectionSpecification getGateway() {
+	    return null;
+	}
     };
 }

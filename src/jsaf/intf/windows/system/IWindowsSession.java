@@ -78,8 +78,7 @@ public interface IWindowsSession extends IComputerSystem {
     View getNativeView();
 
     /**
-     * Test whether the session supports the specified view. Returns true for 32 and 64 on 64-bit machines, and true only
-     * for 32 on 32-bit machines.
+     * Obtain an IRegistry for the machine. For a 32-bit machine, the view is ignored.
      *
      * @since 1.0
      */
@@ -102,6 +101,7 @@ public interface IWindowsSession extends IComputerSystem {
     /**
      * As an IComputerSystem, the getFilesystem() call always returns a non-redirected view, i.e.,
      * getFilesystem(getNativeView()). This method facilitates access to the 32-bit view on a 64-bit machine.
+     * (For a 32-bit machine, the view is ignored).
      *
      * @since 1.0
      */

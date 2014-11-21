@@ -25,7 +25,7 @@ public interface IRunspacePool {
 
     /**
      * Get an IRunspace from the pool, with the specified architecture. If a lock cannot be obtained on an existing
-     * runspace, a new one will be spawned and returned.
+     * runspace, a new one will be spawned and returned. For a 32-bit machine, the view is ignored.
      *
      * @throws IndexOutOfBoundsException if the pool is already at capacity.
      *

@@ -1,41 +1,10 @@
 # Copyright (C) 2011 jOVAL.org.  All rights reserved.
 # This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
-include $(TOP)/customize.mk
+include $(TOP)/../DeveloperTools/install/common.mk
 
 Default: all
 
-PLATFORM=unknown
-ifeq (Windows, $(findstring Windows,$(OS)))
-    PLATFORM=win
-    CLN=;
-    JAVACFLAGS=-Xlint:unchecked
-else
-    OS=$(shell uname)
-    CLN=:
-endif
-
-ifeq (Linux, $(findstring Linux,$(OS)))
-    PLATFORM=linux
-endif
-
-NULL:=
-SPACE:=$(NULL) # end of the line
-SHELL=/bin/sh
-CWD=$(shell pwd)
-
-JAVA=$(JAVA_HOME)/bin/java
-JAVA_VERSION=1.6
-ifeq (1.7, $(findstring 1.7,`$(JAVA) -version`))
-    JAVA_VERSION=1.7
-endif
-ifeq (x, x$(JRE_HOME))
-    JRE_HOME=$(JAVA_HOME)/jre
-endif
-JRE=$(JRE_HOME)/bin/java
-
-JAVAC=$(JAVA_HOME)/bin/javac
-JAR=$(JAVA_HOME)/bin/jar
 CLASSLIB=$(JAVA_HOME)/jre/lib/rt.jar
 BUILD=build
 DIST=dist

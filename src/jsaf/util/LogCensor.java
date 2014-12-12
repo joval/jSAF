@@ -6,6 +6,7 @@ package jsaf.util;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -27,7 +28,7 @@ public class LogCensor implements ILoggable.Censor {
     private Collection<FilterLogger> filters;
 
     public LogCensor() {
-	secrets = new ArrayList<CharSequence>();
+	secrets = new HashSet<CharSequence>();
 	filters = new ArrayList<FilterLogger>();
     }
 

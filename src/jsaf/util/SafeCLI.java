@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.nio.charset.Charset;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -134,34 +135,40 @@ public class SafeCLI {
     /**
      * Run a command and get the first (non-empty) line of output.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
-    public static final String exec(String cmd, IComputerSystem sys, ISession.Timeout to) throws Exception {
-	return exec(cmd, null, sys, sys.getTimeout(to));
+    public static final String exec(String cmd, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+	return exec(cmd, null, sys, sys.getTimeout(readTimeout));
     }
 
     /**
      * Run a command and get the first (non-empty) line of output, using the specified environment.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
-    public static final String exec(String cmd, String[] env, IComputerSystem sys, ISession.Timeout to) throws Exception {
-	return exec(cmd, env, null, sys, sys.getTimeout(to));
+    public static final String exec(String cmd, String[] env, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+	return exec(cmd, env, null, sys, sys.getTimeout(readTimeout));
     }
 
     /**
      * Run a command and get the first (non-empty) line of output, using the specified environment and start directory.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
-    public static final String exec(String cmd, String[] env, String dir, IComputerSystem sys, ISession.Timeout to)
-		throws Exception {
-
-	return exec(cmd, env, dir, sys, sys.getTimeout(to));
+    public static final String exec(String cmd, String[] env, String dir, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+	return exec(cmd, env, dir, sys, sys.getTimeout(readTimeout));
     }
 
     /**
      * Run a command and get the first (non-empty) line of output.
+     *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
      *
      * @since 1.0
      */
@@ -172,6 +179,8 @@ public class SafeCLI {
     /**
      * Run a command and get the first (non-empty) line of output, using the specified environment.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
     public static final String exec(String cmd, String[] env, IComputerSystem sys, long readTimeout) throws Exception {
@@ -181,11 +190,11 @@ public class SafeCLI {
     /**
      * Run a command and get the first (non-empty) line of output, using the specified environment and start directory.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
-    public static final String exec(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout)
-		throws Exception {
-
+    public static final String exec(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout) throws Exception {
 	List<String> lines = multiLine(cmd, env, dir, sys, readTimeout);
 	if (lines.size() == 2 && lines.get(0).equals("")) {
 	    return lines.get(1);
@@ -197,36 +206,40 @@ public class SafeCLI {
     /**
      * Run a command and get the resulting lines of output.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, IComputerSystem sys, ISession.Timeout to) throws Exception {
-	return multiLine(cmd, null, null, sys, sys.getTimeout(to));
+    public static final List<String> multiLine(String cmd, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+	return multiLine(cmd, null, null, sys, sys.getTimeout(readTimeout));
     }
 
     /**
      * Run a command and get the resulting lines of output, using the specified environment.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, String[] env, IComputerSystem sys, ISession.Timeout to)
-		throws Exception {
-
-	return multiLine(cmd, env, null, sys, sys.getTimeout(to));
+    public static final List<String> multiLine(String cmd, String[] env, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+	return multiLine(cmd, env, null, sys, sys.getTimeout(readTimeout));
     }
 
     /**
      * Run a command and get the resulting lines of output, using the specified environment and start directory.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, String[] env, String dir, IComputerSystem sys, ISession.Timeout to)
-		throws Exception {
-
-	return multiLine(cmd, env, dir, sys, sys.getTimeout(to));
+    public static final List<String> multiLine(String cmd, String[] env, String dir, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+	return multiLine(cmd, env, dir, sys, sys.getTimeout(readTimeout));
     }
 
     /**
      * Run a command and get the resulting lines of output.
+     *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
      *
      * @since 1.0
      */
@@ -237,22 +250,22 @@ public class SafeCLI {
     /**
      * Run a command and get the resulting lines of output, using the specified environment.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, String[] env, IComputerSystem sys, long readTimeout)
-		throws Exception {
-
+    public static final List<String> multiLine(String cmd, String[] env, IComputerSystem sys, long readTimeout) throws Exception {
 	return multiLine(cmd, env, null, sys, readTimeout);
     }
 
     /**
      * Run a command and get the resulting lines of output, using the specified environment.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout)
-		throws Exception {
-
+    public static final List<String> multiLine(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout) throws Exception {
 	return execData(cmd, env, dir, sys, readTimeout).getLines();
     }
 
@@ -265,17 +278,52 @@ public class SafeCLI {
      * @since 1.0.1
      */
     public static final Iterator<String> manyLines(String cmd, String[] env, IUnixSession sys) throws Exception {
-	return manyLines(cmd, env, new ErrorLogger(sys), sys);
+	return manyLines(cmd, env, new ErrorLogger(sys), sys, sys.getTimeout(ISession.Timeout.XL));
+    }
+
+    /**
+     * Pass in a custom timeout to the manyLines command.
+     *
+     * @param timeout Specifies the maximum time that the command should take to finish executing.
+     *
+     * @since 1.3
+     */
+    public static final Iterator<String> manyLines(String cmd, String[] env, IUnixSession sys, ISession.Timeout timeout) throws Exception {
+	return manyLines(cmd, env, sys, sys.getTimeout(timeout));
+    }
+
+    /**
+     * Pass in a custom timeout to the manyLines command.
+     *
+     * @param timeout Specifies the maximum time that the command should take to finish executing.
+     *
+     * @since 1.3
+     */
+    public static final Iterator<String> manyLines(String cmd, String[] env, IUnixSession sys, long timeout) throws Exception {
+	return manyLines(cmd, env, new ErrorLogger(sys), sys, timeout);
     }
 
     /**
      * Pass in a custom error stream handler to the manyLines command.
      *
+     * @param timeout Specifies the maximum time that the command should take to finish executing.
+     *
      * @since 1.3
      */
-    public static final Iterator<String> manyLines(String cmd, String[] env, IReaderHandler errHandler, IUnixSession sys)
+    public static final Iterator<String> manyLines(String cmd, String[] env, IReaderHandler errHandler, IUnixSession sys, ISession.Timeout timeout)
 		throws Exception {
 
+	return manyLines(cmd, env, errHandler, sys, sys.getTimeout(timeout));
+    }
+
+    /**
+     * Pass in a custom error stream handler to the manyLines command, with a custom timeout.
+     *
+     * @param timeout Specifies the maximum time that the command should take to finish executing.
+     *
+     * @since 1.3
+     */
+    public static final Iterator<String> manyLines(String cmd, String[] env, IReaderHandler errHandler, IUnixSession sys, long timeout) throws Exception {
 	//
 	// Modify the command to redirect output to a temp file (compressed)
 	//
@@ -314,7 +362,7 @@ public class SafeCLI {
 	try {
 	    BufferHandler out = new BufferHandler();
 	    BufferHandler err = new BufferHandler();
-	    exec(cmd, null, null, sys, sys.getTimeout(ISession.Timeout.XL), out, err);
+	    exec(cmd, null, null, sys, timeout, out, err);
 	    byte[] buff = err.getData();
 	    if (buff.length > 0) {
 		errHandler.handle(new SimpleReader(new ByteArrayInputStream(buff), sys.getLogger()));
@@ -359,6 +407,8 @@ public class SafeCLI {
     /**
      * Run a command and get the resulting ExecData, using the specified environment.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
     public static final ExecData execData(String cmd, String[] env, IComputerSystem sys, long readTimeout) throws Exception {
@@ -368,11 +418,11 @@ public class SafeCLI {
     /**
      * Run a command and get the resulting ExecData, using the specified environment and start directory.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @since 1.0
      */
-    public static final ExecData execData(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout)
-		throws Exception {
-
+    public static final ExecData execData(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout) throws Exception {
 	SafeCLI cli = new SafeCLI(cmd, env, dir, sys, readTimeout);
 	cli.exec();
 	return cli.getResult();
@@ -381,11 +431,13 @@ public class SafeCLI {
     /**
      * Run a command, using the specified output and error handlers.
      *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
      * @see IReaderHandler
      * @since 1.3
      */
-    public static final void exec(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout,
-				  IReaderHandler out, IReaderHandler err) throws Exception {
+    public static final void exec(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout, IReaderHandler out, IReaderHandler err)
+		throws Exception {
 
 	new SafeCLI(cmd, env, dir, sys, readTimeout).exec(out, err);
     }
@@ -508,7 +560,7 @@ public class SafeCLI {
 		result.exitCode = p.exitValue();
 		success = true;
 	    } catch (IOException e) {
-		if (e instanceof InterruptedIOException || e instanceof EOFException) {
+		if (e instanceof InterruptedIOException || e instanceof EOFException || e instanceof SocketException) {
 		    if (attempt > execRetries) {
 			throw new Exception(Message.getMessage(Message.ERROR_PROCESS_RETRY, cmd, attempt), e);
 		    } else {

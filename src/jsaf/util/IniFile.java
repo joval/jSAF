@@ -105,8 +105,9 @@ public class IniFile {
 	    String name = null;
 	    int ptr;
 	    while ((line = br.readLine()) != null) {
-		if (line.startsWith("[") && line.trim().endsWith("]")) {
-		    name = line.substring(1, line.length() - 1);
+		String trimmed = line.trim();
+		if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+		    name = trimmed.substring(1, trimmed.length() - 1);
 		    section = sections.get(name);
 		    if (section == null) {
 			section = new PropertyUtil();

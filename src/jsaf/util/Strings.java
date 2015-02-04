@@ -28,6 +28,13 @@ import java.util.regex.PatternSyntaxException;
  */
 public class Strings {
     /**
+     * Line-feed character (as a String).
+     *
+     * @since 1.3
+     */
+    public static final String LF = System.getProperty("line.separator");
+
+    /**
      * Escape character (as a String).
      *
      * @since 1.2

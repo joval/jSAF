@@ -32,15 +32,15 @@ public class LogMessageConveyor implements IMessageConveyor {
     /**
      * Add a conveyor to handle messages for the specified enum.
      */
-    public void add(Class<? extends Enum<?>> clazz, IMessageConveyor conveyor) {
+    public synchronized void add(Class<? extends Enum<?>> clazz, IMessageConveyor conveyor) {
 	conveyors.put(clazz, conveyor);
     }
 
     /**
      * Return an unmodifiable Map of enum-to-conveyor mappings handled by this instance.
      */
-    public Map<Class<? extends Enum<?>>, IMessageConveyor> getConveyors() {
-	return Collections.unmodifiableMap(conveyors);
+    public synchronized Map<Class<? extends Enum<?>>, IMessageConveyor> getConveyors() {
+	return Collections.unmodifiableMap(new HashMap<Class<? extends Enum<?>>, IMessageConveyor>(conveyors));
     }
 
     // Implement IMessageConveyor

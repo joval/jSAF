@@ -446,6 +446,22 @@ public class Strings {
 	return outerSb.toString();
     }
 
+    /**
+     * Return the number of times ch occurs in target.
+     *
+     * @since 1.3
+     */
+    public static int countOccurrences(String target, char ch) {
+	int count = 0;
+	char[] chars = target.toCharArray();
+	for (int i=0; i < chars.length; i++) {
+	    if (chars[i] == ch) {
+		count++;
+	    }
+	}
+	return count;
+    }
+
     // Private
 
     /**

@@ -88,6 +88,13 @@ public interface IRegistry extends ILoggable {
 	HKU  ("HKEY_USERS", 0x80000003L),
 
 	/**
+	 * Performance data hive (legacy).
+	 *
+	 * @since 1.3.1
+	 */
+	HKPC ("HKEY_PERFORMANCE_DATA", 0x80000004L),
+
+	/**
 	 * Current config hive (legacy).
 	 *
 	 * @since 1.0

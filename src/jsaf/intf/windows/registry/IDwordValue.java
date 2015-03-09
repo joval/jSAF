@@ -6,7 +6,7 @@ package jsaf.intf.windows.registry;
 import java.math.BigInteger;
 
 /**
- * Interface to a Windows registry DWORD value.
+ * Interface to a Windows registry DWORD and DWORD_BIG_ENDIAN values.
  *
  * @author David A. Solin
  * @version %I% %G%

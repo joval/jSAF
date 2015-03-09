@@ -51,13 +51,18 @@ CLASSES=\
 	jsaf.intf.windows.powershell.IRunspace	\
 	jsaf.intf.windows.powershell.IRunspacePool	\
 	jsaf.intf.windows.registry.IBinaryValue	\
+	jsaf.intf.windows.registry.IDwordBigEndianValue	\
 	jsaf.intf.windows.registry.IDwordValue	\
 	jsaf.intf.windows.registry.IExpandStringValue	\
+	jsaf.intf.windows.registry.IFullResourceDescriptorValue	\
 	jsaf.intf.windows.registry.IKey	\
+	jsaf.intf.windows.registry.ILinkValue	\
 	jsaf.intf.windows.registry.IMultiStringValue	\
 	jsaf.intf.windows.registry.INoneValue	\
 	jsaf.intf.windows.registry.IQwordValue	\
 	jsaf.intf.windows.registry.IRegistry	\
+	jsaf.intf.windows.registry.IResourceListValue	\
+	jsaf.intf.windows.registry.IResourceRequirementsListValue	\
 	jsaf.intf.windows.registry.IStringValue	\
 	jsaf.intf.windows.registry.IValue	\
 	jsaf.intf.windows.system.IWindowsSession	\

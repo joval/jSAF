@@ -46,6 +46,20 @@ public interface ISession extends IDisposable {
 	UNIX("unix"),
 
 	/**
+	 * Indicates a session with a device running Cisco ASA.
+	 *
+	 * @since 1.3.1
+	 */
+	CISCO_ASA("asa"),
+
+	/**
+	 * Indicates a session with a device running Cisco CATOS (Catalyst).
+	 *
+	 * @since 1.3.1
+	 */
+	CISCO_CATOS("catos"),
+
+	/**
 	 * Indicates a session with a device running Cisco IOS.
 	 *
 	 * @see jsaf.intf.cisco.system.IIosSession
@@ -53,6 +67,20 @@ public interface ISession extends IDisposable {
 	 * @since 1.0
 	 */
 	CISCO_IOS("ios"),
+
+	/**
+	 * Indicates a session with a device running Cisco IOS-XE.
+	 *
+	 * @since 1.3.1
+	 */
+	CISCO_IOSXE("ios-xe"),
+
+	/**
+	 * Indicates a session with a device running Cisco PixOS (PIX firewall).
+	 *
+	 * @since 1.3.1
+	 */
+	CISCO_PIXOS("pix"),
 
 	/**
 	 * Indicates a session with a device running Juniper JunOS.
@@ -80,6 +108,13 @@ public interface ISession extends IDisposable {
 	 * @since 1.0
 	 */
 	APPLE_IOS("apple_iOS"),
+
+	/**
+	 * Indicates a session with a device running Google Android.
+	 *
+	 * @since 1.3.1
+	 */
+	ANDROID("android"),
 
 	/**
 	 * Indicates a session with a Windows host.

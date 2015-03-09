@@ -24,56 +24,90 @@ public interface IValue {
 	 *
 	 * @since 1.0
 	 */
-	REG_NONE("REG_NONE", "Unknown", 0),
-
-	/**
-	 * Type for 32-bit integer values.
-	 *
-	 * @since 1.0
-	 */
-	REG_DWORD("REG_DWORD", "DWord", 1),
-
-	/**
-	 * Type for binary values.
-	 *
-	 * @since 1.0
-	 */
-	REG_BINARY("REG_BINARY", "Binary", 2),
+	REG_NONE("REG_NONE", 0),
 
 	/**
 	 * Type for string values.
 	 *
 	 * @since 1.0
 	 */
-	REG_SZ("REG_SZ", "String", 3),
+	REG_SZ("REG_SZ", 1),
 
 	/**
 	 * Type for expandable string values.
 	 *
 	 * @since 1.0
 	 */
-	REG_EXPAND_SZ("REG_EXPAND_SZ", "ExpandString", 4),
+	REG_EXPAND_SZ("REG_EXPAND_SZ", 2),
+
+	/**
+	 * Type for binary values.
+	 *
+	 * @since 1.0
+	 */
+	REG_BINARY("REG_BINARY", 3),
+
+	/**
+	 * Type for 32-bit (little-endian) integer values.
+	 *
+	 * @since 1.0
+	 */
+	REG_DWORD("REG_DWORD", 4),
+
+	/**
+	 * Type for 32-bit bit-endian integer values.
+	 *
+	 * @since 1.3.1
+	 */
+	REG_DWORD_BIG_ENDIAN("REG_DWORD_BIG_ENDIAN", 5),
+
+	/**
+	 * Type for registry links.
+	 *
+	 * @since 1.3.1
+	 */
+	REG_LINK("REG_LINK", 6),
 
 	/**
 	 * Type for string array values.
 	 *
 	 * @since 1.0
 	 */
-	REG_MULTI_SZ("REG_MULTI_SZ", "MultiString", 5),
+	REG_MULTI_SZ("REG_MULTI_SZ", 7),
 
 	/**
-	 * Type for 64-bit integer values.
+	 * Type for registry resource lists.
+	 *
+	 * @since 1.3.1
+	 */
+	REG_RESOURCE_LIST("REG_RESOURCE_LIST", 8),
+
+	/**
+	 * Type for registry resource descriptors.
+	 *
+	 * @since 1.3.1
+	 */
+	REG_FULL_RESOURCE_DESCRIPTOR("REG_FULL_RESOURCE_DESCRIPTOR", 9),
+
+	/**
+	 * Type for registry resource requirements lists.
+	 *
+	 * @since 1.3.1
+	 */
+	REG_RESOURCE_REQUIREMENTS_LIST("REG_RESOURCE_REQUIREMENTS_LIST", 10),
+
+	/**
+	 * Type for 64-bit (little-endian) integer values.
 	 *
 	 * @since 1.0
 	 */
-	REG_QWORD("REG_QWORD", "QWord", 6);
+	REG_QWORD("REG_QWORD", 11);
 
-	private String name, kind;
+	private String name;
 	private int id;
 
-	private Type(String name, String kind, int id) {
+	private Type(String name, int id) {
 	    this.name = name;
-	    this.kind = kind;
 	    this.id = id;
 	}
 
@@ -84,15 +118,6 @@ public interface IValue {
 	 */
 	public String getName() {
 	    return name;
-	}
-
-	/**
-	 * The "Kind" as returned by C# Microsoft.Win32.RegistryKey::GetValueKind
-	 *
-	 * @since 1.0
-	 */
-	public String getKind() {
-	    return kind;
 	}
 
 	/**
@@ -119,17 +144,17 @@ public interface IValue {
 	}
 
 	/**
-	 * Return the Type corresponding to the String kind.
+	 * Return the Type corresponding to the specified ID.
 	 *
-	 * @since 1.0
+	 * @since 1.3.1
 	 */
-	public static Type fromKind(String kind) throws IllegalArgumentException {
+	public static Type fromId(int id) throws IllegalArgumentException {
 	    for (Type type : values()) {
-		if (type.getKind().equals(kind)) {
+		if (type.getId() == id) {
 		    return type;
 		}
 	    }
-	    throw new IllegalArgumentException(kind);
+	    throw new IllegalArgumentException(Integer.toString(id));
 	}
     }
 

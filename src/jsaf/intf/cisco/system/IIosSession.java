@@ -100,7 +100,7 @@ public interface IIosSession extends IComputerSystem {
     IShell getShell() throws Exception;
 
     /**
-     * Cast this JunOS session to an INetconf.  Since Java does not permit polymorphism by inheritance, this method
+     * Cast this IOS session to an INetconf.  Since Java does not permit polymorphism by inheritance, this method
      * serves that purpose.
      *
      * @since 1.1

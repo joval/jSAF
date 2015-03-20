@@ -3,10 +3,8 @@
 
 package jsaf.intf.cisco.system;
 
-import jsaf.intf.netconf.INetconf;
-
 /**
- * A representation of an IOS-XE command-line session.
+ * A representation of an ASA command-line session.
  *
  * @see jsaf.intf.system.IComputerSystem
  *
@@ -14,9 +12,5 @@ import jsaf.intf.netconf.INetconf;
  * @version %I% %G%
  * @since 1.3.1
  */
-public interface IIosXeSession extends ICiscoSession {
-    /**
-     * Get an INetconf for this session.
-     */
-    INetconf getNetconf();
+public interface IAsaSession extends ICiscoSession {
 }

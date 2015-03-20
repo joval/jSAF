@@ -3,6 +3,8 @@ CLASSES=\
 	jsaf.Message	\
 	jsaf.identity.IdentityException	\
 	jsaf.intf.apple.system.IiOSSession	\
+	jsaf.intf.cisco.system.IAsaSession	\
+	jsaf.intf.cisco.system.ICiscoSession	\
 	jsaf.intf.cisco.system.IIosSession	\
 	jsaf.intf.cisco.system.IIosXeSession	\
 	jsaf.intf.cisco.system.ITechSupport	\

@@ -1,4 +1,4 @@
-// Copyright (C) 2012 jOVAL.org.  All rights reserved.
+// Copyright (C) 2015 JovalCM.com.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.intf.cisco.system;
@@ -16,32 +16,39 @@ import java.util.NoSuchElementException;
  */
 public interface ITechSupport {
     /**
-     * The series of dashes appearing before and after descriptive section header text.
+     * Cisco IOS, IOS-XE and ASA all have similar tech-support information, but don't necessarily use identical commands.  For example,
+     * Cisco IOS and IOS-XE use the command "show interfaces" to list IPv4 interface information, but Cisco ASA uses the command
+     * "show interface" (singular).  This abstraction makes it possible for an ITechSupport to be shared by the different systems, which
+     * can provide their own constants.
      *
-     * @since 1.0
+     * @since 1.3.1
      */
-    String DASHES = "------------------";
+    interface Constants {
+	/**
+	 * The string of dashes used to demarcate commands in show-tech output.
+	 */
+	String dashes();
 
-    /**
-     * IOS command string "show running-config"
-     *
-     * @since 1.0
-     */
-    String GLOBAL = "show running-config";
+	/**
+	 * The command for showing the running configuration.
+	 */
+	String global();
 
-    /**
-     * IOS command string "show version"
-     *
-     * @since 1.1
-     */
-    String VERSION = "show version";
+	/**
+	 * The command for showing version information.
+	 */
+	String version();
 
-    /**
-     * IOS command string "show interfaces"
-     *
-     * @since 1.1
-     */
-    String INTERFACES = "show interfaces";
+	/**
+	 * The command for listing information about IPv4 interfaces.
+	 */
+	String ip4interfaces();
+
+	/**
+	 * The command for listing information about IPv6 interfaces.
+	 */
+	String ip6interfaces();
+    }
 
     /**
      * A list of subcommands for which information is available.

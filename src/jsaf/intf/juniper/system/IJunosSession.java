@@ -24,10 +24,9 @@ public interface IJunosSession extends IComputerSystem {
     ISupportInformation getSupportInformation();
 
     /**
-     * Cast this JunOS session to an INetconf. Since Java does not permit polymorphism by inheritance, this method
-     * serves that purpose.
+     * Get the INetconf for this device.
      *
-     * @since 1.1
+     * @since 1.3.1
      */
-    INetconf asNetconf();
+    INetconf getNetconf();
 }

@@ -5,7 +5,11 @@ TOP=$(realpath ../..)
 
 include $(TOP)/common.mk
 
-CLASSPATH="$(CLASSLIB)$(CLN)$(LIBS)$(CLN)$(SRC)"
+ifeq (win, $(PLATFORM))
+  CLASSPATH="$(CLASSLIB)$(CLN)$(LIBS)$(CLN)$(shell cygpath -w $(SRC))"
+else
+  CLASSPATH="$(CLASSLIB)$(CLN)$(LIBS)$(CLN)$(SRC)"
+endif
 
 include classes.mk
 

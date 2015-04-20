@@ -94,7 +94,11 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 
     @Override
     public synchronized int available() throws IOException {
-	return in.available();
+	int buffered = 0;
+	if (buffer.hasNext()) {
+	    buffered = buffer.len - buffer.pos;
+	}
+	return buffered + in.available();
     }
 
     @Override

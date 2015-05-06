@@ -17,7 +17,7 @@ CLASS_FILES:=$(foreach class, $(CLASSES), $(BUILD)/$(subst .,/,$(class)).class)
 PACKAGES=$(sort $(basename $(CLASSES)))
 PACKAGEDIRS=$(subst .,/,$(PACKAGES))
 
-all: $(FACADE_LIB)
+all: $(FACADE_LIB) $(DOCS)
 
 $(FACADE_LIB): classes resources
 	$(JAR) cvf $@ -C $(BUILD)/ .

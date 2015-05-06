@@ -1,3 +1,4 @@
+.DS_Store
 build/
 components/facade/jSAF.jar
 components/facade/docs/

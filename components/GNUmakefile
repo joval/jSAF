@@ -4,7 +4,7 @@
 all: _facade
 
 _facade:
-	@$(MAKE) --keep-going --directory=facade all
+	@$(MAKE) --directory=facade all
 
 clean:
-	@$(MAKE) --keep-going --directory=facade clean
+	@$(MAKE) --directory=facade clean

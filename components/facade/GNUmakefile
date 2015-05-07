@@ -5,11 +5,7 @@ TOP=$(realpath ../..)
 
 include $(TOP)/common.mk
 
-ifeq (win, $(PLATFORM))
-  CLASSPATH="$(CLASSLIB)$(CLN)$(LIBS)$(CLN)$(shell cygpath -w $(SRC))"
-else
-  CLASSPATH="$(CLASSLIB)$(CLN)$(LIBS)$(CLN)$(SRC)"
-endif
+CLASSPATH="$(CLASSLIB)$(CLN)$(LIBS)$(CLN)$(SRC)"
 
 include classes.mk
 
@@ -23,7 +19,7 @@ $(FACADE_LIB): classes resources
 	$(JAR) cvf $@ -C $(BUILD)/ .
 
 $(DOCS):
-	$(JAVA_HOME)/bin/javadoc -J-Xmx512m -d $(DOCS) -classpath $(CLASSPATH) -subpackages jsaf
+	$(JAVADOC) -J-Xmx512m -d $(DOCS) -classpath $(CLASSPATH) -subpackages jsaf
 
 clean:
 	rm -rf $(BUILD)

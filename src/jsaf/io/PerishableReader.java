@@ -47,6 +47,9 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
      *              If maxTime <= 0, the default of 1hr will apply.
      */
     public static PerishableReader newInstance(InputStream in, long maxTime) {
+	if (in == null) {
+	    throw new NullPointerException();
+	}
 	PerishableReader reader = null;
 	if (in instanceof PerishableReader) {
 	    reader = (PerishableReader)in;

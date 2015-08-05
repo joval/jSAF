@@ -30,6 +30,9 @@ public class StreamLogger extends InputStream {
     }
 
     public StreamLogger(String comment, InputStream in, OutputStream out) throws IOException {
+	if (in == null) {
+	    throw new NullPointerException();
+	}
 	this.in = in;
 	this.out = out;
 	if (comment != null) {

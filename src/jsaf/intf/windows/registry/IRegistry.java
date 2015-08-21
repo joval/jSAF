@@ -224,6 +224,18 @@ public interface IRegistry extends ILoggable {
     String getStringValue(Hive hive, String subkey, String value) throws Exception;
 
     /**
+     * Load a registry file and mount it to the specified hive and key path. The file will be unloaded from the registry when the
+     * session is disconnected.
+     *
+     * @param filePath the path on the system to the registry file you wish to load
+     * @param hive the registry hive under which you would like the file mounted
+     * @param keyPath the key path under the hive where you would like the file mounted. The parent path must already exist.
+     *
+     * @since 1.3.1
+     */
+    void load(String filePath, Hive hive, String keyPath) throws RegistryException;
+
+    /**
      * Get an ISearchable for the registry.
      *
      * @since 1.0
@@ -270,5 +282,12 @@ public interface IRegistry extends ILoggable {
 	 * @since 1.2
 	 */
 	public static final int FIELD_VALUE_BASE64 = 103;
+
+	/**
+	 * Search type for specifying that a pattern should be applied to subkey paths.
+	 *
+	 * @since 1.3.1
+	 */
+	public static final int TYPE_SUBKEY_PATTERN = 10;
     }
 }

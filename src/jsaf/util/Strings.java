@@ -221,16 +221,40 @@ public class Strings {
      * @since 1.2
      */
     public static byte[] toBytes(char[] chars) {
-	return UTF16.encode(CharBuffer.wrap(chars)).array();
+	return toBytes(chars, UTF16);
     }
 
     /**
-     * Convert a char array to a byte array using the specified encoding.
+     * Convert a char array to a byte array using the specified encoding. Like new String(chars).getBytes(charset), except without
+     * allocating a String.
      *
      * @since 1.2
      */
     public static byte[] toBytes(char[] chars, Charset charset) {
-	return charset.encode(CharBuffer.wrap(chars)).array();
+	//
+	// Perform the conversion
+	//
+	byte[] temp = charset.encode(CharBuffer.wrap(chars)).array();
+
+	//
+	// Terminate at the first NULL
+	//
+	int len = 0;
+	for (int i=0; i < temp.length; i++) {
+	    if (temp[i] == 0) {
+		len = i;
+		break;
+	    } else {
+		len++;
+	    }
+	}
+	if (len == temp.length) {
+	    return temp;
+	} else {
+	    byte[] trunc = Arrays.copyOfRange(temp, 0, len);
+	    Arrays.fill(temp, (byte)0);
+	    return trunc;
+	}
     }
 
     /**

@@ -325,20 +325,19 @@ public class SafeCLI {
      */
     public static final Iterator<String> manyLines(String cmd, String[] env, IReaderHandler errHandler, IUnixSession sys, long timeout) throws Exception {
 	//
+	// If no filesystem is available, then implement using execData.
+	//
+	if (sys.getFilesystem() == null) {
+	    ExecData ed = execData(cmd, env, null, sys, timeout);
+	    errHandler.handle(new SimpleReader(new ByteArrayInputStream(ed.getError()), sys.getLogger()));
+	    return ed.getLines().iterator();
+	}
+
+	//
 	// Modify the command to redirect output to a temp file (compressed)
 	//
-	String unique = null;
-	synchronized(sys) {
-	    unique = Long.toString(System.currentTimeMillis());
-	    Thread.sleep(1);
-	}
-	String tempPath = sys.getTempDir();
-	IFilesystem fs = sys.getFilesystem();
-	if (!tempPath.endsWith(fs.getDelimiter())) {
-	    tempPath = tempPath + fs.getDelimiter();
-	}
-	tempPath = new StringBuffer(tempPath).append("cmd.").append(unique).append(".out").toString();
-	tempPath = sys.getEnvironment().expand(tempPath);
+	IFile remoteTemp = sys.getFilesystem().createTempFile("cmd", null, null);
+	String tempPath = remoteTemp.getPath();
 	if ((cmd.indexOf(";") != -1 || cmd.indexOf("&&") != -1) && !cmd.startsWith("(") && !cmd.endsWith(")")) {
 	    //
 	    // Multiple comands have to be grouped, or only the last one's output will be redirected.
@@ -357,7 +356,7 @@ public class SafeCLI {
 	//
 	// Execute the command, and monitor the size of the output file
 	//
-	FileMonitor mon = new FileMonitor(fs, tempPath);
+	FileMonitor mon = new FileMonitor(sys.getFilesystem(), tempPath);
 	JSAFSystem.getTimer().schedule(mon, 15000, 15000);
 	try {
 	    BufferHandler out = new BufferHandler();
@@ -385,7 +384,6 @@ public class SafeCLI {
 	if (ISession.LOCALHOST.equals(sys.getHostname())) {
 	    return new ReaderIterator(new File(tempPath));
 	} else {
-	    IFile remoteTemp = fs.getFile(tempPath, IFile.Flags.READWRITE);
 	    File tempDir = sys.getWorkspace() == null ? new File(System.getProperty("user.home")) : sys.getWorkspace();
 	    File localTemp = File.createTempFile("cmd", null, tempDir);
 	    Streams.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
@@ -394,7 +392,7 @@ public class SafeCLI {
 	    } catch (IOException e) {
 		try {
 		    if (remoteTemp.exists()) {
-			exec("rm -f " + remoteTemp.getPath(), sys, ISession.Timeout.S);
+			exec(String.format("rm -f '%1$s'", remoteTemp.getPath()), sys, ISession.Timeout.S);
 		    }
 		} catch (Exception e2) {
 		    sys.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e2);

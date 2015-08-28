@@ -336,7 +336,7 @@ public class SafeCLI {
 	//
 	// Modify the command to redirect output to a temp file (compressed)
 	//
-	IFile remoteTemp = sys.getFilesystem().createTempFile("cmd", null, null);
+	IFile remoteTemp = sys.getFilesystem().createTempFile("cmd", ".out", null);
 	String tempPath = remoteTemp.getPath();
 	if ((cmd.indexOf(";") != -1 || cmd.indexOf("&&") != -1) && !cmd.startsWith("(") && !cmd.endsWith(")")) {
 	    //

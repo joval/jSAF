@@ -84,7 +84,7 @@ public class LittleEndian {
      * @since 1.0
      */
     public static final short getShort(byte[] buff, int offset) {
-	return (short)((buff[offset] << 0) | (buff[offset + 1] << 8));
+	return (short)(((buff[offset] & 0xFF) << 0) | ((buff[offset + 1] & 0xFF) << 8));
     }
 
     /**
@@ -143,7 +143,7 @@ public class LittleEndian {
      * @since 1.0
      */
     public static final int getInt(byte[] buff, int offset) {
-	return buff[offset] | (buff[offset + 1] << 8) | (buff[offset + 2] << 16) | (buff[offset + 3] << 24);
+	return (buff[offset] & 0xFF) | ((buff[offset + 1] & 0xFF) << 8) | ((buff[offset + 2] & 0xFF) << 16) | ((buff[offset + 3] & 0xFF) << 24);
     }
 
     /**
@@ -320,7 +320,7 @@ public class LittleEndian {
 		throw new EOFException(Message.getMessage(Message.ERROR_EOF));
 	    }
 	    byte b2 = (byte)ra.read();
-	    if (b1 == -1) {
+	    if (b2 == -1) {
 		throw new EOFException(Message.getMessage(Message.ERROR_EOF));
 	    }
 

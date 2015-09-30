@@ -476,7 +476,6 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 		if (!hasCapacity()) {
 		    init(buff.length + 1);
 		}
-		int ahead = len - pos;
 		for (int i=len; i > pos; i--) {
 		    buff[i] = buff[i-1];
 		}

@@ -3,6 +3,10 @@
 
 package jsaf.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -484,6 +488,26 @@ public class Strings {
 	    }
 	}
 	return count;
+    }
+
+    /**
+     * Read the contents of a File as a String, using the specified character set.
+     *
+     * @since 1.3.2
+     */
+    public static String readFile(File f, Charset charset) throws IOException {
+	InputStreamReader reader = new InputStreamReader(new FileInputStream(f), charset);
+	try {
+	    StringBuffer buff = new StringBuffer();
+	    char[] ch = new char[1024];
+	    int len = 0;
+	    while((len = reader.read(ch, 0, 1024)) > 0) {
+		buff.append(ch, 0, len);
+	    }
+	    return buff.toString();
+	} finally {
+	    reader.close();
+	}
     }
 
     // Private

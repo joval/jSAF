@@ -268,7 +268,7 @@ public interface ISession extends IDisposable {
      * A shortcut for getType().value(), except when type is Type.EXTENDED, in which case the desired value for the
      * extended type is returned.
      *
-     * @see jsaf.intf.system.ISession.Type.value()
+     * @see jsaf.intf.system.ISession.Type#value()
      *
      * @since 1.1
      */

@@ -123,7 +123,7 @@ public class Strings {
     public static final String LOCAL_CR = System.getProperty("line.separator");
 
     /**
-     * Sort the array from A->Z (ascending ordering).
+     * Sort the array from A-&gt;Z (ascending ordering).
      *
      * @since 1.2
      */
@@ -134,7 +134,7 @@ public class Strings {
     /**
      * Arrays can be sorted ascending or descending.
      *
-     * @param asc true for ascending (A->Z), false for descending (Z->A).
+     * @param asc true for ascending (A-&gt;Z), false for descending (Z-&gt;A).
      *
      * @since 1.2
      */

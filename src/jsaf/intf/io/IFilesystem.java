@@ -59,7 +59,7 @@ public interface IFilesystem extends ILoggable {
     /**
      * Retrieve an IFile with the specified flags.
      *
-     * @arg flags IFile.READONLY, IFile.READWRITE, IFile.READVOLATILE, IFile.NOCACHE
+     * @param flags IFile.READONLY, IFile.READWRITE, IFile.READVOLATILE, IFile.NOCACHE
      *
      * @since 1.0
      */
@@ -79,7 +79,7 @@ public interface IFilesystem extends ILoggable {
      * order of the path argument array. Note that if the flag is IFile.Flags.READONLY, any path that doesn't exist will
      * have a null entry in its place in the result.
      *
-     * @arg flags IFile.Flags.READONLY, IFile.Flags.READWRITE, IFile.Flags.READVOLATILE, IFile.Flags.NOCACHE
+     * @param flags IFile.Flags.READONLY, IFile.Flags.READWRITE, IFile.Flags.READVOLATILE, IFile.Flags.NOCACHE
      *
      * @since 1.1
      */
@@ -168,7 +168,7 @@ public interface IFilesystem extends ILoggable {
 	/**
 	 * Get the type of the mount. This is a platform-dependent String.
 	 *
-	 * @see jsaf.intf.windows.io.IWindowsFilesystem.FsType.value()
+	 * @see jsaf.intf.windows.io.IWindowsFilesystem.FsType#value()
 	 * @see <a href="http://www.kernel.org/doc/man-pages/online/pages/man2/mount.2.html">mount man page</a>
 	 *
 	 * @since 1.0
@@ -224,7 +224,7 @@ public interface IFilesystem extends ILoggable {
 	 * the same as the path. Supports the following condition types:
 	 *  TYPE_PATTERN - search directories matching the java.util.regex.Pattern value
 	 *  TYPE_EQUALITY - search the directory matching the String value
-	 *  TYPE_ANY - search all directories matching the java.util.List<String> value
+	 *  TYPE_ANY - search all directories matching the java.util.List&lt;String&gt; value
 	 *
 	 * @since 1.0
 	 */

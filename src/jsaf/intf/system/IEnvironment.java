@@ -32,12 +32,11 @@ public interface IEnvironment extends Iterable<String> {
     public String expand(String s);
 
     /**
-     * Returns a String array suitable for passing into ISession.createProcess as the environment argument.
+     * Returns a String array suitable for passing into IComputerSystem.createProcess as the environment argument.
      *
-     * @see jsaf.intf.system.ISession.createProcess
+     * @see jsaf.intf.system.IComputerSystem#createProcess
      *
      * @since 1.0
      */
     public String[] toArray();
 }
-

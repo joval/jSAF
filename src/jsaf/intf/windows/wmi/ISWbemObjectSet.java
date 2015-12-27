@@ -10,13 +10,11 @@ import jsaf.provider.windows.wmi.WmiException;
 /**
  * An SWbemObjectSet object is a collection of SWbemObject objects.
  * 
- * @param <T> A class that extends SWbemObject
- *
  * @author David A. Solin
  * @version %I% %G%
  * @since 1.0
  */
-public interface ISWbemObjectSet extends Iterable <ISWbemObject> {
+public interface ISWbemObjectSet extends Iterable<ISWbemObject> {
     /**
      * Iterate over the objects in the set.
      *

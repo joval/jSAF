@@ -43,8 +43,8 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
      *
      * If the specified InputStream is already a PerishableReader, then its timeout is altered and it is returned.
      *
-     * @arg maxTime the maximum amount of time that should be allowed to elapse between successful reads, in milliseconds.
-     *              If maxTime <= 0, the default of 1hr will apply.
+     * @param maxTime the maximum amount of time that should be allowed to elapse between successful reads, in milliseconds.
+     *                If maxTime &lt;= 0, the default of 1hr will apply.
      */
     public static PerishableReader newInstance(InputStream in, long maxTime) {
 	if (in == null) {

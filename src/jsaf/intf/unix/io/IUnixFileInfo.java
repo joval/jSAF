@@ -155,7 +155,7 @@ public interface IUnixFileInfo extends IFileEx {
     /**
      * Test whether the file has an extended ACL.
      *
-     * @returns null if it is unknown whether or not the file has an extended ACL.
+     * @return null if it is unknown whether or not the file has an extended ACL.
      * @since 1.0.1
      */
     Boolean hasPosixAcl();

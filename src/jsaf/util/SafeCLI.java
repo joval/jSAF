@@ -85,7 +85,7 @@ public class SafeCLI {
      * additional commands into the statement (potentially maliciously). Primarily, this is accomplished by insuring that
      * the string contains no quotes, so that it cannot terminate any enclosing quotes thereby obtaining access to the shell.
      *
-     * @returns the input String (if no exception is thrown)
+     * @return the input String (if no exception is thrown)
      *
      * @throws IllegalArgumentException if a potentially-malicious pattern has been detected.
      *

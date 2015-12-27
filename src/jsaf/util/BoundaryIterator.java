@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * Breaks a single Iterator<String> into multiple iterators, using the specified "boundary" string to determine where
+ * Breaks a single Iterator&lt;String&gt; into multiple iterators, using the specified "boundary" string to determine where
  * to perform the breaks.
  *
  * @author David A. Solin

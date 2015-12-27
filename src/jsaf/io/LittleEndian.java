@@ -345,8 +345,8 @@ public class LittleEndian {
     /**
      * Get a byte[] padding to 32-bit align within the buffer from the offset.
      *
-     * @arg fileOffset is the offset from the start of the file to the start of the buffer itself.
-     * @arg offset is the offset within the buffer from which to start padding.
+     * @param fileOffset is the offset from the start of the file to the start of the buffer itself.
+     * @param offset is the offset within the buffer from which to start padding.
      *
      * @since 1.0
      */

@@ -50,7 +50,7 @@ public interface ISWbemProperty {
     /**
      * Get the value of the proeprty as a Windows Timestamp, which is the number of 100-nanosecond 'clicks' since 1601AD.
      *
-     * @see org.joval.os.windows.Timestamp
+     * @see jsaf.provider.windows.Timestamp
      *
      * @since 1.0
      */

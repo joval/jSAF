@@ -4,6 +4,7 @@
 package jsaf.intf.ssh.system;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 
 import jsaf.provider.SessionException;
 

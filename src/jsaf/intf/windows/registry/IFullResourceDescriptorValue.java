@@ -11,7 +11,7 @@ import java.util.List;
  * @author David A. Solin
  * @version %I% %G%
  * @since 1.3.1
- * @see https://msdn.microsoft.com/en-us/library/windows/hardware/ff541954(v=vs.85).aspx
+ * @see <a href="https://msdn.microsoft.com/en-us/library/windows/hardware/ff541954(v=vs.85).aspx">CM_FULL_RESOURCE_DESCRIPTOR structure</a>
  */
 public interface IFullResourceDescriptorValue extends IValue {
     /**

@@ -88,8 +88,8 @@ public interface IUnixFilesystem extends IFilesystem {
 	 * Condition field for Unix file user ownership. Supports the following condition types:
 	 *   Condition.TYPE_EQUALITY - return files owned by the userID specified by the BigInteger value
 	 *   Condition.TYPE_INEQUALITY - return files owned by userIDs not specified by the BigInteger value
-	 *   Condition.TYPE_ANY - return files owned by any of the userIDs in the specified Collection<BigInteger> value
-	 *   Condition.TYPE_NONE - return files owned by userIDs not in the specified Collection<BigInteger> value
+	 *   Condition.TYPE_ANY - return files owned by any of the userIDs in the specified Collection&lt;BigInteger&gt; value
+	 *   Condition.TYPE_NONE - return files owned by userIDs not in the specified Collection&lt;BigInteger&gt; value
 	 *
 	 * @since 1.2
 	 */
@@ -99,8 +99,8 @@ public interface IUnixFilesystem extends IFilesystem {
 	 * Condition field for Unix file group ownership. Supports the following condition types:
 	 *   Condition.TYPE_EQUALITY - return files owned by the groupID specified by the BigInteger value
 	 *   Condition.TYPE_INEQUALITY - return files owned by groupIDs not specified by the BigInteger value
-	 *   Condition.TYPE_ANY - return files owned by any of the groupIDs in the specified Collection<BigInteger> value
-	 *   Condition.TYPE_NONE - return files owned by groupIDs not in the specified Collection<BigInteger> value
+	 *   Condition.TYPE_ANY - return files owned by any of the groupIDs in the specified Collection&lt;BigInteger&gt; value
+	 *   Condition.TYPE_NONE - return files owned by groupIDs not in the specified Collection&lt;BigInteger&gt; value
 	 *
 	 * @since 1.2
 	 */

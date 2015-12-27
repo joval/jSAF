@@ -3,6 +3,7 @@
 
 package jsaf.intf.io;
 
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;

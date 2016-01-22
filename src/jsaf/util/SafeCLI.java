@@ -390,13 +390,7 @@ public class SafeCLI {
 	    try {
 		remoteTemp.delete();
 	    } catch (IOException e) {
-		try {
-		    if (remoteTemp.exists()) {
-			exec(String.format("rm -f '%1$s'", remoteTemp.getPath()), sys, ISession.Timeout.S);
-		    }
-		} catch (Exception e2) {
-		    sys.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e2);
-		}
+		sys.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
 	    return new ReaderIterator(localTemp);
 	}

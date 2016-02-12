@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import jsaf.Message;
+
 /**
  * An interface for searching something.
  *
@@ -190,6 +192,28 @@ public interface ISearchable<T> {
 	@Override
 	public final String toString() {
 	    return "Condition: " + getClass().getName() + " type=" + type + ", field=" + field + ", value=" + value.toString();
+	}
+    }
+
+    /**
+     * An Exception class for field IDs that are not supported by a particular ISearchable implementation.
+     *
+     * @since 1.3.3
+     */
+    public class UnsupportedSearchFieldException extends IllegalArgumentException {
+	public UnsupportedSearchFieldException(Condition condition) {
+	    super(Message.getMessage(Message.ERROR_SEARCH_FIELD, condition.toString()));
+	}
+    }
+
+    /**
+     * An Exception class for ISearchable.Conditions that are not supported by a particular ISearchable implementation.
+     *
+     * @since 1.3.3
+     */
+    public class UnsupportedSearchConditionException extends IllegalArgumentException {
+	public UnsupportedSearchConditionException(Condition condition) {
+	    super(Message.getMessage(Message.ERROR_SEARCH_CONDITION, condition.toString()));
 	}
     }
 }

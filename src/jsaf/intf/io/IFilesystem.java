@@ -248,5 +248,16 @@ public interface IFilesystem extends ILoggable {
 	 * @since 1.0.1
 	 */
 	public static final int FIELD_FSTYPE = 54;
+
+        /**
+         * Condition field for the link-following flag. Condition type and value are ignored. Links will not be followed
+	 * in any filesystem search unless a condition with this field value is added.
+	 *
+	 * This field definition originally appeared in the IUnixFilesystem.UnixFSCondition in jSAF v1.2, but was migrated
+	 * to this base class when support for Windows reparse points (AKA junctions) was added in 1.3.4.
+         *
+         * @since 1.3.4
+         */
+        public static final int FIELD_FOLLOW_LINKS = 100;
     }
 }

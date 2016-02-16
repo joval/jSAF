@@ -61,13 +61,6 @@ public interface IUnixFilesystem extends IFilesystem {
 	}
 
 	/**
-	 * Condition field for the link-following flag. Condition type and value are ignored.
-	 *
-	 * @since 1.2
-	 */
-	public static final int FIELD_FOLLOW_LINKS = 100;
-
-	/**
 	 * Condition field for the xdev flag (remain on filesystem). Condition type and value are ignored.
 	 *
 	 * @since 1.2

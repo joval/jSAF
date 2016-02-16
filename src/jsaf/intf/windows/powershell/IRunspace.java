@@ -69,6 +69,20 @@ public interface IRunspace extends ILoggable {
     void loadAssembly(InputStream in, long timeout) throws IOException, PowershellException;
 
     /**
+     * Load a module based on an assembly.
+     *
+     * @since 1.3.3
+     */
+    void loadModuleAssembly(InputStream in) throws IOException, PowershellException;
+
+    /**
+     * Load a module based on an assembly, with the specified read timeout (in millis).
+     *
+     * @since 1.3.3
+     */
+    void loadModuleAssembly(InputStream in, long timeout) throws IOException, PowershellException;
+
+    /**
      * Invoke a command or module.
      *
      * @return Text output from the command

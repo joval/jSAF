@@ -178,7 +178,7 @@ public interface IWindowsFileInfo extends IFileEx {
 	/**
 	 * Identifies the attributes in the specified int value.
 	 */
-	static Collection<Attribute> values(int attrs) {
+	public static Collection<Attribute> values(int attrs) {
 	    Collection<Attribute> result = new ArrayList<Attribute>();
 	    for (Attribute attr : values()) {
 		if ((attr.val & attrs) == attr.val) {
@@ -191,7 +191,7 @@ public interface IWindowsFileInfo extends IFileEx {
 	/**
 	 * Converts a collection of attributes back into an int representation.
 	 */
-	static int intValue(Collection<Attribute> attrs) {
+	public static int intValue(Collection<Attribute> attrs) {
 	    int val = 0;
 	    for (Attribute attr : attrs) {
 		val += attr.val;

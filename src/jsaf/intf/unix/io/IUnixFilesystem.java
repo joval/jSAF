@@ -32,24 +32,6 @@ public interface IUnixFilesystem extends IFilesystem {
     char DELIM_CH = '/';
 
     /**
-     * The Condition signifying that links should be followed in filesystem searches. The default behavior, if this
-     * condition is not present, is to not follow links.
-     *
-     * @since 1.2
-     */
-    UnixFSCondition FOLLOW_LINKS =
-	new UnixFSCondition(UnixFSCondition.FIELD_FOLLOW_LINKS, Condition.TYPE_EQUALITY, Boolean.TRUE);
-
-    /**
-     * The Condition signifying that the search should be confined to the filesystem of the FROM condition. If this
-     * condition is not present, the search can include results that reside in linked filesystems.
-     *
-     * @since 1.2
-     */
-    UnixFSCondition XDEV =
-	new UnixFSCondition(UnixFSCondition.FIELD_XDEV, Condition.TYPE_EQUALITY, Boolean.TRUE);
-
-    /**
      * ISearchable.Condition subclass for IUnixFilesystem searches.
      */
     public class UnixFSCondition extends FSCondition {
@@ -59,13 +41,6 @@ public interface IUnixFilesystem extends IFilesystem {
 	public UnixFSCondition(int field, int type, Object arg) {
 	    super(field, type, arg);
 	}
-
-	/**
-	 * Condition field for the xdev flag (remain on filesystem). Condition type and value are ignored.
-	 *
-	 * @since 1.2
-	 */
-	public static final int FIELD_XDEV = 101;
 
 	/**
 	 * Condition field for Unix file permissions. The only valid TYPE_ value is Condition.TYPE_EQUALITY.

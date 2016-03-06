@@ -191,6 +191,22 @@ public interface IFilesystem extends ILoggable {
     FSCondition DIRECTORIES = new FSCondition(FSCondition.FIELD_FILETYPE, Condition.TYPE_EQUALITY, FILETYPE_DIR);
 
     /**
+     * A search condition signifying that links should be followed in filesystem searches. The default behavior, if this
+     * condition is not present, is to not follow links.
+     *
+     * @since 1.3.4
+     */
+    FSCondition FOLLOW_LINKS = new FSCondition(FSCondition.FIELD_FOLLOW_LINKS, Condition.TYPE_EQUALITY, Boolean.TRUE);
+
+    /**
+     * A search condition signifying that the search should be confined to the filesystem of the FROM condition. If this
+     * condition is not present, the search can include results that reside in linked filesystems.
+     *
+     * @since 1.3.4
+     */
+    FSCondition XDEV = new FSCondition(FSCondition.FIELD_XDEV, Condition.TYPE_EQUALITY, Boolean.TRUE);
+
+    /**
      * Base ISearchable.Condition subclass for IFilesystem search conditions.
      *
      * @since 1.2
@@ -259,5 +275,15 @@ public interface IFilesystem extends ILoggable {
          * @since 1.3.4
          */
         public static final int FIELD_FOLLOW_LINKS = 100;
+
+        /**
+         * Condition field for the xdev flag (remain on filesystem). Condition type and value are ignored.
+	 *
+	 * This field definition originally appeared in the IUnixFilesystem.UnixFSCondition in jSAF v1.2, but was migrated
+	 * to this base class when analogous support was added for Windows in 1.3.4.
+         *
+         * @since 1.3.4
+         */
+        public static final int FIELD_XDEV = 101;
     }
 }

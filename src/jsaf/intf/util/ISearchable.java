@@ -77,6 +77,20 @@ public interface ISearchable<T> {
          * @since 1.3
 	 */
 	Collection<String> getErrors();
+
+	/**
+	 * Determine whether there were warnings which about the search results, such as a skipped filesystem loop.
+         *
+         * @since 1.3.4
+	 */
+	boolean hasWarnings();
+
+	/**
+	 * Get the warnings (if any);
+         *
+         * @since 1.3.4
+	 */
+	Collection<String> getWarnings();
     }
 
     /**

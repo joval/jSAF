@@ -1,4 +1,4 @@
-// Copyright (C) 2011 jOVAL.org.  All rights reserved.
+// Copyright (C) 2011-2016 JovalCM.com.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.intf.windows.io;
@@ -20,6 +20,27 @@ import jsaf.intf.windows.identity.IUser;
  * @since 1.0
  */
 public interface IWindowsFileInfo extends IFileEx {
+    /**
+     * Get the time the file was created. Returns null if unknown.
+     *
+     * @since 1.3
+     */
+    Date getCreateTime() throws IOException;
+
+    /**
+     * Get the file owner.
+     *
+     * @since 1.0.1
+     */
+    IUser getOwner() throws IOException;
+
+    /**
+     * Returns the checksum value from the Windows ImageHlp MapFileAndCheckSum function.
+     *
+     * @since 1.3.4
+     */
+    int getMSChecksum() throws IOException;
+
     /**
      * An enumeration of Windows file types.
      *
@@ -216,82 +237,64 @@ public interface IWindowsFileInfo extends IFileEx {
     Collection<Attribute> getAttributes() throws IOException;
 
     /**
-     * @since 1.0.1
-     */
-    String PE_MS_CHECKSUM = "MSChecksum";
-
-    /**
-     * @since 1.0.1
-     */
-    String PE_VERSION = "FileVersion";
-
-    /**
-     * @since 1.0.1
-     */
-    String PE_VERSION_MAJOR_PART = "FileMajorPart";
-
-    /**
-     * @since 1.0.1
-     */
-    String PE_VERSION_MINOR_PART = "FileMinorPart";
-
-    /**
-     * @since 1.0.1
-     */
-    String PE_VERSION_BUILD_PART = "FileBuildPart";
-
-    /**
-     * @since 1.0.1
-     */
-    String PE_VERSION_PRIVATE_PART = "FilePrivatePart";
-
-    /**
-     * @since 1.0.1
-     */
-    String PE_PRODUCT_NAME = "ProductName";
-
-    /**
-     * @since 1.0.1
-     */
-    String PE_PRODUCT_VERSION = "ProductVersion";
-
-    /**
-     * @since 1.0.1
-     */
-    String PE_COMPANY_NAME = "CompanyName";
-
-    /**
-     * @since 1.0.1
-     */
-    String PE_LANGUAGE = "Language";
-
-    /**
-     * @since 1.0.1
-     */
-    String PE_ORIGINAL_NAME = "OriginalFilename";
-
-    /**
-     * @since 1.0.1
-     */
-    String PE_INTERNAL_NAME = "InternalName";
-
-    /**
-     * Get the file owner.
-     */
-    IUser getOwner() throws IOException;
-
-    /**
-     * Retrieve information from the Portable Execution (PE) format file headers.
+     * An enumeration of supported PE string table keys.
      *
-     * @return null if not a PE-format file
-     * @since 1.0.1
+     * @since 1.3.4
      */
-    Map<String, String> getPEHeaders() throws IOException;
+    enum StringTableKey {
+	PRODUCT_NAME("ProductName"),
+	PRODUCT_VERSION("ProductVersion"),
+	COMPANY_NAME("CompanyName"),
+	ORIGINAL_NAME("OriginalFilename"),
+	INTERNAL_NAME("InternalName");
+
+	private String value;
+
+	private StringTableKey(String value) {
+	    this.value = value;
+	}
+
+	public String value() {
+	    return value;
+	}
+
+	public static final StringTableKey fromValue(String value) throws IllegalArgumentException {
+	    for (StringTableKey key : values()) {
+		if (key.value.equals(value)) {
+		    return key;
+		}
+	    }
+	    throw new IllegalArgumentException(value);
+	}
+    }
 
     /**
-     * Get the time the file was created. Returns null if unknown.
+     * Returns a value from the string table of a Windows Portable Execution (PE) file.
      *
-     * @since 1.3
+     * @return null if the key is not found in the string table, or there is no string table because, e.g., the file
+     *              is not a PE/COFF-format file.
+     * @since 1.3.4
      */
-    public Date getCreateTime() throws IOException;
+    String getStringTableValue(StringTableKey key) throws IOException;
+
+    /**
+     * An interface corresponding to a Windows VERSIONINFO structure.
+     *
+     * @since 1.3.4
+     */
+    interface VersionInfo {
+	String getLanguage();
+	String getVersion();
+	int getMajorPart();
+	int getMinorPart();
+	int getBuildPart();
+	int getPrivatePart();
+    }
+
+    /**
+     * Get version information for the file.
+     *
+     * @since 1.3.4
+     */
+    VersionInfo getVersionInfo() throws IOException;
 }

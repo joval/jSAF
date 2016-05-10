@@ -242,6 +242,7 @@ public interface IWindowsFileInfo extends IFileEx {
      * @since 1.3.4
      */
     enum StringTableKey {
+	FILE_VERSION("FileVersion"),
 	PRODUCT_NAME("ProductName"),
 	PRODUCT_VERSION("ProductVersion"),
 	COMPANY_NAME("CompanyName"),

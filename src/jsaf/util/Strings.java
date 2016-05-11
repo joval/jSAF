@@ -515,7 +515,7 @@ public class Strings {
      *
      * @since 1.3.4
      */
-    private static boolean isEscaped(String s, int ptr) {
+    public static boolean isEscaped(String s, int ptr) {
 	int escapes = 0;
 	while (ptr-- > 0) {
 	    if ('\\' == s.charAt(ptr)) {

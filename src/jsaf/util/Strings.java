@@ -510,10 +510,10 @@ public class Strings {
 	}
     }
 
-    // Private
-
     /**
-     * Determine whether or not the character at ptr is preceeded by an even number of escape characters.
+     * Determine whether or not the character at ptr is preceeded by an odd number of escape characters.
+     *
+     * @since 1.3.4
      */
     private static boolean isEscaped(String s, int ptr) {
 	int escapes = 0;
@@ -533,6 +533,7 @@ public class Strings {
 	return true;
     }
 
+    // Private
 
     /**
      * Comparator implementation for Strings.

@@ -533,6 +533,26 @@ public class Strings {
 	return true;
     }
 
+    /**
+     * Convert a Throwable stack trace to a String.
+     *
+     * @since 1.3.5
+     */
+    public static String toString(Throwable t) {
+	StringBuffer sb = new StringBuffer(t.getClass().getName());
+	sb.append(": ").append(t.getMessage() == null ? "null" : t.getMessage()).append(LF);
+	StackTraceElement[] ste = t.getStackTrace();
+	for (int i=0; i < ste.length; i++) {
+	    sb.append("        at ").append(ste[i].toString()).append(LF);
+	}
+	Throwable cause = t.getCause();
+	if (cause != null) {
+	    sb.append("Caused by: ").append(toString(cause));
+	}
+	return sb.toString();
+    }
+
+
     // Private
 
     /**

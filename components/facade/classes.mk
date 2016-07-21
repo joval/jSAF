@@ -94,6 +94,7 @@ CLASSES=\
 	jsaf.service.UnsupportedServiceException	\
 	jsaf.util.AbstractEnvironment	\
 	jsaf.util.Base64	\
+	jsaf.util.Bytes	\
 	jsaf.util.BoundaryIterator	\
 	jsaf.util.BoundaryReaderHandler	\
 	jsaf.util.Checksum	\

@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import jsaf.intf.io.IRandomAccess;
 
 import jsaf.Message;
+import jsaf.util.Bytes;
 import jsaf.util.Strings;
 
 /**
@@ -22,55 +23,57 @@ import jsaf.util.Strings;
  */
 public class LittleEndian {
     /**
-     * Get a string representation of a byte array, where each byte is converted into a [0-F] hex character pair.
-     * This is just a utility method that has nothing in particular to do with byte ordering.
-     *
      * @since 1.0
+     * @deprecated Use {@link jsaf.util.Bytes#toHexString(byte[])}
      */
+    @Deprecated
     public static final String toHexString(byte[] b) {
-	return toHexString(b, 0, b.length);
+	return Bytes.toHexString(b, 0, b.length);
     }
 
     /**
      * @since 1.0.1
+     * @deprecated Use {@link jsaf.util.Bytes#toHexString(byte)}
      */
+    @Deprecated
     public static final String toHexString(byte[] b, int offset, int len) {
-	int end = Math.min(b.length, (offset + len));
-	StringBuffer sb = new StringBuffer();
-	for (int i=offset; i < end; i++) {
-	    sb.append(toHexString(b[i]));
-	}
-	return sb.toString();
+	return Bytes.toHexString(b, offset, len);
     }
 
     /**
-     * Get a string representation of a byte, as a [0-F] hex character pair.
-     *
      * @since 1.0
+     * @deprecated Use {@link jsaf.util.Bytes#toHexString(byte)}
      */
+    @Deprecated
     public static final String toHexString(byte b) {
-	return Integer.toString((b&0xff) + 0x100, 16).substring(1);
+	return Bytes.toHexString(b);
     }
 
     /**
      * @since 1.0
+     * @deprecated Use {@link jsaf.util.Bytes#toHexString(short)}
      */
+    @Deprecated
     public static final String toHexString(short s) {
-	return Integer.toHexString(s & 0xFFFF);
+	return Bytes.toHexString(s);
     }
 
     /**
      * @since 1.0
+     * @deprecated Use {@link jsaf.util.Bytes#toHexString(int)}
      */
+    @Deprecated
     public static final String toHexString(int i) {
-	return Integer.toHexString(i);
+	return Bytes.toHexString(i);
     }
 
     /**
      * @since 1.0
+     * @deprecated Use {@link jsaf.util.Bytes#toHexString(long)}
      */
+    @Deprecated
     public static final String toHexString(long l) {
-	return Long.toHexString(l & 0xFFFFFFFFFFFFFFFFL);
+	return Bytes.toHexString(l);
     }
 
     /**

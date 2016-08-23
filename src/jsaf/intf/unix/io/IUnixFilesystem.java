@@ -44,7 +44,7 @@ public interface IUnixFilesystem extends IFilesystem {
 
 	/**
 	 * Condition field for Unix file permissions. The only valid TYPE_ value is Condition.TYPE_EQUALITY.
-	 * The value must be of the form "[u/g/o][+/-][r/w/x]" -- meaning that the condition makes an assertion
+	 * The value must be one of the enum values of FilePermission -- meaning that the condition makes an assertion
 	 * about the user owner/group owner/other (i.e., world) permission setting on files that will be returned
 	 * by the search. Multiple non-conflicting permission assertions can be made for any given search.
 	 *
@@ -73,5 +73,34 @@ public interface IUnixFilesystem extends IFilesystem {
 	 * @since 1.2
 	 */
 	public static final int FIELD_GROUP = 104;
+    }
+
+    /**
+     * Enumeration of Unix file permissions, for use with the FIELD_PERM condition field.
+     *
+     * @since 1.3.5
+     */
+    enum FilePermission {
+	UEXEC(0100),
+	UREAD(0200),
+	UWRITE(0400),
+	GEXEC(010),
+	GREAD(020),
+	GWRITE(040),
+	OEXEC(01),
+	OREAD(02),
+	OWRITE(04),
+	SETUID(04000),
+	SETGID(02000);
+
+	private int bits;
+
+	private FilePermission(int bits) {
+	    this.bits = bits;
+	}
+
+	public int bits() {
+	    return bits;
+	}
     }
 }

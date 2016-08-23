@@ -146,6 +146,23 @@ public interface ISearchable<T> {
 	public static final int TYPE_NONE = 4;
 
 	/**
+	 * Condition type used with array and collection values, indicating a search for something matching all of
+	 * the specified values. Obviously this is only useful when the underlying field data can be multi-valued.
+	 *
+	 * @since 1.3.5
+	 */
+	public static final int TYPE_ALL = 5;
+
+	/**
+	 * Condition type used with array and collection values, indicating a search for something that does not
+	 * match all of the specified values, i.e., at least one value does not match. This requires the underlying
+	 * field data is multi-valued.
+	 *
+	 * @since 1.3.5
+	 */
+	public static final int TYPE_NOT_ALL = 6;
+
+	/**
 	 * Depth condition field ID for recursive searches.
 	 *
 	 * @since 1.2

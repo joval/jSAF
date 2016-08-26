@@ -23,8 +23,10 @@ public interface IDiscoveryService extends ILoggable {
 
     /**
      * Decrypt an SSH private key.
+     *
+     * @since 1.3.5
      */
-    byte[] decryptPrivateKey(byte[] encrypted, byte[] passphrase) throws Exception;
+    byte[] decryptPrivateKey(byte[] encrypted, char[] passphrase) throws Exception;
 
     /**
      * Get the public key fingerprint of an SSH target.

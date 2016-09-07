@@ -163,8 +163,7 @@ public interface IWindowsFileInfo extends IFileEx {
 
 	/**
 	 * A file that is read-only. Applications can read the file, but cannot write to it or delete it. This attribute
-	 * is not honored on directories. For more information, see You cannot view or change the Read-only or the
-	 * System attributes of folders in Windows Server 2003, in Windows XP, in Windows Vista or in Windows 7.
+	 * is not honored on directories.
 	 */
 	FILE_ATTRIBUTE_READONLY(1),
 

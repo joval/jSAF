@@ -102,11 +102,11 @@ public interface IRegistry extends ILoggable {
 	HKCC ("HKEY_CURRENT_CONFIG", 0x80000005L),
 
 	/**
-	 * Dynamic data hive (legacy).
+	 * Current user local settings hive (user registry data not contained in a roaming profile).
 	 *
-	 * @since 1.0
+	 * @since 1.3.5
 	 */
-	HKDD ("HKEY_DYN_DATA", 0x80000006L);
+	HKCULS("HKEY_CURRENT_USER_LOCAL_SETTINGS", 0x80000007L);
 
 	private String name;
 	private long id;

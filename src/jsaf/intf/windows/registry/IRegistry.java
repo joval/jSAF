@@ -92,7 +92,7 @@ public interface IRegistry extends ILoggable {
 	 *
 	 * @since 1.3.1
 	 */
-	HKPC ("HKEY_PERFORMANCE_DATA", 0x80000004L),
+	HKPD ("HKEY_PERFORMANCE_DATA", 0x80000004L),
 
 	/**
 	 * Current config hive (legacy).

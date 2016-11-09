@@ -4,6 +4,7 @@
 package jsaf.io;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -119,6 +120,17 @@ public class Streams {
      */
     public static OutputStream devNull() {
 	return DEVNULL;
+    }
+
+    /**
+     * Read the contents of a file into a String.
+     *
+     * @since 1.3.5
+     */
+    public static String readAsString(File f, Charset charset) throws IOException {
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
+	copy(new FileInputStream(f), out);
+	return new String(out.toByteArray(), charset);
     }
 
     /**

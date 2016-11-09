@@ -1122,9 +1122,6 @@ public class Base64 {
 		    out.close();
                     bytes = out.toByteArray();
 		    out = null;
-                } catch( java.io.IOException e ) {
-		    e.printStackTrace();
-                    // Just return decoded (non-unzipped) bytes
                 } finally {
                     try{ if (out != null) out.close(); } catch( Exception e ){}
                     try{ in.close(); } catch( Exception e ){}

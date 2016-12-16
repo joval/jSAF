@@ -592,7 +592,7 @@ public class SafeCLI {
 		}
 		if (errThread != null && errThread.isAlive()) {
 		    try {
-			errThread.join(sys.getTimeout(ISession.Timeout.S));
+			errThread.join(1000L);
 		    } catch (InterruptedException e) {
 		    }
 		}

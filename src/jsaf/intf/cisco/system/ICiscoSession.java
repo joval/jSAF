@@ -47,7 +47,12 @@ public interface ICiscoSession extends IComputerSystem {
 	/**
 	 * Configuration mode.
 	 */
-	CONFIGURE("\\(config.*\\)#\\s*$");
+	CONFIGURE("\\(config.*\\)#\\s*$"),
+
+	/**
+	 * Indicates an authentication failure.
+	 */
+	AUTH_PROMPT("^Password:");
 
 	private Pattern pattern;
 

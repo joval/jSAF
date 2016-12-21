@@ -545,10 +545,10 @@ public class SafeCLI {
 		    errThread.start(PerishableReader.newInstance(p.getErrorStream(), sys.getTimeout(ISession.Timeout.XL)));
 		} else {
 		    errThread = new HandlerThread(errorHandler, "stderr reader");
-		    errThread.start(PerishableReader.newInstance(p.getErrorStream(), readTimeout));
+		    errThread.start(PerishableReader.newInstance(p.getErrorStream(), sys.getTimeout(ISession.Timeout.XL)));
 		}
 		outputHandler.handle(reader);
-		p.waitFor(sys.getTimeout(ISession.Timeout.M));
+		p.waitFor(sys.getTimeout(ISession.Timeout.S));
 		result.exitCode = p.exitValue();
 		success = true;
 	    } catch (IOException e) {
@@ -614,6 +614,10 @@ public class SafeCLI {
     static class BufferHandler implements IReaderHandler {
 	private ByteArrayOutputStream buff;
 
+	BufferHandler() {
+	    buff = new ByteArrayOutputStream();
+	}
+
 	byte[] getData() {
 	    if (buff == null) {
 		return null;
@@ -623,13 +627,7 @@ public class SafeCLI {
 	}
 
 	public void handle(IReader reader) throws IOException {
-	    buff = new ByteArrayOutputStream();
-	    byte[] b = new byte[512];
-	    int len = 0;
-	    while((len = reader.getStream().read(b)) > 0) {
-		buff.write(b, 0, len);
-	    }
-	    buff.close();
+	    Streams.copy(reader.getStream(), buff, true);
 	}
     }
 
@@ -679,6 +677,7 @@ public class SafeCLI {
 	    try {
 		handler.handle(reader);
 	    } catch (IOException e) {
+		sys.getLogger().warn(Message.ERROR_EXCEPTION, e);
 	    }
 	}
     }

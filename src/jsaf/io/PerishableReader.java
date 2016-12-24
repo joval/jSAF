@@ -377,7 +377,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 		//
 		StringBuffer sb = new StringBuffer();
 		for (int i=0; i < trace.length; i++) {
-		    sb.append(Strings.LOCAL_CR);
+		    sb.append(Strings.LF);
 		    if (i > 0) {
 			sb.append("    at ");
 		    }

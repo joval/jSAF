@@ -39,6 +39,14 @@ public class Strings {
     public static final String LF = System.getProperty("line.separator");
 
     /**
+     * The line separator on the local machine.
+     *
+     * @since 1.2
+     * @deprecated since 1.3.5. Use LF instead.
+     */
+    @Deprecated public static final String LOCAL_CR = LF;
+
+    /**
      * Escape character (as a String).
      *
      * @since 1.2
@@ -114,13 +122,6 @@ public class Strings {
      * @since 1.2
      */
     public static final Charset UTF16LE = Charset.forName("UTF-16LE");
-
-    /**
-     * The line separator on the local machine.
-     *
-     * @since 1.2
-     */
-    public static final String LOCAL_CR = System.getProperty("line.separator");
 
     /**
      * Sort the array from A-&gt;Z (ascending ordering).

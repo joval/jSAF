@@ -128,8 +128,17 @@ public class Streams {
      * @since 1.3.5
      */
     public static String readAsString(File f, Charset charset) throws IOException {
+	return readAsString(new FileInputStream(f), charset);
+    }
+
+    /**
+     * Read the contents of an InputStream into a String.
+     *
+     * @since 1.3.5
+     */
+    public static String readAsString(InputStream in, Charset charset) throws IOException {
 	ByteArrayOutputStream out = new ByteArrayOutputStream();
-	copy(new FileInputStream(f), out);
+	copy(in, out);
 	return new String(out.toByteArray(), charset);
     }
 

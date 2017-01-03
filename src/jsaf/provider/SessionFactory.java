@@ -14,7 +14,7 @@ import jsaf.intf.remote.IConnectionSpecification;
 import jsaf.intf.remote.IConnectionSpecificationFactory;
 import jsaf.intf.system.ISession;
 import jsaf.intf.util.ILoggable;
-import jsaf.intf.util.IPublisher;
+import jsaf.util.Publisher;
 
 /**
  * Factory class for creating ISessions.
@@ -23,7 +23,7 @@ import jsaf.intf.util.IPublisher;
  * @version %I% %G%
  * @since 1.0
  */
-public abstract class SessionFactory implements ILoggable, IPublisher<ConnectionEvent> {
+public abstract class SessionFactory extends Publisher<ConnectionEvent> implements ILoggable {
     /**
      * The class name of the default (local) factory implementation.
      *

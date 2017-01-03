@@ -73,17 +73,22 @@ public class Streams {
     }
 
     /**
-     * Copy from in to out asynchronously (i.e., in a new Thread). Closes the InputStream when done, but not
-     * the OutputStream.
-     *
-     * @return the new Thread
+     * Shortcut for copyAsync(in, out, false).
      *
      * @since 1.2
      */
-    public static Thread copyAsync(InputStream in, OutputStream out) {
-	Thread thread = new Thread(new Copier(in, out));
-	thread.start();
-	return thread;
+    public static void copyAsync(InputStream in, OutputStream out) {
+	copyAsync(in, out, false);
+    }
+
+    /**
+     * Copy from in to out asynchronously (i.e., in a new Thread). Closes the InputStream when done, and closes
+     * the OutputStream according to closeOut.
+     *
+     * @since 1.3.5
+     */
+    public static void copyAsync(InputStream in, OutputStream out, boolean closeOut) {
+	new Copier(in, out, closeOut).start();
     }
 
     /**
@@ -101,19 +106,10 @@ public class Streams {
      * @since 1.2
      */
     public static void copy(InputStream in, OutputStream out, boolean closeOut) throws IOException {
-	try {
-	    Copier copier = new Copier(in, out);
-	    copier.run();
-	    if (copier.hasError()) {
-		throw copier.error();
-	    }
-	} finally {
-	    if (closeOut && out != null) {
-		try {
-		    out.close();
-		} catch (IOException e) {
-		}
-	    }
+	Copier copier = new Copier(in, out, closeOut);
+	copier.run();
+	if (copier.hasError()) {
+	    throw copier.error();
 	}
     }
 
@@ -178,10 +174,13 @@ public class Streams {
 	InputStream in;
 	OutputStream out;
 	IOException error;
+	boolean closeOut;
+	Thread thread;
 
-	Copier(InputStream in, OutputStream out) {
+	Copier(InputStream in, OutputStream out, boolean closeOut) {
 	    this.in = in;
 	    this.out = out;
+	    this.closeOut = closeOut;
 	    error = null;
 	}
 
@@ -191,6 +190,10 @@ public class Streams {
 
 	IOException error() {
 	    return error;
+	}
+
+	void start() {
+	    (thread = new Thread(this)).start();
 	}
 
 	// Implement Runnable
@@ -203,11 +206,21 @@ public class Streams {
 		    out.write(buff, 0, len);
 		}
 	    } catch (IOException e) {
-		error = e;
+		if (thread == null) {
+		    error = e;
+		} else {
+		    Message.getLogger().warn(Message.ERROR_EXCEPTION, e);
+		}
 	    } finally {
 		try {
 		    in.close();
 		} catch (IOException e) {
+		}
+		if (closeOut) {
+		    try {
+			out.close();
+		    } catch (IOException e) {
+		    }
 		}
 	    }
 	}

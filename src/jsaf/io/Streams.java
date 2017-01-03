@@ -91,7 +91,7 @@ public class Streams {
      *
      * @since 1.2
      */
-    public static void copy(InputStream in, OutputStream out) {
+    public static void copy(InputStream in, OutputStream out) throws IOException {
 	copy(in, out, false);
     }
 
@@ -100,9 +100,13 @@ public class Streams {
      *
      * @since 1.2
      */
-    public static void copy(InputStream in, OutputStream out, boolean closeOut) {
+    public static void copy(InputStream in, OutputStream out, boolean closeOut) throws IOException {
 	try {
-	    new Copier(in, out).run();
+	    Copier copier = new Copier(in, out);
+	    copier.run();
+	    if (copier.hasError()) {
+		throw copier.error();
+	    }
 	} finally {
 	    if (closeOut && out != null) {
 		try {
@@ -173,10 +177,20 @@ public class Streams {
     private static class Copier implements Runnable {
 	InputStream in;
 	OutputStream out;
+	IOException error;
 
 	Copier(InputStream in, OutputStream out) {
 	    this.in = in;
 	    this.out = out;
+	    error = null;
+	}
+
+	boolean hasError() {
+	    return error != null;
+	}
+
+	IOException error() {
+	    return error;
 	}
 
 	// Implement Runnable
@@ -189,6 +203,7 @@ public class Streams {
 		    out.write(buff, 0, len);
 		}
 	    } catch (IOException e) {
+		error = e;
 	    } finally {
 		try {
 		    in.close();

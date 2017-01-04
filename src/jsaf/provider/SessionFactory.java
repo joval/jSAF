@@ -117,6 +117,12 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
 
     protected SessionFactory() {
 	logger = Message.getLogger();
+	start();
+    }
+
+    @Override
+    protected void finalize() {
+	stop();
     }
 
     // Implement ILoggable

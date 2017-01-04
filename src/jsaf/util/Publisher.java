@@ -6,6 +6,7 @@ package jsaf.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import jsaf.intf.util.IPublisher;
 import jsaf.intf.util.ISubscriber;
@@ -16,12 +17,36 @@ import jsaf.intf.util.ISubscriber;
  * @author David A. Solin
  * @version %I% %G%
  */
-public class Publisher<T extends Enum> implements IPublisher<T> {
+public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
     private Collection<ISubscriber<T>> subscribers;
+    private LinkedBlockingQueue<QueueEntry> queue;
+    private Thread thread;
 
     public Publisher() {
 	subscribers = new HashSet<ISubscriber<T>>();
+	queue = new LinkedBlockingQueue<QueueEntry>();
     }
+
+    public void start() {
+	if (thread == null) {
+	    thread = new Thread(this, "Event Publisher Thread");
+	    thread.setDaemon(false);
+	    thread.start();
+	} else {
+	    throw new IllegalStateException();
+	}
+    }
+
+    public void stop() {
+	if (thread == null) {
+	    throw new IllegalStateException();
+	} else {
+	    thread.interrupt();
+	    thread = null;
+	}
+    }
+
+    // Implement IPublisher<T>
 
     public void subscribe(ISubscriber<T> subscriber) {
 	synchronized(subscribers) {
@@ -36,27 +61,39 @@ public class Publisher<T extends Enum> implements IPublisher<T> {
     }
 
     public void publish(T msg, Object arg) {
-	new Thread(new PubTask(msg, arg), "jSAF Event Publisher").start();
+	try {
+	    queue.put(new QueueEntry(msg, arg));
+	} catch (InterruptedException e) {
+	}
+    }
+
+    // Implement Runnable
+
+    public void run() {
+	try {
+	    while(true) {
+		queue.take().publish();
+	    }
+	} catch (InterruptedException e) {
+	}
     }
 
     // Internal
 
-    class PubTask implements Runnable {
+    class QueueEntry {
 	private T msg;
 	private Object arg;
-	private Collection<ISubscriber<T>> subscribers;
 
-	PubTask(T msg, Object arg) {
+	QueueEntry(T msg, Object arg) {
 	    this.msg = msg;
 	    this.arg = arg;
+	}
+
+	void publish() {
+	    Collection<ISubscriber<T>> subscribers;
 	    synchronized(Publisher.this.subscribers) {
 		subscribers = new ArrayList<ISubscriber<T>>(Publisher.this.subscribers);
 	    }
-	}
-
-	// Implement Runnable
-
-	public void run() {
 	    for (ISubscriber<T> subscriber : subscribers) {
 		subscriber.notify(Publisher.this, msg, arg);
 	    }

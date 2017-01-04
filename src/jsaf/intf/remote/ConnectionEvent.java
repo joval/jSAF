@@ -89,8 +89,8 @@ public enum ConnectionEvent {
     PRIVILEGE_ESCALATION_SUCCESS,
 
     /**
-     * An event indicating that a privilege escalation test has started. The argument will be a String id corresponding
-     * to IConnectionSpecification.getIdentifier().
+     * An event indicating that a connection is being closed. The argument will be a String id corresponding to
+     * IConnectionSpecification.getIdentifier().
      */
     DISCONNECT;
 }

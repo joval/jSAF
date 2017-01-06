@@ -1,4 +1,4 @@
-// Copyright (C) 2011 jOVAL.org.  All rights reserved.
+// Copyright (C) 2011-2017 JovalCM.com.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.provider;
@@ -9,10 +9,12 @@ import java.lang.reflect.Constructor;
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
+import jsaf.intf.remote.ConnectionEvent;
 import jsaf.intf.remote.IConnectionSpecification;
 import jsaf.intf.remote.IConnectionSpecificationFactory;
 import jsaf.intf.system.ISession;
 import jsaf.intf.util.ILoggable;
+import jsaf.util.Publisher;
 
 /**
  * Factory class for creating ISessions.
@@ -21,7 +23,7 @@ import jsaf.intf.util.ILoggable;
  * @version %I% %G%
  * @since 1.0
  */
-public abstract class SessionFactory implements ILoggable {
+public abstract class SessionFactory extends Publisher<ConnectionEvent> implements ILoggable {
     /**
      * The class name of the default (local) factory implementation.
      *
@@ -115,6 +117,12 @@ public abstract class SessionFactory implements ILoggable {
 
     protected SessionFactory() {
 	logger = Message.getLogger();
+	start();
+    }
+
+    @Override
+    protected void finalize() {
+	stop();
     }
 
     // Implement ILoggable

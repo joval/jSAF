@@ -20,6 +20,7 @@ CLASSES=\
 	jsaf.intf.juniper.system.IJunosSession	\
 	jsaf.intf.juniper.system.ISupportInformation	\
 	jsaf.intf.netconf.INetconf	\
+	jsaf.intf.remote.ConnectionEvent	\
 	jsaf.intf.remote.IConnectionSpecification	\
 	jsaf.intf.remote.IConnectionSpecificationFactory	\
 	jsaf.intf.service.IDatabase	\
@@ -42,7 +43,9 @@ CLASSES=\
 	jsaf.intf.util.ILoggable	\
 	jsaf.intf.util.IPerishable	\
 	jsaf.intf.util.IProperty	\
+	jsaf.intf.util.IPublisher	\
 	jsaf.intf.util.ISearchable	\
+	jsaf.intf.util.ISubscriber	\
 	jsaf.intf.windows.identity.IACE	\
 	jsaf.intf.windows.identity.IDirectory	\
 	jsaf.intf.windows.identity.IGroup	\
@@ -104,5 +107,6 @@ CLASSES=\
 	jsaf.util.LogCensor	\
 	jsaf.util.LogMessageConveyor	\
 	jsaf.util.PropertyUtil	\
+	jsaf.util.Publisher	\
 	jsaf.util.SafeCLI	\
 	jsaf.util.Strings

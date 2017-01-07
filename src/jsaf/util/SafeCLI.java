@@ -440,8 +440,8 @@ public class SafeCLI {
      * @since 1.0
      */
     public class ExecData {
-	int exitCode;
-	byte[] data, err;
+	private int exitCode;
+	private byte[] data, err;
 
 	ExecData() {
 	    exitCode = -1;
@@ -477,14 +477,32 @@ public class SafeCLI {
 	}
 
 	/**
-	 * Guaranteed to have at least one entry.
+	 * Guaranteed to have at least one entry.  Since 1.3.5, if there was nothing printed to stdout, this
+	 * method returns any output printed to stderr.
 	 *
 	 * @since 1.0
 	 */
 	public List<String> getLines() throws IOException {
-	    ByteArrayInputStream in = new ByteArrayInputStream(data);
+	    List<String> lines = toLines(data);
+	    if (lines.size() == 0) {
+		sys.getLogger().debug(Message.WARNING_MISSING_OUTPUT, cmd, exitCode, data.length);
+		if (err != null && err.length > 0) {
+		    lines = toLines(err);
+		    if (lines.size() > 0) {
+			return lines;
+		    }
+		}
+		lines.add("");
+	    }
+	    return lines;
+	}
+
+	// Private
+
+	private List<String> toLines(byte[] buff) throws IOException {
+	    ByteArrayInputStream in = new ByteArrayInputStream(buff);
 	    in.mark(data.length);
-	    Charset encoding = Strings.ASCII;
+	    Charset encoding = Strings.UTF8;
 	    try {
 		encoding = Streams.detectEncoding(in);
 	    } catch (IOException e) {
@@ -495,10 +513,6 @@ public class SafeCLI {
 	    String line = null;
 	    while((line = reader.readLine()) != null) {
 		lines.add(line);
-	    }
-	    if (lines.size() == 0) {
-		sys.getLogger().debug(Message.WARNING_MISSING_OUTPUT, cmd, exitCode, data.length);
-		lines.add("");
 	    }
 	    return lines;
 	}

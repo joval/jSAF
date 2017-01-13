@@ -4,7 +4,10 @@
 package jsaf;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Timer;
+
+import jsaf.protocol.JSAFURLStreamHandlerFactory;
 
 /**
  * This class is used to retrieve JSAF-wide resources, like the location of the JSAF workspace directory, and the
@@ -13,9 +16,10 @@ import java.util.Timer;
  * @author David A. Solin
  * @version %I% %G%
  */
-public class JSAFSystem {
+public final class JSAFSystem {
     private static Timer timer;
     private static File dataDir = null;
+    private static boolean registeredHandlers = false;
 
     static {
 	if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
@@ -33,6 +37,16 @@ public class JSAFSystem {
 	    dataDir = new File(homeDir, ".jSAF");
 	}
 	timer = new Timer("jSAF System Timer", true);
+    }
+
+    /**
+     * Register the JSAF URL handlers for the tftp and zip protocols.
+     */
+    public static void registerURLHandlers() {
+	if (!registeredHandlers) {
+	    URL.setURLStreamHandlerFactory(JSAFURLStreamHandlerFactory.getInstance());
+	    registeredHandlers = true;
+	}
     }
 
     /**

@@ -61,15 +61,17 @@ public class Streams {
      * @since 1.2
      */
     public static final void readFully(InputStream in, byte[] buff) throws IOException {
-	int offset = 0;
-	do {
-	    int bytesRead = in.read(buff, offset, buff.length-offset);
-	    if (bytesRead == 0) {
-	        throw new EOFException(Message.getMessage(Message.ERROR_EOS));
-	    } else {
-		offset += bytesRead;
-	    }
-	} while (offset < buff.length);
+	if (buff.length > 0) {
+	    int offset = 0;
+	    do {
+		int bytesRead = in.read(buff, offset, buff.length-offset);
+		if (bytesRead == 0) {
+		    throw new EOFException(Message.getMessage(Message.ERROR_EOS));
+		} else {
+		    offset += bytesRead;
+		}
+	    } while (offset < buff.length);
+	}
     }
 
     /**

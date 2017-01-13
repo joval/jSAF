@@ -84,6 +84,7 @@ CLASSES=\
 	jsaf.io.StreamLogger	\
 	jsaf.io.Streams	\
 	jsaf.io.TruncatedInputStream	\
+	jsaf.protocol.JSAFURLStreamHandlerFactory	\
 	jsaf.protocol.tftp.TftpURLConnection	\
 	jsaf.protocol.tftp.TftpURLStreamHandler	\
 	jsaf.protocol.zip.ZipURLConnection	\

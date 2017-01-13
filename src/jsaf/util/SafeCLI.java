@@ -333,66 +333,78 @@ public class SafeCLI {
 	    return ed.getLines().iterator();
 	}
 
-	//
-	// Modify the command to redirect output to a temp file (compressed)
-	//
-	IFile remoteTemp = sys.getFilesystem().createTempFile("cmd", ".out", null);
-	String tempPath = remoteTemp.getPath();
-	if ((cmd.indexOf(";") != -1 || cmd.indexOf("&&") != -1) && !cmd.startsWith("(") && !cmd.endsWith(")")) {
-	    //
-	    // Multiple comands have to be grouped, or only the last one's output will be redirected.
-	    //
-	    cmd = new StringBuffer("(").append(cmd).append(")").toString();
-	}
-	switch(sys.getFlavor()) {
-	  case HPUX:
-	    cmd = new StringBuffer(cmd).append(" | /usr/contrib/bin/gzip > ").append(tempPath).toString();
-	    break;
-	  default:
-	    cmd = new StringBuffer(cmd).append(" | gzip > ").append(tempPath).toString();
-	    break;
-	}
-
-	//
-	// Execute the command, and monitor the size of the output file
-	//
-	FileMonitor mon = new FileMonitor(sys.getFilesystem(), tempPath);
+	FileMonitor mon = new FileMonitor(sys.getFilesystem());
 	JSAFSystem.getTimer().schedule(mon, 15000, 15000);
 	try {
-	    BufferHandler out = new BufferHandler();
-	    BufferHandler err = new BufferHandler();
-	    exec(cmd, null, null, sys, timeout, out, err);
-	    byte[] buff = err.getData();
-	    if (buff.length > 0) {
-		errHandler.handle(new SimpleReader(new ByteArrayInputStream(buff), sys.getLogger()));
-	    } else {
+	    for (int attempt=1; true; attempt++) {
 		//
-		// Since stdout has been redirected to a file, and we've already attempted to process the buffered
-		// output from stderr, any data contained by the output buffer must be stderr output that's been
-		// directed for whatever reason to the stdout stream.
+		// Modify the command to redirect output to a temp file (compressed)
 		//
-		errHandler.handle(new SimpleReader(new ByteArrayInputStream(out.getData()), sys.getLogger()));
+		IFile remoteTemp = sys.getFilesystem().createTempFile("cmd", ".out", null);
+		String tempPath = remoteTemp.getPath();
+		mon.setPath(tempPath);
+		String redirected;
+		if ((cmd.indexOf(";") != -1 || cmd.indexOf("&&") != -1) && !cmd.startsWith("(") && !cmd.endsWith(")")) {
+		    //
+		    // Multiple comands have to be grouped, or only the last one's output will be redirected.
+		    //
+		    redirected = new StringBuffer("(").append(cmd).append(")").toString();
+		} else {
+		    redirected = cmd;
+		}
+		switch(sys.getFlavor()) {
+		  case HPUX:
+		    redirected = new StringBuffer(redirected).append(" | /usr/contrib/bin/gzip > ").append(tempPath).toString();
+		    break;
+		  default:
+		    redirected = new StringBuffer(redirected).append(" | gzip > ").append(tempPath).toString();
+		    break;
+		}
+
+		BufferHandler out = new BufferHandler();
+		BufferHandler err = new BufferHandler();
+		SafeCLI cli = new SafeCLI(redirected, null, null, sys, timeout);
+		if (cli.execOnce(out, err, attempt)) {
+		    //
+		    // Handle error data
+		    //
+		    byte[] buff = err.getData();
+		    if (buff.length > 0) {
+			errHandler.handle(new SimpleReader(new ByteArrayInputStream(buff), sys.getLogger()));
+		    } else {
+			//
+			// Since stdout has been redirected to a file, and we've already attempted to process the buffered
+			// output from stderr, any data contained by the output buffer must be stderr output that's been
+			// directed for whatever reason to the stdout stream.
+			//
+			errHandler.handle(new SimpleReader(new ByteArrayInputStream(out.getData()), sys.getLogger()));
+		    }
+
+		    //
+		    // Create and return a reader/Iterator<String> based on a local cache file containing the output
+		    //
+		    if (ISession.LOCALHOST.equals(sys.getHostname())) {
+			return new ReaderIterator(new File(tempPath));
+		    } else {
+			File tempDir = sys.getWorkspace() == null ? new File(System.getProperty("user.home")) : sys.getWorkspace();
+			File localTemp = File.createTempFile("cmd", null, tempDir);
+			try {
+			    Streams.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
+			    remoteTemp.delete();
+			    return new ReaderIterator(localTemp);
+			} catch (IOException e) {
+			    if (attempt > cli.execRetries) {
+				throw e;
+			    } else {
+				sys.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+			    }
+			}
+		    }
+		}
 	    }
 	} finally {
 	    mon.cancel();
 	    JSAFSystem.getTimer().purge();
-	}
-
-	//
-	// Create and return a reader/Iterator<String> based on a local cache file
-	//
-	if (ISession.LOCALHOST.equals(sys.getHostname())) {
-	    return new ReaderIterator(new File(tempPath));
-	} else {
-	    File tempDir = sys.getWorkspace() == null ? new File(System.getProperty("user.home")) : sys.getWorkspace();
-	    File localTemp = File.createTempFile("cmd", null, tempDir);
-	    Streams.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
-	    try {
-		remoteTemp.delete();
-	    } catch (IOException e) {
-		sys.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    }
-	    return new ReaderIterator(localTemp);
 	}
     }
 
@@ -544,71 +556,78 @@ public class SafeCLI {
     }
 
     private void exec(IReaderHandler outputHandler, IReaderHandler errorHandler) throws Exception {
-	boolean success = false;
-	for (int attempt=1; !success; attempt++) {
-	    IProcess p = null;
-	    PerishableReader reader = null;
-	    HandlerThread errThread = null;
-	    try {
-		p = sys.createProcess(cmd, env, dir);
-		p.start();
-		reader = PerishableReader.newInstance(p.getInputStream(), readTimeout);
-		reader.setLogger(sys.getLogger());
-		if (errorHandler == null) {
-		    errThread = new HandlerThread(DevNull, "pipe to /dev/null");
-		    errThread.start(PerishableReader.newInstance(p.getErrorStream(), sys.getTimeout(ISession.Timeout.XL)));
-		} else {
-		    errThread = new HandlerThread(errorHandler, "stderr reader");
-		    errThread.start(PerishableReader.newInstance(p.getErrorStream(), sys.getTimeout(ISession.Timeout.XL)));
-		}
-		outputHandler.handle(reader);
-		p.waitFor(sys.getTimeout(ISession.Timeout.S));
-		result.exitCode = p.exitValue();
-		success = true;
-	    } catch (IOException e) {
-		if (e instanceof InterruptedIOException || e instanceof EOFException || e instanceof SocketException) {
-		    if (attempt > execRetries) {
-			throw new Exception(Message.getMessage(Message.ERROR_PROCESS_RETRY, cmd, attempt), e);
-		    } else {
-			// the process has hung up, so kill it
-			p.destroy();
-			p = null;
-			sys.getLogger().info(Message.STATUS_PROCESS_RETRY, cmd);
-		    }
-		} else {
-		    throw e;
-		}
-	    } catch (SessionException e) {
+	for (int attempt=1; true; attempt++) {
+	    if (execOnce(outputHandler, errorHandler, attempt)) {
+		break;
+	    }
+	}
+    }
+
+    private boolean execOnce(IReaderHandler outputHandler, IReaderHandler errorHandler, int attempt) throws Exception {
+	IProcess p = null;
+	PerishableReader reader = null;
+	HandlerThread errThread = null;
+	try {
+	    p = sys.createProcess(cmd, env, dir);
+	    p.start();
+	    reader = PerishableReader.newInstance(p.getInputStream(), readTimeout);
+	    reader.setLogger(sys.getLogger());
+	    if (errorHandler == null) {
+		errThread = new HandlerThread(DevNull, "pipe to /dev/null");
+		errThread.start(PerishableReader.newInstance(p.getErrorStream(), sys.getTimeout(ISession.Timeout.XL)));
+	    } else {
+		errThread = new HandlerThread(errorHandler, "stderr reader");
+		errThread.start(PerishableReader.newInstance(p.getErrorStream(), sys.getTimeout(ISession.Timeout.XL)));
+	    }
+	    outputHandler.handle(reader);
+	    p.waitFor(sys.getTimeout(ISession.Timeout.S));
+	    result.exitCode = p.exitValue();
+	    return true;
+	} catch (IOException e) {
+	    if (e instanceof InterruptedIOException || e instanceof EOFException || e instanceof SocketException) {
 		if (attempt > execRetries) {
-		    sys.getLogger().warn(Message.ERROR_PROCESS_RETRY, cmd, attempt);
-		    throw e;
+		    throw new Exception(Message.getMessage(Message.ERROR_PROCESS_RETRY, cmd, attempt), e);
 		} else {
-		    sys.getLogger().warn(Message.ERROR_SESSION_INTEGRITY, e.getMessage());
-		    sys.getLogger().info(Message.STATUS_PROCESS_RETRY, cmd);
-		    sys.disconnect();
-		}
-	    } finally {
-		if (p != null && p.isRunning()) {
+		    // the process has hung up, so kill it
 		    p.destroy();
-		} else {
-		    if (reader != null) {
-			try {
-			    reader.close();
-			} catch (IOException e) {
-			}
-		    }
-		    if (errThread != null) {
-			try {
-			    errThread.close();
-			} catch (IOException e) {
-			}
+		    p = null;
+		    sys.getLogger().info(Message.STATUS_PROCESS_RETRY, cmd);
+		}
+		return false;
+	    } else {
+		throw e;
+	    }
+	} catch (SessionException e) {
+	    if (attempt > execRetries) {
+		sys.getLogger().warn(Message.ERROR_PROCESS_RETRY, cmd, attempt);
+		throw e;
+	    } else {
+		sys.getLogger().warn(Message.ERROR_SESSION_INTEGRITY, e.getMessage());
+		sys.getLogger().info(Message.STATUS_PROCESS_RETRY, cmd);
+		sys.disconnect();
+		return false;
+	    }
+	} finally {
+	    if (p != null && p.isRunning()) {
+		p.destroy();
+	    } else {
+		if (reader != null) {
+		    try {
+			reader.close();
+		    } catch (IOException e) {
 		    }
 		}
-		if (errThread != null && errThread.isAlive()) {
+		if (errThread != null) {
 		    try {
-			errThread.join(1000L);
-		    } catch (InterruptedException e) {
+			errThread.close();
+		    } catch (IOException e) {
 		    }
+		}
+	    }
+	    if (errThread != null && errThread.isAlive()) {
+		try {
+		    errThread.join(1000L);
+		} catch (InterruptedException e) {
 		}
 	    }
 	}
@@ -719,17 +738,23 @@ public class SafeCLI {
 	private IFilesystem fs;
 	private String path;
 
-	FileMonitor(IFilesystem fs, String path) {
+	FileMonitor(IFilesystem fs) {
 	    this.fs = fs;
-	    this.path = path;
-	    fs.getLogger().debug(Message.STATUS_COMMAND_OUTPUT_TEMP, path);
+	    this.path = null;
 	}
 
-	public void run() {
-	    try {
-		long len = fs.getFile(path, IFile.Flags.READVOLATILE).length();
-		fs.getLogger().info(Message.STATUS_COMMAND_OUTPUT_PROGRESS, len);
-	    } catch (IOException e) {
+	public synchronized void setPath(String path) {
+	    fs.getLogger().debug(Message.STATUS_COMMAND_OUTPUT_TEMP, path);
+	    this.path = path;
+	}
+
+	public synchronized void run() {
+	    if (path != null) {
+		try {
+		    long len = fs.getFile(path, IFile.Flags.READVOLATILE).length();
+		    fs.getLogger().info(Message.STATUS_COMMAND_OUTPUT_PROGRESS, len);
+		} catch (IOException e) {
+		}
 	    }
 	}
     }

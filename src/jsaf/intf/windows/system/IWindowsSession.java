@@ -27,6 +27,14 @@ public interface IWindowsSession extends IComputerSystem {
     String PROP_WMI_TIMEOUT = "wmi.timeout";
 
     /**
+     * Property indicating the default number of milliseconds to wait for output from a Powershell command, before quitting
+     * and throwing an exception.
+     *
+     * @since 1.3.5
+     */
+    String PROP_POWERSHELL_TIMEOUT = "powershell.timeout";
+
+    /**
      * Name of the environment variable containing the processor architecture (when running in 32-bit mode on a 64-bit
      * machine, the value will actually be the emulated architecture).
      *

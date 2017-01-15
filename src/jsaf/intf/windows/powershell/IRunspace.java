@@ -5,6 +5,7 @@ package jsaf.intf.windows.powershell;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.net.URL;
 
 import jsaf.intf.util.ILoggable;
 import jsaf.intf.windows.system.IWindowsSession;
@@ -35,52 +36,112 @@ public interface IRunspace extends ILoggable {
     IWindowsSession.View getView();
 
     /**
-     * Load a Powershell module into the runspace from a stream.
-     *
-     * @throws IOException if there is a problem reading from the input, or writing to the Runspace
-     * @throws PowershellException if there is a Powershell syntactical error with the module contents
+     * Load a Powershell module into the runspace from an InputStream.
      *
      * @since 1.0
      */
     void loadModule(InputStream in) throws IOException, PowershellException;
 
     /**
-     * Load a module with the specified read timeout (in millis).
+     * Load a Powershell module into the runspace from an InputStream, using the specified timeout (in millis).
      *
      * @since 1.0
      */
     void loadModule(InputStream in, long timeout) throws IOException, PowershellException;
 
     /**
-     * Load an assembly (DLL) into the runspace from a stream.
+     * Load a Powershell module into the runspace from a URL.
      *
-     * @throws IOException if there is a problem reading from the input, or writing to the Runspace
-     * @throws PowershellException if there is an error loading the assembly
+     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
+     * @throws PowershellException if there is a Powershell syntactical error with the module contents
+     *
+     * @since 1.3.5
+     */
+    void loadModule(URL url) throws IOException, PowershellException;
+
+    /**
+     * Load a Powershell module into the runspace from a URL, using the specified timeout (in millis).
+     *
+     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
+     * @throws PowershellException if there is a Powershell syntactical error with the module contents
+     *
+     * @since 1.3.5
+     */
+    void loadModule(URL url, long timeout) throws IOException, PowershellException;
+
+    /**
+     * Load an assembly (DLL) into the runspace from an InputStream.
      *
      * @since 1.1
      */
     void loadAssembly(InputStream in) throws IOException, PowershellException;
 
     /**
-     * Load an assembly with the specified read timeout (in millis).
+     * Load an assembly (DLL) into the runspace from an InputStream, using the specified timeout (in millis).
      *
      * @since 1.1
      */
     void loadAssembly(InputStream in, long timeout) throws IOException, PowershellException;
 
     /**
-     * Load a module based on an assembly.
+     * Load an assembly (DLL) into the runspace from a URL.
+     *
+     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
+     * @throws PowershellException if there is a Powershell syntactical error with the module contents
+     *
+     * @since 1.3.5
+     */
+    void loadAssembly(URL url) throws IOException, PowershellException;
+
+    /**
+     * Load an assembly (DLL) into the runspace from a URL, using the specified timeout (in millis).
+     *
+     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
+     * @throws PowershellException if there is a Powershell syntactical error with the module contents
+     *
+     * @since 1.3.5
+     */
+    void loadAssembly(URL url, long timeout) throws IOException, PowershellException;
+
+    /**
+     * Load a module based on an assembly from an InputStream.
+     *
+     * @throws IOException if there is a problem reading from the stream, or writing to the Runspace
+     * @throws PowershellException if there is a Powershell syntactical error with the module contents
      *
      * @since 1.3.3
      */
     void loadModuleAssembly(InputStream in) throws IOException, PowershellException;
 
     /**
-     * Load a module based on an assembly, with the specified read timeout (in millis).
+     * Load a module based on an assembly from an InputStream, using the specified timeout (in millis).
+     *
+     * @throws IOException if there is a problem reading from the stream, or writing to the Runspace
+     * @throws PowershellException if there is a Powershell syntactical error with the module contents
      *
      * @since 1.3.3
      */
     void loadModuleAssembly(InputStream in, long timeout) throws IOException, PowershellException;
+
+    /**
+     * Load a module based on an assembly from a URL.
+     *
+     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
+     * @throws PowershellException if there is a Powershell syntactical error with the module contents
+     *
+     * @since 1.3.5
+     */
+    void loadModuleAssembly(URL url) throws IOException, PowershellException;
+
+    /**
+     * Load a module based on an assembly from a URL, using the specified timeout (in millis).
+     *
+     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
+     * @throws PowershellException if there is a Powershell syntactical error with the module contents
+     *
+     * @since 1.3.5
+     */
+    void loadModuleAssembly(URL url, long timeout) throws IOException, PowershellException;
 
     /**
      * Invoke a command or module.

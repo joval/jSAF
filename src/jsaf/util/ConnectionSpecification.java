@@ -11,13 +11,13 @@ import jsaf.intf.identity.ICredentialStore;
 import jsaf.intf.remote.IConnectionSpecification;
 
 /**
- * An implementation of IConnectionSpecification.
+ * An abstract implementation of IConnectionSpecification. Subclasses must populate the ICredentialStore.
  *
  * @author David A. Solin
  * @version %I% %G%
  * @since 1.1
  */
-public class ConnectionSpecification implements IConnectionSpecification {
+public abstract class ConnectionSpecification implements IConnectionSpecification {
     protected int port = -1;
     protected Type type;
     protected String id, hostname, fingerprint;

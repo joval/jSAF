@@ -30,7 +30,7 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
     public void start() {
 	if (thread == null) {
 	    thread = new Thread(this, "Event Publisher Thread");
-	    thread.setDaemon(false);
+	    thread.setDaemon(true);
 	    thread.start();
 	} else {
 	    throw new IllegalStateException();

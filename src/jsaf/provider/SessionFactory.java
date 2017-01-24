@@ -17,7 +17,8 @@ import jsaf.intf.util.ILoggable;
 import jsaf.util.Publisher;
 
 /**
- * Factory class for creating ISessions.
+ * Factory class for creating ISessions. To be loaded using this class's convenience methods, subclasses must implement a
+ * single-argument constructor that accepts a File indicating a workspace directory for caching temporary files.
  *
  * @author David A. Solin
  * @version %I% %G%

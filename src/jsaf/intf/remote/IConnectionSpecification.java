@@ -20,10 +20,36 @@ public interface IConnectionSpecification {
      * An enumeration of connection node types.
      */
     enum Type {
+	/**
+	 * Indicates a SOCKS proxy.
+	 */
 	SOCKS_PROXY(1080),
+
+	/**
+	 * Indicates an HTTP proxy.
+	 */
 	HTTP_PROXY(8080),
+
+	/**
+	 * Indicates an SSH-enabled device.
+	 */
 	SSH(22),
+
+	/**
+	 * Indicates a WS-Management-enabled device.
+	 */
 	WS_MAN(5985),
+
+	/**
+	 * Indicates a WS-Management-over-TLS-enabled device.
+	 *
+	 * @since 1.3.5
+	 */
+	WS_MAN_TLS(5986),
+
+	/**
+	 * Indicates a device type that is unknown.
+	 */
 	UNKNOWN(-1);
 
 	Type(int port) {
@@ -32,6 +58,9 @@ public interface IConnectionSpecification {
 
 	private int port;
 
+	/**
+	 * Get the default port number for the Type.
+	 */
 	public int getDefaultPort() {
 	    return port;
 	}

@@ -23,46 +23,73 @@ public interface IConnectionSpecification {
 	/**
 	 * Indicates a SOCKS proxy.
 	 */
-	SOCKS_PROXY(1080),
+	SOCKS_PROXY("proxy/socks", 1080),
 
 	/**
 	 * Indicates an HTTP proxy.
 	 */
-	HTTP_PROXY(8080),
+	HTTP_PROXY("proxy/http", 8080),
 
 	/**
 	 * Indicates an SSH-enabled device.
 	 */
-	SSH(22),
+	SSH("ssh", 22),
 
 	/**
 	 * Indicates a WS-Management-enabled device.
 	 */
-	WS_MAN(5985),
+	WS_MAN("WS-Management", 5985),
 
 	/**
 	 * Indicates a WS-Management-over-TLS-enabled device.
 	 *
 	 * @since 1.3.5
 	 */
-	WS_MAN_TLS(5986),
+	WS_MAN_TLS("WS-Management/TLS", 5986),
 
 	/**
 	 * Indicates a device type that is unknown.
 	 */
-	UNKNOWN(-1);
+	UNKNOWN("unknown", -1);
 
-	Type(int port) {
-	    this.port = port;
+	private String value;
+	private int defaultPort;
+
+	private Type(String value, int defaultPort) {
+	    this.value = value;
+	    this.defaultPort = defaultPort;
 	}
 
-	private int port;
+	/**
+	 * Get the Type's corresponding String value.
+	 *
+	 * @since 1.3.5
+	 */
+	public String value() {
+	    return value;
+	}
 
 	/**
 	 * Get the default port number for the Type.
+	 *
+	 * @since 1.1
 	 */
 	public int getDefaultPort() {
-	    return port;
+	    return defaultPort;
+	}
+
+	/**
+	 * Given a String value, obtain a corresponding Type.
+	 *
+	 * @since 1.3.5
+	 */
+	public static Type typeOf(String s) {
+	    for (Type t : values()) {
+		if (t.value.equals(s)) {
+		    return t;
+		}
+	    }
+	    return UNKNOWN;
 	}
     }
 

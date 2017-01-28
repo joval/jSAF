@@ -4,7 +4,6 @@
 package jsaf.intf.discovery;
 
 import jsaf.intf.remote.IConnectionSpecification;
-import jsaf.intf.system.ISession;
 import jsaf.intf.util.ILoggable;
 
 /**
@@ -40,7 +39,7 @@ public interface IDiscoveryService extends ILoggable {
 	/**
 	 * Return the session type discovered for the device.
 	 */
-        ISession.Type getType();
+        IConnectionSpecification.Type getType();
 
 	/**
 	 * Return the fingerprint of the SSH public key (if Type is SSH).

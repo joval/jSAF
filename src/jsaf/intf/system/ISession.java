@@ -29,7 +29,7 @@ public interface ISession extends IDisposable {
      */
     enum Type {
 	/**
-	 * An SSH-type session. This type is only intended to be a transition state used during a discovery process, that
+	 * A generic SSH-type session. This type is typically used as a transition state during a discovery process that
 	 * will ultimately yield a type of UNIX, CISCO_IOS, JUNIPER_JUNOS, NETCONF or UNKNOWN.
 	 *
 	 * @since 1.0
@@ -124,14 +124,6 @@ public interface ISession extends IDisposable {
 	 * @since 1.0
 	 */
 	WINDOWS("windows"),
-
-	/**
-	 * A WS-Management-type session. This type is only intended to be a transition state used during a discovery process,
-	 * that will ultimately yield a type of WINDOWS or UNKNOWN.
-	 *
-	 * @since 1.3
-	 */
-	WS_MAN("WS-Management"),
 
 	/**
 	 * Provides a mechanism for extended jSAF session types. The String value for the extended type

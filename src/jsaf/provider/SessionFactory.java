@@ -97,7 +97,7 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
 	    //
 	    // Find the constructor that accepts a single File argument
 	    //
-	    for (Constructor constructor : clazz.getConstructors()) {
+	    for (Constructor constructor : clazz.getDeclaredConstructors()) {
 		Class<?>[] params = constructor.getParameterTypes();
 		if (params.length == 1 && File.class == params[0]) {
 		    initializer = constructor;

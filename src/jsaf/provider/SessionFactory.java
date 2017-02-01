@@ -108,6 +108,7 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
 		String msg = Message.getMessage(Message.ERROR_FACTORY_INITIALIZER, factoryClassName);
 		throw new FactoryConfigurationError(msg);
 	    }
+	    initializer.setAccessible(true);
 	    return (SessionFactory)initializer.newInstance(workspace);
 	} catch (Exception e) {
 	    throw new FactoryConfigurationError(e);

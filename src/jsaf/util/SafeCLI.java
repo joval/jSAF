@@ -316,6 +316,9 @@ public class SafeCLI {
 	return manyLines(cmd, env, errHandler, sys, sys.getTimeout(timeout));
     }
 
+    static final String OPEN = "(";
+    static final String CLOSE = ")";
+
     /**
      * Pass in a custom error stream handler to the manyLines command, with a custom timeout.
      *
@@ -344,11 +347,11 @@ public class SafeCLI {
 		String tempPath = remoteTemp.getPath();
 		mon.setPath(tempPath);
 		String redirected;
-		if ((cmd.indexOf(";") != -1 || cmd.indexOf("&&") != -1) && !cmd.startsWith("(") && !cmd.endsWith(")")) {
+		if ((cmd.indexOf(";") != -1 || cmd.indexOf("&&") != -1) && !cmd.startsWith(OPEN) && !cmd.endsWith(CLOSE)) {
 		    //
 		    // Multiple comands have to be grouped, or only the last one's output will be redirected.
 		    //
-		    redirected = new StringBuffer("(").append(cmd).append(")").toString();
+		    redirected = new StringBuffer(OPEN).append(cmd).append(CLOSE).toString();
 		} else {
 		    redirected = cmd;
 		}

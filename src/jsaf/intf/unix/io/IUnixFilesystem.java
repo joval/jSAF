@@ -91,7 +91,8 @@ public interface IUnixFilesystem extends IFilesystem {
 	OREAD(02),
 	OWRITE(04),
 	SETUID(04000),
-	SETGID(02000);
+	SETGID(02000),
+	STICKY(01000);
 
 	private int bits;
 

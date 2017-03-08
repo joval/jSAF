@@ -340,6 +340,10 @@ public class SafeCLI {
 	JSAFSystem.getTimer().schedule(mon, 15000, 15000);
 	try {
 	    for (int attempt=1; true; attempt++) {
+		if (!sys.isConnected()) {
+		    sys.connect();
+		}
+
 		//
 		// Modify the command to redirect output to a temp file (compressed)
 		//

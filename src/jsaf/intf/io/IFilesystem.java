@@ -36,7 +36,7 @@ public interface IFilesystem extends ILoggable {
     String FILETYPE_DIR = "d";
 
     /**
-     * A condition value indicating a ling, for conditions of type FIELD_FILETYPE.
+     * A condition value indicating a link, for conditions of type FIELD_FILETYPE.
      *
      * @since 1.0
      */

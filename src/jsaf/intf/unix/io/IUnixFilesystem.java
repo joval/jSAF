@@ -81,18 +81,18 @@ public interface IUnixFilesystem extends IFilesystem {
      * @since 1.3.5
      */
     enum FilePermission {
-	UEXEC(0100),
-	UREAD(0200),
-	UWRITE(0400),
-	GEXEC(010),
-	GREAD(020),
-	GWRITE(040),
-	OEXEC(01),
-	OREAD(02),
-	OWRITE(04),
-	SETUID(04000),
+	OEXEC    (01),
+	OWRITE   (02),
+	OREAD    (04),
+	GEXEC   (010),
+	GWRITE  (020),
+	GREAD   (040),
+	UEXEC  (0100),
+	UWRITE (0200),
+	UREAD  (0400),
+	STICKY(01000),
 	SETGID(02000),
-	STICKY(01000);
+	SETUID(04000);
 
 	private int bits;
 

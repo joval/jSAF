@@ -35,6 +35,13 @@ public interface IWindowsSession extends IComputerSystem {
     String PROP_POWERSHELL_TIMEOUT = "powershell.timeout";
 
     /**
+     * Property indicating the initialization arguments to pass to the powershell process upon startup.
+     *
+     * @since 1.3.6
+     */
+    String PROP_POWERSHELL_INIT_ARGS = "powershell.initArgs";
+
+    /**
      * Name of the environment variable containing the processor architecture (when running in 32-bit mode on a 64-bit
      * machine, the value will actually be the emulated architecture).
      *

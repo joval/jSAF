@@ -1,4 +1,4 @@
-// Copyright (C) 2011 jOVAL.org.  All rights reserved.
+// Copyright (C) 2011-2017 jOVAL.org.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.intf.io;
@@ -88,14 +88,14 @@ public interface IReader extends ILoggable {
     /**
      * Set a checkpoint to which the reader can be reset.
      *
-     * @since 1.0
+     * @since 1.3.6
      */
-    void setCheckpoint(int readAheadLimit) throws IOException;
+    void mark(int readLimit);
 
     /**
      * Return the stream to the last mark position.
      *
-     * @since 1.0
+     * @since 1.3.6
      */
-    void restoreCheckpoint() throws IOException;
+    void reset() throws IOException;
 }

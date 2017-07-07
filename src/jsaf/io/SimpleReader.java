@@ -1,12 +1,10 @@
-// Copyright (C) 2014 jOVAL.org.  All rights reserved.
+// Copyright (C) 2014-2017 jOVAL.org.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.io;
 
-import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -24,7 +22,6 @@ import jsaf.util.Strings;
  * @since 1.0
  */
 public class SimpleReader implements IReader {
-    private BufferedReader reader;
     private InputStream in;
     private boolean closed, eof;
     private LocLogger logger;
@@ -50,7 +47,13 @@ public class SimpleReader implements IReader {
     // Implement IReader
 
     public int read() throws IOException {
-	return in.read();
+	if (eof) {
+	    return -1;
+	} else {
+	    int ch = in.read();
+	    eof = ch == -1;
+	    return ch;
+	}
     }
 
     public InputStream getStream() {
@@ -62,10 +65,14 @@ public class SimpleReader implements IReader {
     }
 
     public String readLine(Charset charset) throws IOException {
-	if (reader == null) {
-	    reader = new BufferedReader(new InputStreamReader(in, charset));
+	byte[] buff = readUntilInternal('\n', false);
+	if (buff.length == 0) {
+	    return eof ? null : "";
+	} else if (buff[buff.length - 1] == '\r') {
+	    return new String(buff, 0, buff.length - 1, charset);
+	} else {
+	    return new String(buff, charset);
 	}
-	return reader.readLine();
     }
 
     public void readFully(byte[] buff) throws IOException {
@@ -82,22 +89,7 @@ public class SimpleReader implements IReader {
     }
 
     public byte[] readUntil(int ch) throws IOException {
-	ArrayList<Byte> list = new ArrayList<Byte>();
-	while(true) {
-	    int c = read();
-	    if (c == -1) {
-		eof = true;
-		throw new EOFException();
-	    } else if (c == ch) {
-		byte[] buff = new byte[list.size()];
-		for (int i=0; i < buff.length; i++) {
-		    buff[i] = list.get(i).byteValue();
-		}
-		return buff;
-	    } else {
-		list.add(new Byte((byte)(0xFF & c)));
-	    }
-	}
+	return readUntilInternal(ch, true);
     }
 
     public void close() throws IOException {
@@ -113,11 +105,31 @@ public class SimpleReader implements IReader {
 	return eof;
     }
 
-    public void setCheckpoint(int readAheadLimit) throws IOException {
-	in.mark(readAheadLimit);
+    public void mark(int readLimit) {
+	in.mark(readLimit);
     }
 
-    public void restoreCheckpoint() throws IOException {
+    public void reset() throws IOException {
 	in.reset();
+    }
+
+    // Private
+
+    public byte[] readUntilInternal(int ch, boolean throwEOF) throws IOException {
+	ArrayList<Byte> list = new ArrayList<Byte>();
+	while(true) {
+	    int c = read();
+	    if (eof && throwEOF) {
+		throw new EOFException();
+	    } else if (c == ch || eof) {
+		byte[] buff = new byte[list.size()];
+		for (int i=0; i < buff.length; i++) {
+		    buff[i] = list.get(i).byteValue();
+		}
+		return buff;
+	    } else {
+		list.add(new Byte((byte)(0xFF & c)));
+	    }
+	}
     }
 }

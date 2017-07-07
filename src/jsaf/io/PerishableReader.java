@@ -1,4 +1,4 @@
-// Copyright (c) 2011 jOVAL.org.  All rights reserved.
+// Copyright (c) 2011-2017 jOVAL.org.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.io;
@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TimerTask;
-import java.util.Vector;
 
 import org.slf4j.cal10n.LocLogger;
 
@@ -50,14 +49,13 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	if (in == null) {
 	    throw new NullPointerException();
 	}
-	PerishableReader reader = null;
 	if (in instanceof PerishableReader) {
-	    reader = (PerishableReader)in;
+	    PerishableReader reader = (PerishableReader)in;
 	    reader.setTimeout(maxTime);
+	    return reader;
 	} else {
-	    reader = new PerishableReader(in, maxTime);
+	    return new PerishableReader(in, maxTime);
 	}
-	return reader;
     }
 
     protected InputStream in;
@@ -110,21 +108,24 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
     }
 
     @Override
-    public void mark(int readlimit) {
-	setCheckpoint(readlimit);
+    public synchronized void mark(int readLimit) {
+	buffer.mark(readLimit);
     }
 
     @Override
-    public void reset() throws IOException {
-	restoreCheckpoint();
+    public synchronized void reset() throws IOException {
+	if (buffer.isEmpty()) {
+	    throw new IOException("empty buffer");
+	}
+	buffer.reset();
     }
 
-    public synchronized boolean checkClosed() {
-	return buffer.hasNext() || closed;
+    public boolean checkClosed() {
+	return buffer.hasNext() ? false : closed;
     }
 
-    public synchronized boolean checkEOF() {
-	return buffer.hasNext() || isEOF;
+    public boolean checkEOF() {
+	return buffer.hasNext() ? false : isEOF;
     }
 
     public synchronized String readLine() throws IOException {
@@ -142,9 +143,9 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 		break;
 
 	      case '\r':
-		setCheckpoint(1);
+		mark(1);
 		if (read() != '\n') {
-		    restoreCheckpoint();
+		    reset();
 		}
 		result = new String(buff.toByteArray(), charset);
 		break;
@@ -191,7 +192,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 		return null;
 	    }
 	    out.write(buff);
-	    setCheckpoint(delim.length);
+	    mark(delim.length);
 	    byte[] b2 = new byte[delim.length];
 	    b2[0] = delim[0];
 	    try {
@@ -200,10 +201,10 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 		    found = true;
 		} else {
 		    out.write(b2[0]);
-		    restoreCheckpoint();
+		    reset();
 		}
 	    } catch (EOFException e) {
-		restoreCheckpoint();
+		reset();
 		int len = 0;
 		buff = new byte[512];
 		while((len = read(buff)) > 0) {
@@ -283,17 +284,6 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	    resetTimer();
 	}
 	return i;
-    }
-
-    public synchronized void setCheckpoint(int readAheadLimit) {
-	buffer.init(readAheadLimit);
-    }
-
-    public synchronized void restoreCheckpoint() throws IOException {
-	if (buffer.isEmpty()) {
-	    throw new IOException("empty buffer");
-	}
-	buffer.reset();
     }
 
     // Implement IPerishable
@@ -399,7 +389,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	int resetPos = 0;
 
 	public Buffer(int size) {
-	    init(size);
+	    mark(size);
 	}
 
 	@Override
@@ -411,7 +401,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 		 " Ahead: \"" + new String(buff, pos, len - pos) + "\"" + " hasNext: " + hasNext();
 	}
 
-	void init(int size) {
+	public void mark(int size) {
 	    if (hasNext()) {
 		//
 		// If the stream is already reading from inside the buffer, then don't lose the buffered data.
@@ -432,18 +422,6 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	    }
 	}
 
-	public boolean isEmpty() {
-	    return buff == null;
-	}
-
-	public void clear() throws IllegalStateException {
-	    if (hasNext()) {
-		throw new IllegalStateException(Integer.toString(len - pos));
-	    } else if (buff != null) {
-		buff = null;
-	    }
-	}
-
 	public void reset() {
 	    pos = resetPos;
 	}
@@ -452,7 +430,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	    return buff != null && pos < len;
 	}
 
-	public byte next() throws NoSuchElementException {
+	public synchronized byte next() throws NoSuchElementException {
 	    if (hasNext()) {
 		return buff[pos++];
 	    } else {
@@ -460,21 +438,17 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	    }
 	}
 
-	public boolean hasCapacity() {
-	    return buff != null && len < buff.length;
-	}
-
-	public void add(int ch) {
+	public synchronized void add(int ch) {
 	    add((byte)(ch & 0xFF));
 	}
 
-	public void add(byte b) {
+	public synchronized void add(byte b) {
 	    if (hasNext()) {
 		//
 		// A delayed add: insert the byte before the active part of the buffer
 		//
 		if (!hasCapacity()) {
-		    init(buff.length + 1);
+		    mark(buff.length + 1);
 		}
 		for (int i=len; i > pos; i--) {
 		    buff[i] = buff[i-1];
@@ -489,11 +463,29 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	    }
 	}
 
-	public void add(byte[] bytes, int offset, int length) {
+	public synchronized void add(byte[] bytes, int offset, int length) {
 	    int end = Math.min(bytes.length, (offset + length));
 	    for (int i=offset; i < end; i++) {
 		add(bytes[i]);
 	    }
+	}
+
+	public synchronized void clear() throws IllegalStateException {
+	    if (hasNext()) {
+		throw new IllegalStateException(Integer.toString(len - pos));
+	    } else if (buff != null) {
+		buff = null;
+	    }
+	}
+
+	// Protected
+
+	protected boolean hasCapacity() {
+	    return buff != null && len < buff.length;
+	}
+
+	protected boolean isEmpty() {
+	    return buff == null;
 	}
     }
 }

@@ -88,14 +88,14 @@ public interface IReader extends ILoggable {
     /**
      * Set a checkpoint to which the reader can be reset.
      *
-     * @since 1.3.6
+     * @since 1.3.7
      */
     void mark(int readLimit);
 
     /**
      * Return the stream to the last mark position.
      *
-     * @since 1.3.6
+     * @since 1.3.7
      */
     void reset() throws IOException;
 }

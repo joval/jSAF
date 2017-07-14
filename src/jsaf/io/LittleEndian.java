@@ -167,6 +167,18 @@ public class LittleEndian {
     }
 
     /**
+     * @since 1.3.7
+     */
+    public static final byte[] uintToLEBytes(int i) {
+	byte[] buff = new byte[4];
+	buff[0] = (byte)(0xFF & i);
+	buff[1] = (byte)(0xFF & (i >> 8));
+	buff[2] = (byte)(0xFF & (i >> 16));
+	buff[3] = (byte)(0xFF & (i >> 24));
+	return buff;
+    }
+
+    /**
      * Read a signed 4-byte int (AKA DWORD).
      *
      * @since 1.0
@@ -201,12 +213,7 @@ public class LittleEndian {
      * @since 1.0
      */
     public static final void writeUInt(int i, OutputStream out) throws IOException {
-	byte[] buff = new byte[4];
-	buff[0] = (byte)(0xFF & i);
-	buff[1] = (byte)(0xFF & (i >> 8));
-	buff[2] = (byte)(0xFF & (i >> 16));
-	buff[3] = (byte)(0xFF & (i >> 24));
-	out.write(buff);
+	out.write(uintToLEBytes(i));
     }
 
     /**

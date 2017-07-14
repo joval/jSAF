@@ -65,7 +65,7 @@ public class Streams {
 	    int offset = 0;
 	    do {
 		int bytesRead = in.read(buff, offset, buff.length-offset);
-		if (bytesRead == 0) {
+		if (bytesRead == -1) {
 		    throw new EOFException(Message.getMessage(Message.ERROR_EOS));
 		} else {
 		    offset += bytesRead;

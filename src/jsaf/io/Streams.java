@@ -170,6 +170,33 @@ public class Streams {
 	throw new java.nio.charset.CharacterCodingException();
     }
 
+    /**
+     * Read a line from an InputStream.
+     *
+     * @since 1.3.7
+     */
+    public static String readLine(InputStream in, Charset charset) throws IOException {
+	ByteArrayOutputStream buff = new ByteArrayOutputStream();
+	int ch = -1;
+	while((ch = in.read()) != -1) {
+	    switch(ch) {
+	      case '\n':
+		byte[] data = buff.toByteArray();
+		if (data.length == 0) {
+		    return "";
+		} else if (data[data.length - 1] == '\r') {
+		    return new String(buff.toByteArray(), 0, data.length - 1, charset);
+		} else {
+		    return new String(buff.toByteArray(), charset).trim();
+		}
+	      default:
+		buff.write(ch);
+		break;
+	    }
+	}
+	throw new EOFException();
+    }
+
     // Private
 
     private static class Copier implements Runnable {

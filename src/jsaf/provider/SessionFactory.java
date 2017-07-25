@@ -47,6 +47,13 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
     public static final String OFFLINE_FACTORY = "jsaf.provider.OfflineSessionFactory";
 
     /**
+     * The class name of the default agent-based factory implementation.
+     *
+     * @since 1.3.7
+     */
+    public static final String AGENT_FACTORY = "jsaf.provider.AgentSessionFactory";
+
+    /**
      * Obtain a new instance of a SessionFactory, with no workspace directory. 
      *
      * @since 1.0

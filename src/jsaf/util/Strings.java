@@ -446,7 +446,7 @@ public class Strings {
 	if (s.endsWith("$")) {
 	    s = s.substring(0, s.length()-1);
 	} else if (!s.endsWith(".*")) {
-	    throw new IllegalArgumentException();
+	    s = new StringBuffer(s).append(".*").toString(); // trailing .* is implied
 	}
 	StringBuffer outerSb = new StringBuffer();
 	Iterator<String> outerIter = tokenize(s, ".*", false);
@@ -464,7 +464,7 @@ public class Strings {
 		    }
 		    String innerFrag = innerIter.next();
 		    if (containsRegex(innerFrag)) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("contains regex: " + innerFrag);
 		    } else {
 			innerSb.append(innerFrag);
 		    }

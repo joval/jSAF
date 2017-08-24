@@ -295,6 +295,40 @@ public class Strings {
     }
 
     /**
+     * Undo escapeRegex.
+     *
+     * @since 1.3.7
+     */
+    public static String unescapeRegex(String s) {
+	Stack<String> delims = new Stack<String>();
+	for (int i=0; i < REGEX_STRS.length; i++) {
+	    delims.add(new StringBuffer("\\").append(REGEX_STRS[i]).toString());
+	}
+	while(!delims.empty()) {
+	    StringBuffer unescaped = new StringBuffer();
+	    String delim = delims.pop();
+	    int ptr=0, last=0;
+	    while(ptr != -1) {
+		if (ptr == 0) {
+		    ptr = s.indexOf(delim, ptr);
+		} else {
+		    unescaped.append(s.substring(last, ptr));
+		    if (isEscaped(s, ptr)) {
+			unescaped.append(delim);
+		    } else {
+			unescaped.append(delim.substring(1));
+		    }
+		    last = ptr + delim.length();
+		    ptr = s.indexOf(delim, last);
+		}
+	    }
+	    unescaped.append(s.substring(last));
+	    s = unescaped.toString();
+	}
+	return s;
+    }
+
+    /**
      * Returns true if the specified String contains any regular expression syntax.
      *
      * @since 1.2

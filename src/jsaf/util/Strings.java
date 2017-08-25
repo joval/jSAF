@@ -1,4 +1,4 @@
-// Copyright (C) 2011 jOVAL.org.  All rights reserved.
+// Copyright (C) 2011-2017 JovalCM.com.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.util;
@@ -67,26 +67,9 @@ public class Strings {
      */
     public static final String CLOSE = "}";
 
-    /**
-     * A regular expression pattern for a quantifier string (which would be enclosed by curly-brackets).
-     *
-     * @since 1.2
-     */
-    public static final String QUALIFIER_PATTERN = "[0-9]+,{0,1}[0-9]*";
-
-    /**
-     * Array containing all the regex special characters.
-     *
-     * @since 1.2
-     */
-    public static final char[] REGEX_CHARS = {'\\', '^', '.', '$', '|', '(', ')', '[', ']', '{', '}', '*', '+', '?'};
-
-    /**
-     * String equivalents of REGEX_CHARS.
-     *
-     * @since 1.2
-     */
-    public static final String[] REGEX_STRS = {ESCAPE, "^", ".", "$", "|", "(", ")", "[", "]", OPEN, CLOSE, "*", "+", "?"};
+    private static final char[] REGEX_CHARS = {'\\', '^', '.', '$', '|', '(', ')', '[', ']', '{', '}', '*', '+', '?'};
+    private static final String[] REGEX_STRS = {ESCAPE, "^", ".", "$", "|", "(", ")", "[", "]", OPEN, CLOSE, "*", "+", "?"};
+    private static final String QUALIFIER_PATTERN = "[0-9]+,{0,1}[0-9]*";
 
     /**
      * An ascending Comparator for Strings.
@@ -145,8 +128,7 @@ public class Strings {
     }
 
     /**
-     * A StringTokenizer operates on single-character tokens.  This acts on a delimiter that is a multi-character
-     * String.
+     * A StringTokenizer operates on single-character tokens. This acts on a delimiter that is a multi-character String.
      *
      * @since 1.2
      */
@@ -156,12 +138,21 @@ public class Strings {
 
     /**
      * Gives you an option to keep any zero-length tokens at the ends of the target, if it begins or ends with the delimiter.
-     * This guarantees that you get one token for every time the delimiter appears in the target String.
+     * This guarantees that you get one token for every instance of the delimiter in the target String.
      *
      * @since 1.2
      */
     public static Iterator<String> tokenize(String target, String delimiter, boolean trim) {
 	return new StringTokenIterator(target, delimiter, trim);
+    }
+
+    /**
+     * Like tokenize, but skips escaped instances of the delimiter.
+     *
+     * @since 1.3.7
+     */
+    public static Iterator<String> tokenizeUnescaped(String target, String delimiter, boolean trim) {
+	return new StringTokenIterator(target, delimiter, trim, true);
     }
 
     /**
@@ -287,11 +278,7 @@ public class Strings {
      * @since 1.2
      */
     public static String escapeRegex(String s) {
-	Stack<String> delims = new Stack<String>();
-	for (int i=0; i < REGEX_STRS.length; i++) {
-	    delims.add(REGEX_STRS[i]);
-	}
-	return safeEscape(delims, s);
+	return safeEscape(s, REGEX_STRS);
     }
 
     /**
@@ -300,32 +287,7 @@ public class Strings {
      * @since 1.3.7
      */
     public static String unescapeRegex(String s) {
-	Stack<String> delims = new Stack<String>();
-	for (int i=0; i < REGEX_STRS.length; i++) {
-	    delims.add(new StringBuffer("\\").append(REGEX_STRS[i]).toString());
-	}
-	while(!delims.empty()) {
-	    StringBuffer unescaped = new StringBuffer();
-	    String delim = delims.pop();
-	    int ptr=0, last=0;
-	    while(ptr != -1) {
-		if (ptr == 0) {
-		    ptr = s.indexOf(delim, ptr);
-		} else {
-		    unescaped.append(s.substring(last, ptr));
-		    if (isEscaped(s, ptr)) {
-			unescaped.append(delim);
-		    } else {
-			unescaped.append(delim.substring(1));
-		    }
-		    last = ptr + delim.length();
-		    ptr = s.indexOf(delim, last);
-		}
-	    }
-	    unescaped.append(s.substring(last));
-	    s = unescaped.toString();
-	}
-	return s;
+	return safeUnescape(s, REGEX_STRS);
     }
 
     /**
@@ -336,6 +298,18 @@ public class Strings {
     public static boolean containsRegex(String s) {
 	for (String ch : REGEX_STRS) {
 	    if (s.indexOf(ch) != -1) {
+		return true;
+	    }
+	}
+	return false;
+    }
+
+    /**
+     * @since 1.3.7
+     */
+    public static boolean isRegexChar(char c) {
+	for (char ch : REGEX_CHARS) {
+	    if (c == ch) {
 		return true;
 	    }
 	}
@@ -442,7 +416,8 @@ public class Strings {
     }
 
     /**
-     * Perform a substitution of POSIX character classes to Unicode character classes.
+     * Perform a substitution of POSIX character classes to Unicode character classes. Also, replaces '\_' with '_',
+     * which is a harmless error in most regular expression engines, but not Microsoft's.
      *
      * @since 1.2
      */
@@ -460,7 +435,7 @@ public class Strings {
 	psExpression = psExpression.replace("[:upper:]", "\\p{Lu}");
 	psExpression = psExpression.replace("[:lower:]", "\\p{Ll}");
 	psExpression = psExpression.replace("[:cntrl:]", "\\p{Cc}");
-	return psExpression;
+	return safeUnescape(psExpression, "_");
     }
 
     /**
@@ -617,7 +592,7 @@ public class Strings {
     }
 
     /**
-     * Escape instances of the pattern in s which are not already escaped.
+     * Escape unescaped instances of the pattern in s.
      */
     private static String escapeUnescaped(String s, String pattern) {
 	StringBuffer sb = new StringBuffer();
@@ -628,36 +603,87 @@ public class Strings {
 	    if (isEscaped(s, next)) {
 		sb.append(pattern);
 	    } else {
-		sb.append("\\").append(pattern);
+		sb.append(ESCAPE).append(pattern);
 	    }
 	    last = next + pattern.length();
 	}
 	return sb.append(s.substring(last)).toString();
     }
 
-    private static String safeEscape(Stack<String> delims, String s) {
-	if (delims.empty()) {
-	    return s;
-	} else {
-	    String delim = delims.pop();
-	    Stack<String> copy = new Stack<String>();
-	    copy.addAll(delims);
-	    List<String> list = toList(tokenize(s, delim, false));
-	    int len = list.size();
-	    StringBuffer result = new StringBuffer();
-	    for (int i=0; i < len; i++) {
-		if (i > 0) {
-		    result.append(ESCAPE);
-		    result.append(delim);
-		}
-		result.append(safeEscape(copy, list.get(i)));
-	    }
-	    return result.toString();
+    /**
+     * Escape instances of the pattern in s which are not already escaped.
+     */
+    private static String safeEscape(String s, String... delims) {
+	//
+	// Insure ESCAPE is processed first
+	//
+	List<String> array = new ArrayList<String>(Arrays.<String>asList(delims));
+	if (array.contains(ESCAPE) && !ESCAPE.equals(delims[0])) {
+	    array.remove(ESCAPE);
+	    List<String> temp = array;
+	    array = new ArrayList<String>();
+	    array.add(ESCAPE);
+	    array.addAll(temp);
+	    delims = array.<String>toArray(new String[array.size()]);
 	}
+	for (int i=0; i < delims.length; i++) {
+	    String delim = delims[i];
+	    List<String> list = toList(tokenize(s, delim, false));
+	    StringBuffer escaped = new StringBuffer();
+	    for (int j=0; j < list.size(); j++) {
+		if (j > 0) {
+		    escaped.append(ESCAPE);
+		    escaped.append(delim);
+		}
+		escaped.append(list.get(j));
+	    }
+	    s = escaped.toString();
+	}
+	return s;
+    }
+
+    /**
+     * Unescape the specified stack (of escaped delimiters) from the supplied String, s. Escaped
+     * delimiters are unescaped in the order provided.
+     */
+    private static String safeUnescape(String s, String... delims) {
+	//
+	// Insure ESCAPE is processed last
+	//
+	List<String> array = new ArrayList<String>(Arrays.<String>asList(delims));
+	int lastIndex = delims.length - 1;
+	if (array.contains(ESCAPE) && !ESCAPE.equals(delims[lastIndex])) {
+	    array.remove(ESCAPE);
+	    List<String> temp = array;
+	    array = new ArrayList<String>();
+	    array.addAll(temp);
+	    array.add(ESCAPE);
+	    delims = array.<String>toArray(new String[array.size()]);
+	}
+	for (int i=0; i < delims.length; i++) {
+	    String delim = ESCAPE + delims[i];
+	    StringBuffer unescaped = new StringBuffer();
+	    int last = 0;
+	    int ptr = s.indexOf(delim);
+	    while (ptr != -1) {
+		unescaped.append(s.substring(last, ptr));
+		if (isEscaped(s, ptr)) {
+		    unescaped.append(delim);
+		} else {
+		    unescaped.append(delim.substring(1));
+		}
+		last = ptr + delim.length();
+		ptr = s.indexOf(delim, last);
+	    }
+	    unescaped.append(s.substring(last));
+	    s = unescaped.toString();
+	}
+	return s;
     }
 
     static final class StringTokenIterator implements Iterator<String> {
 	private String target, delimiter, next, last=null;
+	private boolean ignoreEscaped;
 	int pointer;
 
 	StringTokenIterator(String target, String delimiter) {
@@ -665,21 +691,29 @@ public class Strings {
 	}
 
 	StringTokenIterator(String target, String delimiter, boolean trim) {
+	    this(target, delimiter, trim, false);
+	}
+
+	StringTokenIterator(String target, String delimiter, boolean trim, boolean ignoreEscaped) {
 	    if (trim) {
 		//
 		// Trim tokens from the beginning and end.
 		//
 		int len = delimiter.length();
-		if (target.startsWith(delimiter)) {
+		while(target.startsWith(delimiter)) {
 		    target = target.substring(len);
 		}
-		if (target.endsWith(delimiter)) {
-		    target = target.substring(0, target.length() - len);
+		while(target.endsWith(delimiter)) {
+		    if (ignoreEscaped && isEscaped(target, target.length() - len)) {
+			break;
+		    } else {
+			target = target.substring(0, target.length() - len);
+		    }
 		}
 	    }
-
 	    this.target = target;
 	    this.delimiter = delimiter;
+	    this.ignoreEscaped = ignoreEscaped;
 	    pointer = 0;
 	}
 
@@ -700,7 +734,13 @@ public class Strings {
 		next = null;
 		return tmp;
 	    }
-	    int i = target.indexOf(delimiter, pointer);
+	    int i = pointer;
+	    do {
+		if (i > pointer) {
+		    i += delimiter.length();
+		}
+		i = target.indexOf(delimiter, i);
+	    } while (i != -1 && ignoreEscaped && isEscaped(target, i));
 	    if (last != null) {
 		String tmp = last;
 		last = null;

@@ -320,6 +320,27 @@ public class Strings {
 	return sb.toString();
     }
 
+    /**
+     * Trim white-space from the left-hand side of a string.
+     *
+     * @since 1.3.8
+     */
+    public static String leftTrim(String s) {
+	int ptr = 0;
+	for (int i=0; i < s.length(); i++) {
+	    switch(s.charAt(i)) {
+	      case ' ':
+	      case '\t':
+	      case '\r':
+	      case '\n':
+		ptr++;
+		break;
+	      default:
+		return s.substring(ptr);
+	    }
+	}
+	return "";
+    }
 
     // Private
 

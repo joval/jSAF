@@ -110,4 +110,5 @@ CLASSES=\
 	jsaf.util.PropertyUtil	\
 	jsaf.util.Publisher	\
 	jsaf.util.SafeCLI	\
+	jsaf.util.Regex	\
 	jsaf.util.Strings

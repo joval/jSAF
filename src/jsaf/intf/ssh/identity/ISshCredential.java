@@ -74,7 +74,7 @@ public interface ISshCredential extends ICredential {
 	/**
 	 * Retrieve the credential associated with the escalation type.
 	 *
-	 * @return null for Type.NONE and Type.SUDO, ICredential for Type.ROOT and Type.IOS_ENABLE.
+	 * @return null for Type.NONE and Type.SUDO, ICredential for Type.SU and Type.IOS_ENABLE.
 	 */
 	ICredential getCredential();
     }

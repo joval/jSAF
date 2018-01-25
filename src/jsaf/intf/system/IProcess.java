@@ -37,7 +37,8 @@ public interface IProcess {
     public InputStream getInputStream() throws IOException;
 
     /**
-     * Get the process's stderr
+     * Get the process's stderr. Note: this could potentially return null, for example, if the process is run via SSH using
+     * a pseudo-terminal.
      *
      * @since 1.0
      */

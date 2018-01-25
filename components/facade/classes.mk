@@ -78,6 +78,7 @@ CLASSES=\
 	jsaf.intf.windows.wmi.ISWbemProperty	\
 	jsaf.intf.windows.wmi.ISWbemPropertySet	\
 	jsaf.intf.windows.wmi.IWmiProvider	\
+	jsaf.io.LineIterator	\
 	jsaf.io.LittleEndian	\
 	jsaf.io.PerishableReader	\
 	jsaf.io.SimpleReader	\
@@ -99,8 +100,6 @@ CLASSES=\
 	jsaf.util.AbstractEnvironment	\
 	jsaf.util.Base64	\
 	jsaf.util.Bytes	\
-	jsaf.util.BoundaryIterator	\
-	jsaf.util.BoundaryReaderHandler	\
 	jsaf.util.Checksum	\
 	jsaf.util.ConnectionSpecification	\
 	jsaf.util.Environment	\

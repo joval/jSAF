@@ -32,9 +32,11 @@ import jsaf.intf.system.IProcess;
 import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.system.ISession;
 import jsaf.intf.unix.system.IUnixSession;
+import jsaf.io.LineIterator;
 import jsaf.io.PerishableReader;
 import jsaf.io.SimpleReader;
 import jsaf.io.Streams;
+import jsaf.io.TruncatedInputStream;
 import jsaf.provider.SessionException;
 
 /**
@@ -60,6 +62,9 @@ public class SafeCLI {
     public interface IReaderHandler {
 	/**
 	 * Handle data from the reader. Implementations must NEVER catch an IOException originating from the reader!
+	 *
+	 * NOTE: This method will be called multiple times if the process must retry, so be sure to perform (re-)initialization
+	 *       within the implementation of this method.
 	 *
 	 * @since 1.3
 	 */
@@ -368,37 +373,20 @@ public class SafeCLI {
 		    break;
 		}
 
-		BufferHandler out = new BufferHandler();
-		BufferHandler err = new BufferHandler();
 		SafeCLI cli = new SafeCLI(redirected, null, null, sys, timeout);
-		if (cli.execOnce(out, err, attempt)) {
+		if (cli.execOnce(null, errHandler, attempt)) {
 		    //
-		    // Handle error data
-		    //
-		    byte[] buff = err.getData();
-		    if (buff.length > 0) {
-			errHandler.handle(new SimpleReader(new ByteArrayInputStream(buff), sys.getLogger()));
-		    } else {
-			//
-			// Since stdout has been redirected to a file, and we've already attempted to process the buffered
-			// output from stderr, any data contained by the output buffer must be stderr output that's been
-			// directed for whatever reason to the stdout stream.
-			//
-			errHandler.handle(new SimpleReader(new ByteArrayInputStream(out.getData()), sys.getLogger()));
-		    }
-
-		    //
-		    // Create and return a reader/Iterator<String> based on a local cache file containing the output
+		    // Create and return a LineIterator based on a local cache file containing the output
 		    //
 		    if (ISession.LOCALHOST.equals(sys.getHostname())) {
-			return new ReaderIterator(new File(tempPath));
+			return new LineIterator(new File(tempPath), true);
 		    } else {
 			File tempDir = sys.getWorkspace() == null ? new File(System.getProperty("user.home")) : sys.getWorkspace();
 			File localTemp = File.createTempFile("cmd", null, tempDir);
 			try {
 			    Streams.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
 			    remoteTemp.delete();
-			    return new ReaderIterator(localTemp);
+			    return new LineIterator(localTemp, true);
 			} catch (IOException e) {
 			    if (attempt > cli.execRetries) {
 				throw e;
@@ -577,15 +565,29 @@ public class SafeCLI {
 	try {
 	    p = sys.createProcess(cmd, env, dir);
 	    p.start();
-	    reader = PerishableReader.newInstance(p.getInputStream(), readTimeout);
-	    reader.setLogger(sys.getLogger());
-	    if (errorHandler == null) {
+	    InputStream err = p.getErrorStream();
+	    if (outputHandler == null) {
+		if (err == null) {
+		    //
+		    // In this scenario, e.g., the output is redirected to a file, and a pseudo-terminal precludes the existence
+		    // of a stderr channel. Hence, we use the errorHandler to process stdout.
+		    //
+		    outputHandler = errorHandler;
+		} else {
+		    outputHandler = new DevNullHandler();
+		}
+	    }
+	    if (err == null) {
+		// no errThread
+	    } else if (errorHandler == null) {
 		errThread = new HandlerThread(DevNull, "pipe to /dev/null");
-		errThread.start(PerishableReader.newInstance(p.getErrorStream(), sys.getTimeout(ISession.Timeout.XL)));
+		errThread.start(PerishableReader.newInstance(err, sys.getTimeout(ISession.Timeout.XL)));
 	    } else {
 		errThread = new HandlerThread(errorHandler, "stderr reader");
-		errThread.start(PerishableReader.newInstance(p.getErrorStream(), sys.getTimeout(ISession.Timeout.XL)));
+		errThread.start(PerishableReader.newInstance(err, sys.getTimeout(ISession.Timeout.XL)));
 	    }
+	    reader = PerishableReader.newInstance(p.getInputStream(), readTimeout);
+	    reader.setLogger(sys.getLogger());
 	    outputHandler.handle(reader);
 	    p.waitFor(sys.getTimeout(ISession.Timeout.S));
 	    result.exitCode = p.exitValue();
@@ -641,8 +643,9 @@ public class SafeCLI {
     }
 
     private void exec() throws Exception {
-	BufferHandler out = new BufferHandler();
-	BufferHandler err = new BufferHandler();
+	int maxLen = sys.getProperties().getIntProperty(ISession.PROP_PROCESS_MAXBUFFLEN);
+	BufferHandler out = new BufferHandler(maxLen);
+	BufferHandler err = new BufferHandler(maxLen);
 	exec(out, err);
 	result.data = out.getData();
 	result.err = err.getData();
@@ -653,9 +656,11 @@ public class SafeCLI {
      */
     static class BufferHandler implements IReaderHandler {
 	private ByteArrayOutputStream buff;
+	private int maxLen;
 
-	BufferHandler() {
+	BufferHandler(int maxLen) {
 	    buff = new ByteArrayOutputStream();
+	    this.maxLen = maxLen;
 	}
 
 	byte[] getData() {
@@ -667,7 +672,19 @@ public class SafeCLI {
 	}
 
 	public void handle(IReader reader) throws IOException {
-	    Streams.copy(reader.getStream(), buff, true);
+	    Streams.copy(new TruncatedInputStream(reader.getStream(), maxLen), buff, true);
+	}
+    }
+
+    /**
+     * An IReaderHandler that discards data.
+     */
+    static class DevNullHandler implements IReaderHandler {
+	DevNullHandler() {
+	}
+
+	public void handle(IReader reader) throws IOException {
+	    Streams.copy(reader.getStream(), Streams.devNull());
 	}
     }
 
@@ -761,80 +778,6 @@ public class SafeCLI {
 		    long len = fs.getFile(path, IFile.Flags.READVOLATILE).length();
 		    fs.getLogger().info(Message.STATUS_COMMAND_OUTPUT_PROGRESS, len);
 		} catch (IOException e) {
-		}
-	    }
-	}
-    }
-
-    static class ReaderIterator implements Iterator<String> {
-	File file;
-	BufferedReader reader;
-	String next = null;
-
-	ReaderIterator(File file) throws IOException {
-	    this.file = file;
-	    try {
-		InputStream in = new GZIPInputStream(new FileInputStream(file));
-		reader = new BufferedReader(new InputStreamReader(in, Strings.UTF8));
-	    } catch (IOException e) {
-		close();
-		throw e;
-	    }
-	}
-
-	@Override
-	protected void finalize() {
-	    close();
-	}
-
-	// Implement Iterator<String>
-
-	public boolean hasNext() {
-	    if (next == null) {
-		try {
-		    next = next();
-		    return true;
-		} catch (NoSuchElementException e) {
-		    close();
-		    return false;
-		}
-	    } else {
-		return true;
-	    }
-	}
-
-	public String next() throws NoSuchElementException {
-	    if (next == null) {
-		try {
-		    if ((next = reader.readLine()) == null) {
-			try {
-			    reader.close();
-			} catch (IOException e) {
-			}
-			throw new NoSuchElementException();
-		    }
-		} catch (IOException e) {
-		    throw new NoSuchElementException(e.getMessage());
-		}
-	    }
-	    String temp = next;
-	    next = null;
-	    return temp;
-	}
-
-	public void remove() {
-	    throw new UnsupportedOperationException();
-	}
-
-	// Private
-
-	/**
-	 * Clean up the remote or local file.
-	 */
-	private void close() {
-	    if (file != null) {
-		if (file.delete()) {
-		    file = null;
 		}
 	    }
 	}

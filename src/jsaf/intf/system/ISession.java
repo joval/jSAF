@@ -248,6 +248,13 @@ public interface ISession extends IDisposable {
     String PROP_DEBUG = "debug";
 
     /**
+     * Property indicating the maximum size of any in-memory buffer containing process output.
+     *
+     * @since 1.3.9
+     */
+    String PROP_PROCESS_MAXBUFFLEN = "process.output.maxBufferSize";
+
+    /**
      * Get the session type.
      *
      * @throws SessionException if an error is encountered attempting to determine the type.

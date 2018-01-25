@@ -33,6 +33,20 @@ public interface IComputerSystem extends ISession {
     String PROP_CACHE_JDBM = "fs.cache.useJDBM";
 
     /**
+     * Property governing the maximum number of filesystem search error messages to keep.
+     *
+     * @since 1.3.9
+     */
+    String PROP_FS_SEARCH_MAX_ERRORS = "fs.search.maxErrors";
+
+    /**
+     * Property governing the maximum number of filesystem search warning messages to keep.
+     *
+     * @since 1.3.9
+     */
+    String PROP_FS_SEARCH_MAX_WARNINGS = "fs.search.maxWarnings";
+
+    /**
      * Get the machine's own impression of its name. This name might not be meaningful to DNS.
      *
      * @since 1.1

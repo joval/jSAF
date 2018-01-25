@@ -33,6 +33,15 @@ public interface IComputerSystem extends ISession {
     String PROP_CACHE_JDBM = "fs.cache.useJDBM";
 
     /**
+     * Property governing whether searches for un-anchored path expressions are permitted. For example, '^/tmp' is
+     * a left-anchored regular expression, but '/tmp' is not. Un-anchored expressions require searching all mounted
+     * filesystems, and typically reflect a configuration error (as opposed to a legitimate search).
+     *
+     * @since 1.3.9
+     */
+    String PROP_FS_SEARCH_ALLOW_UNANCHORED = "fs.search.allowUnanchored";
+
+    /**
      * Property governing the maximum number of filesystem search error messages to keep.
      *
      * @since 1.3.9

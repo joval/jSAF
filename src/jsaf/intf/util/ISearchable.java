@@ -34,11 +34,9 @@ public interface ISearchable<T> {
      *
      * @param conditions a list of search conditions
      *
-     * @throws IllegalArgumentException if there is a problem with one or more search conditions
-     *
      * @since 1.2
      */
-    IResult<T> search(List<Condition> conditions) throws IllegalArgumentException;
+    IResult<T> search(List<Condition> conditions);
 
     /**
      * Perform multiple searches in parallel.
@@ -47,11 +45,9 @@ public interface ISearchable<T> {
      *
      * @return a List of results, whose order corresponds to the conditionLists
      *
-     * @throws IllegalArgumentException if there is a problem with one or more search conditions in any list
-     *
      * @since 1.2
      */
-    List<IResult<T>> searches(List<List<Condition>> conditionLists) throws IllegalArgumentException;
+    List<IResult<T>> searches(List<List<Condition>> conditionLists);
 
     /**
      * An interface for search results.

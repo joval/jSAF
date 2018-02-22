@@ -11,4 +11,10 @@ package jsaf.intf.windows.registry;
  * @since 1.0
  */
 public interface INoneValue extends IValue {
+    /**
+     * Get the data.
+     *
+     * @since 1.3.9
+     */
+    byte[] getData();
 }

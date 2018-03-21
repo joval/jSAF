@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -136,7 +137,7 @@ public class IniFile {
 			if (rawVal.endsWith(ESC)) {
 			    StringBuffer val = new StringBuffer(rawVal.substring(0, rawVal.length() - 1));
 			    while ((rawVal = br.readLine()) != null) {
-				val.append("\n");
+				val.append(Strings.LF);
 				if (rawVal.endsWith(ESC)) {
 				    val.append(rawVal.substring(0, rawVal.length() - 1));
 				} else {
@@ -169,13 +170,18 @@ public class IniFile {
     public synchronized void save(OutputStream out) throws IOException {
 	PrintWriter writer = new PrintWriter(out);
 	writer.println("; Saved " + new java.util.Date().toString());
-	for (String header : listSections()) {
+	String[] headers = listSections().toArray(new String[0]);
+	Arrays.sort(headers);
+	for (String header : headers) {
+	    writer.println("");
 	    writer.println("[" + header + "]");
 	    IProperty props = getSection(header);
-	    for (String key : props) {
+	    String[] keys = Strings.toList(props.iterator()).toArray(new String[0]);
+	    Arrays.sort(keys);
+	    for (String key : keys) {
 		String escapedKey = key.replace(COLON, ESC + COLON).replace(EQUAL, ESC + EQUAL);
-		String escapedValue = props.getProperty(key).replace("\r\n", "\n").replace("\n", ESC + "\n");
-		writer.println(escapedKey + COLON + escapedValue);
+		String escapedValue = props.getProperty(key).replace("\r\n", "\n").replace("\n", ESC + Strings.LF);
+		writer.format("%s%s %s%s", escapedKey, COLON, escapedValue, Strings.LF);
 	    }
 	}
 	writer.close();

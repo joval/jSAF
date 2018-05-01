@@ -163,11 +163,11 @@ public class IniFile {
     }
 
     /**
-     * Write the INI file to a stream.
+     * Write the INI file to a stream and optionally don't close the stream.
      *
-     * @since 1.0
+     * @since 1.3.9
      */
-    public synchronized void save(OutputStream out) throws IOException {
+    public synchronized void save(OutputStream out, boolean close) throws IOException {
 	PrintWriter writer = new PrintWriter(out);
 	writer.println("; Saved " + new java.util.Date().toString());
 	String[] headers = listSections().toArray(new String[0]);
@@ -184,7 +184,20 @@ public class IniFile {
 		writer.format("%s%s %s%s", escapedKey, COLON, escapedValue, Strings.LF);
 	    }
 	}
-	writer.close();
+	if (close) {
+	    writer.close();
+	} else {
+	    writer.flush();
+	}
+    }
+
+    /**
+     * Write the INI file to a stream. Closes the stream when done.
+     *
+     * @since 1.0
+     */
+    public synchronized void save(OutputStream out) throws IOException {
+	save(out, true);
     }
 
     /**

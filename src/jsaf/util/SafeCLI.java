@@ -30,7 +30,8 @@ import jsaf.intf.io.IFilesystem;
 import jsaf.intf.io.IReader;
 import jsaf.intf.system.IProcess;
 import jsaf.intf.system.IComputerSystem;
-import jsaf.intf.system.ISession;
+import jsaf.intf.system.ISession.Timeout;
+import static jsaf.intf.system.ISession.LOCALHOST;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.io.LineIterator;
 import jsaf.io.PerishableReader;
@@ -144,7 +145,7 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final String exec(String cmd, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+    public static final String exec(String cmd, IComputerSystem sys, Timeout readTimeout) throws Exception {
 	return exec(cmd, null, sys, sys.getTimeout(readTimeout));
     }
 
@@ -155,7 +156,7 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final String exec(String cmd, String[] env, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+    public static final String exec(String cmd, String[] env, IComputerSystem sys, Timeout readTimeout) throws Exception {
 	return exec(cmd, env, null, sys, sys.getTimeout(readTimeout));
     }
 
@@ -166,7 +167,7 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final String exec(String cmd, String[] env, String dir, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+    public static final String exec(String cmd, String[] env, String dir, IComputerSystem sys, Timeout readTimeout) throws Exception {
 	return exec(cmd, env, dir, sys, sys.getTimeout(readTimeout));
     }
 
@@ -215,7 +216,7 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+    public static final List<String> multiLine(String cmd, IComputerSystem sys, Timeout readTimeout) throws Exception {
 	return multiLine(cmd, null, null, sys, sys.getTimeout(readTimeout));
     }
 
@@ -226,7 +227,7 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, String[] env, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+    public static final List<String> multiLine(String cmd, String[] env, IComputerSystem sys, Timeout readTimeout) throws Exception {
 	return multiLine(cmd, env, null, sys, sys.getTimeout(readTimeout));
     }
 
@@ -237,7 +238,7 @@ public class SafeCLI {
      *
      * @since 1.0
      */
-    public static final List<String> multiLine(String cmd, String[] env, String dir, IComputerSystem sys, ISession.Timeout readTimeout) throws Exception {
+    public static final List<String> multiLine(String cmd, String[] env, String dir, IComputerSystem sys, Timeout readTimeout) throws Exception {
 	return multiLine(cmd, env, dir, sys, sys.getTimeout(readTimeout));
     }
 
@@ -283,7 +284,7 @@ public class SafeCLI {
      * @since 1.0.1
      */
     public static final Iterator<String> manyLines(String cmd, String[] env, IUnixSession sys) throws Exception {
-	return manyLines(cmd, env, new ErrorLogger(sys), sys, sys.getTimeout(ISession.Timeout.XL));
+	return manyLines(cmd, env, new ErrorLogger(sys), sys, sys.getTimeout(Timeout.XL));
     }
 
     /**
@@ -293,7 +294,7 @@ public class SafeCLI {
      *
      * @since 1.3
      */
-    public static final Iterator<String> manyLines(String cmd, String[] env, IUnixSession sys, ISession.Timeout timeout) throws Exception {
+    public static final Iterator<String> manyLines(String cmd, String[] env, IUnixSession sys, Timeout timeout) throws Exception {
 	return manyLines(cmd, env, sys, sys.getTimeout(timeout));
     }
 
@@ -315,7 +316,7 @@ public class SafeCLI {
      *
      * @since 1.3
      */
-    public static final Iterator<String> manyLines(String cmd, String[] env, IReaderHandler errHandler, IUnixSession sys, ISession.Timeout timeout)
+    public static final Iterator<String> manyLines(String cmd, String[] env, IReaderHandler errHandler, IUnixSession sys, Timeout timeout)
 		throws Exception {
 
 	return manyLines(cmd, env, errHandler, sys, sys.getTimeout(timeout));
@@ -378,7 +379,7 @@ public class SafeCLI {
 		    //
 		    // Create and return a LineIterator based on a local cache file containing the output
 		    //
-		    if (ISession.LOCALHOST.equals(sys.getHostname())) {
+		    if (LOCALHOST.equals(sys.getHostname())) {
 			return new LineIterator(new File(tempPath), true);
 		    } else {
 			File tempDir = sys.getWorkspace() == null ? new File(System.getProperty("user.home")) : sys.getWorkspace();
@@ -581,15 +582,15 @@ public class SafeCLI {
 		// no errThread
 	    } else if (errorHandler == null) {
 		errThread = new HandlerThread(DevNull, "pipe to /dev/null");
-		errThread.start(PerishableReader.newInstance(err, sys.getTimeout(ISession.Timeout.XL)));
+		errThread.start(PerishableReader.newInstance(err, sys.getTimeout(Timeout.XL)));
 	    } else {
 		errThread = new HandlerThread(errorHandler, "stderr reader");
-		errThread.start(PerishableReader.newInstance(err, sys.getTimeout(ISession.Timeout.XL)));
+		errThread.start(PerishableReader.newInstance(err, sys.getTimeout(Timeout.XL)));
 	    }
 	    reader = PerishableReader.newInstance(p.getInputStream(), readTimeout);
 	    reader.setLogger(sys.getLogger());
 	    outputHandler.handle(reader);
-	    p.waitFor(sys.getTimeout(ISession.Timeout.S));
+	    p.waitFor(sys.getTimeout(Timeout.S));
 	    result.exitCode = p.exitValue();
 	    return true;
 	} catch (IOException e) {
@@ -643,7 +644,7 @@ public class SafeCLI {
     }
 
     private void exec() throws Exception {
-	int maxLen = sys.getProperties().getIntProperty(ISession.PROP_PROCESS_MAXBUFFLEN);
+	int maxLen = sys.getProperties().getIntProperty(IComputerSystem.PROP_PROCESS_MAXBUFFLEN);
 	BufferHandler out = new BufferHandler(maxLen);
 	BufferHandler err = new BufferHandler(maxLen);
 	exec(out, err);

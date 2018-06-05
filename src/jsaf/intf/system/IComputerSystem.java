@@ -26,6 +26,13 @@ public interface IComputerSystem extends ISession {
     String PROP_EXEC_RETRIES = "exec.retries";
 
     /**
+     * Property indicating the maximum size of any in-memory buffer containing process output.
+     *
+     * @since 1.4
+     */
+    String PROP_PROCESS_MAXBUFFLEN = "process.output.maxBufferSize";
+
+    /**
      * Property governing whether the filesystem cache layer should be JDBM-backed (true) or memory-backed (false).
      *
      * @since 1.2

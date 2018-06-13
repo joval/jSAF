@@ -135,13 +135,25 @@ public class IniFile {
 			String key = sb.toString();
 			String rawVal = line.substring(ptr+1);
 			if (rawVal.endsWith(ESC)) {
-			    StringBuffer val = new StringBuffer(rawVal.substring(0, rawVal.length() - 1));
+			    String temp = rawVal.trim();
+			    StringBuffer val = new StringBuffer(temp.substring(0, temp.length() - 1));
 			    while ((rawVal = br.readLine()) != null) {
 				val.append(Strings.LF);
-				if (rawVal.endsWith(ESC)) {
-				    val.append(rawVal.substring(0, rawVal.length() - 1));
+				temp = rawVal.trim();
+				if (temp.startsWith(ESC) && temp.length() > 1) {
+				    switch(temp.charAt(1)) {
+				      case ' ':
+				      case '\t':
+					temp = temp.substring(1);
+					break;
+				      default:
+					break;
+				    }
+				}
+				if (temp.endsWith(ESC)) {
+				    val.append(temp.substring(0, temp.length() - 1));
 				} else {
-				    val.append(rawVal.trim());
+				    val.append(temp);
 				    break;
 				}
 			    }

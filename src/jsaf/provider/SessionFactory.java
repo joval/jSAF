@@ -54,6 +54,13 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
     public static final String AGENT_FACTORY = "jsaf.provider.AgentSessionFactory";
 
     /**
+     * The class name of the default unauthenticated factory implementation.
+     *
+     * @since 1.4.0
+     */
+    public static final String UNAUTHENTICATED_FACTORY = "jsaf.provider.UnauthenticatedSessionFactory";
+
+    /**
      * Obtain a new instance of a SessionFactory, with no workspace directory. 
      *
      * @since 1.0
@@ -88,9 +95,7 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
      *
      * @since 1.0
      */
-    public static SessionFactory newInstance(String factoryClassName, ClassLoader classLoader, File workspace)
-		throws FactoryConfigurationError {
-
+    public static SessionFactory newInstance(String factoryClassName, ClassLoader classLoader, File workspace) throws FactoryConfigurationError {
 	if (factoryClassName == null) {
 	    throw new NullPointerException(Message.getMessage(Message.ERROR_FACTORY_CLASS));
 	}

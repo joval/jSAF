@@ -42,4 +42,19 @@ public class Bytes {
     public static final String toHexString(long l) {
 	return Long.toHexString(l & 0xFFFFFFFFFFFFFFFFL);
     }
+
+    public static final byte[] fromHexString(String s) throws IllegalArgumentException {
+	int len = s.length();
+	if (len % 2 == 1) {
+	    throw new IllegalArgumentException(s);
+	}
+	byte[] data = new byte[len / 2];
+	for (int i=0; i < data.length; i++) {
+	    int charIndex = i * 2;
+	    int msb = Character.digit(s.charAt(charIndex), 16);
+	    int lsb = Character.digit(s.charAt(charIndex+1), 16);
+	    data[i] = (byte) ((msb << 4) + lsb);
+	}
+	return data;
+    }
 }

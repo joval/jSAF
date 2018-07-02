@@ -9,7 +9,6 @@ import java.util.Collection;
 
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFilesystem;
-import jsaf.intf.net.IService;
 
 /**
  * A representation of a session on a computer system, which is an ISession on which you can potentially run processes
@@ -116,11 +115,4 @@ public interface IComputerSystem extends ISession {
      * @since 1.1
      */
     public IEnvironment getEnvironment();
-
-    /**
-     * Returns a collection of network services running on the target computer.
-     *
-     * @since 1.4
-     */
-    public Collection<IService> getServices();
 }

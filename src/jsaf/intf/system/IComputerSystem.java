@@ -5,13 +5,15 @@ package jsaf.intf.system;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFilesystem;
+import jsaf.intf.net.IService;
 
 /**
  * A representation of a session on a computer system, which is an ISession on which you can potentially run processes
- * and access files.
+ * and access files and network services.
  *
  * @author David A. Solin
  * @version %I% %G%
@@ -114,4 +116,11 @@ public interface IComputerSystem extends ISession {
      * @since 1.1
      */
     public IEnvironment getEnvironment();
+
+    /**
+     * Returns a collection of network services running on the target computer.
+     *
+     * @since 1.4
+     */
+    public Collection<IService> getServices();
 }

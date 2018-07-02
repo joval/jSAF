@@ -19,6 +19,7 @@ CLASSES=\
 	jsaf.intf.io.IReader	\
 	jsaf.intf.juniper.system.IJunosSession	\
 	jsaf.intf.juniper.system.ISupportInformation	\
+	jsaf.intf.net.IService	\
 	jsaf.intf.netconf.INetconf	\
 	jsaf.intf.remote.ConnectionEvent	\
 	jsaf.intf.remote.IConnectionSpecification	\

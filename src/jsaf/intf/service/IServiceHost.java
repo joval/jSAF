@@ -3,6 +3,8 @@
 
 package jsaf.intf.service;
 
+import java.util.Collection;
+
 import jsaf.intf.net.IService;
 
 /**

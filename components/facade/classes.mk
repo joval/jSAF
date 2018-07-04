@@ -98,6 +98,7 @@ CLASSES=\
 	jsaf.provider.windows.powershell.PowershellException	\
 	jsaf.provider.windows.registry.RegistryException	\
 	jsaf.provider.windows.wmi.WmiException	\
+	jsaf.service.PortRegistry	\
 	jsaf.service.UnsupportedServiceException	\
 	jsaf.util.AbstractEnvironment	\
 	jsaf.util.Base64	\

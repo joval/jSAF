@@ -18,7 +18,13 @@ import jsaf.intf.net.IService;
  */
 public interface IServiceHost {
     /**
+     * Property indicating the maximum number of milliseconds to wait for a TCP connection attempt to complete when performing a
+     * port scan of a device over the network.
+     */
+    String PROP_PORTSCAN_TIMEOUT = "portScan.timeout";
+
+    /**
      * Returns a collection of IService instances running on the host.
      */
-    Collection<IService> getServices();
+    Collection<IService> getServices() throws Exception;
 }

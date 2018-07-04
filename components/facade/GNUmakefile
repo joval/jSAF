@@ -30,6 +30,7 @@ clean:
 resources:
 	rm -f $(BUILD)/*.properties
 	cp $(RSRC)/jsafmsg_en.properties $(BUILD)
+	cp $(SRC)/jsaf/service/etc.services $(BUILD)/jsaf/service
 
 classes: classdirs $(CLASS_FILES)
 

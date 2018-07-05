@@ -5,6 +5,8 @@ package jsaf.intf.net;
 
 import java.net.InetSocketAddress;
 
+import jsaf.service.PortRegistry;
+
 /**
  * An interface encapsulating information about a network service (i.e., a listening socket) on a computer system.
  * See: /etc/services
@@ -43,4 +45,82 @@ public interface IService {
      * Shortcut for getSocketAddress().getPort()
      */
     int getPort();
+
+    /**
+     * Implementation of IService interface.
+     */
+    class Entry implements IService, Comparable<IService> {
+	private InetSocketAddress addr;
+	private Protocol transport;
+	private String name;
+
+	public Entry(Protocol transport, InetSocketAddress addr) {
+	    this.transport = transport;
+	    this.addr = addr;
+	    int port = addr.getPort();
+	    switch(transport) {
+	      case UDP:
+		name = PortRegistry.getUdpServiceName(port);
+		break;
+	      case TCP:
+		name = PortRegistry.getTcpServiceName(port);
+		break;
+	    }
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+	    if (obj instanceof Entry) {
+		Entry other = (Entry)obj;
+		return other.transport == transport &&
+		       other.addr.getAddress().getHostAddress().equals(addr.getAddress().getHostAddress()) &&
+		       other.addr.getPort() == addr.getPort();
+	    }
+	    return false;
+	}
+
+	@Override
+	public int hashCode() {
+	    return new StringBuffer()
+		.append(Entry.class.getName())
+		.append(":")
+		.append(toString())
+		.toString().hashCode();
+	}
+
+	@Override
+	public String toString() {
+	    return new StringBuffer()
+		.append(transport.toString())
+		.append(":")
+		.append(addr.getAddress().getHostAddress())
+		.append(":")
+		.append(Integer.toString(addr.getPort()))
+		.toString();
+	}
+
+	// Implement IService
+
+	public Protocol getProtocol() {
+	    return transport;
+	}
+
+	public String getName() {
+	    return name;
+	}
+
+	public InetSocketAddress getSocketAddress() {
+	    return addr;
+	}
+
+	public int getPort() {
+	    return addr.getPort();
+	}
+
+	// Implement Comparable<IService>
+
+	public int compareTo(IService other) {
+	    return toString().compareTo(other.toString());
+	}
+    }
 }

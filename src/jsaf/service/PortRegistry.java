@@ -75,4 +75,36 @@ public class PortRegistry {
     public static Set<Map.Entry<Integer, String>> enumTcp() {
 	return Collections.<Map.Entry<Integer, String>>unmodifiableSet(TCP.entrySet());
     }
+
+    /**
+     * Returns the TCP service name for the specified port number (or "unknown" if not identified).
+     *
+     * @throws IllegalArgumentException if port is outside the range [1..65535]
+     */
+    public static String getTcpServiceName(int port) throws IllegalArgumentException {
+	if (1 > port || port > 65535) {
+	    throw new IllegalArgumentException("Bad port: " + port);
+	}
+	if (TCP.containsKey(port)) {
+	    return TCP.get(port);
+	} else {
+	    return "unknown";
+	}
+    }
+
+    /**
+     * Returns the UDP service name for the specified port number (or "unknown" if not identified).
+     *
+     * @throws IllegalArgumentException if port is outside the range [1..65535]
+     */
+    public static String getUdpServiceName(int port) throws IllegalArgumentException {
+	if (1 > port || port > 65535) {
+	    throw new IllegalArgumentException("Bad port: " + port);
+	}
+	if (UDP.containsKey(port)) {
+	    return UDP.get(port);
+	} else {
+	    return "unknown";
+	}
+    }
 }

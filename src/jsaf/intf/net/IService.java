@@ -6,6 +6,7 @@ package jsaf.intf.net;
 import java.net.InetSocketAddress;
 
 import jsaf.service.PortRegistry;
+import jsaf.util.Bytes;
 
 /**
  * An interface encapsulating information about a network service (i.e., a listening socket) on a computer system.
@@ -93,9 +94,9 @@ public interface IService {
 	    return new StringBuffer()
 		.append(transport.toString())
 		.append(":")
-		.append(addr.getAddress().getHostAddress())
+		.append(Bytes.toHexString(addr.getAddress().getAddress()))
 		.append(":")
-		.append(Integer.toString(addr.getPort()))
+		.append(String.format("0x%04x", addr.getPort()))
 		.toString();
 	}
 

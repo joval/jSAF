@@ -21,8 +21,10 @@ import jsaf.intf.ssh.system.IShell;
 public interface ICiscoSession extends IComputerSystem {
     /**
      * The IOS command to enable privilege level 15 (the highest privilege level).
+     * NOTE: On IOS and IOS-XE, the command is "enable &lt;level&gt;" with the default &lt;level&gt; being 15. On ASA it's simply "enable"
+     *       if AAA is enabled. So the value of this constant is functionally the common denominator.
      */
-    String ENABLE_COMMAND = "enable 15";
+    String ENABLE_COMMAND = "enable";
 
     /**
      * Basic IOS command modes.

@@ -49,6 +49,20 @@ import jsaf.provider.SessionException;
  */
 public class SafeCLI {
     /**
+     * ANSI C locale environment.
+     *
+     * @since 1.4
+     */
+    public static final String[] ANSI_C = new String[] {"LANG=C", "LC_ALL=C"};
+
+    /**
+     * en_US UTF8 locale environment.
+     *
+     * @since 1.4
+     */
+    public static final String[] en_US = new String[] {"LANG=en_US.UTF-8", "LC_ALL=en_US.UTF-8"};
+
+    /**
      * An interface for processing data from a process stream (stdout or stderr), used by the exec method.
      *
      * If the command hangs diring processing (signaled to SafeCLI by an InterruptedIOException or SessionException),

@@ -388,7 +388,7 @@ public class SafeCLI {
 		    break;
 		}
 
-		SafeCLI cli = new SafeCLI(redirected, null, null, sys, timeout);
+		SafeCLI cli = new SafeCLI(redirected, env, null, sys, timeout);
 		if (cli.execOnce(null, errHandler, attempt)) {
 		    //
 		    // Create and return a LineIterator based on a local cache file containing the output

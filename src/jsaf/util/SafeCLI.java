@@ -728,11 +728,17 @@ public class SafeCLI {
 	    if (thread != null && thread.isAlive()) {
 		thread.interrupt();
 	    }
-	    reader.close();
+	    if (reader != null) {
+		reader.close();
+	    }
 	}
 
 	boolean isAlive() {
-	    return thread.isAlive();
+	    if (thread == null) {
+		return false;
+	    } else {
+		return thread.isAlive();
+	    }
 	}
 
 	void join() throws InterruptedException {
@@ -740,7 +746,9 @@ public class SafeCLI {
 	}
 
 	void join(long millis) throws InterruptedException {
-	    thread.join(millis);
+	    if (thread != null) {
+		thread.join(millis);
+	    }
 	}
 
 	// Implement Runnable

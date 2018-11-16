@@ -57,4 +57,22 @@ public class Bytes {
 	}
 	return data;
     }
+
+    /**
+     * Return a human-friendly string representation of the specified byte length.
+     */
+    public static String humanReadable(int length) {
+	return humanReadable((long)length);
+    }
+
+    /**
+     * Return a human-friendly string representation of the specified byte length.
+     */
+    public static String humanReadable(long length) {
+	// See: http://programming.guide/java/formatting-byte-size-to-human-readable-format.html
+	if (length < 1024) return length + " B";
+	int exp = (int) (Math.log(length) / Math.log(1024));
+	String pre = new StringBuffer().append("kMGTPE".charAt(exp-1)).toString();
+	return String.format("%.1f %sB", length / Math.pow(1024, exp), pre);
+    }
 }

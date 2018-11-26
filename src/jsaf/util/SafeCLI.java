@@ -574,6 +574,9 @@ public class SafeCLI {
     }
 
     private boolean execOnce(IReaderHandler outputHandler, IReaderHandler errorHandler, int attempt) throws Exception {
+	if (attempt > 1) {
+	    sys.getLogger().info(Message.STATUS_PROCESS_RETRY, cmd);
+	}
 	IProcess p = null;
 	PerishableReader reader = null;
 	HandlerThread errThread = null;
@@ -615,7 +618,6 @@ public class SafeCLI {
 		    // the process has hung up, so kill it
 		    p.destroy();
 		    p = null;
-		    sys.getLogger().info(Message.STATUS_PROCESS_RETRY, cmd);
 		}
 		return false;
 	    } else {
@@ -627,7 +629,6 @@ public class SafeCLI {
 		throw e;
 	    } else {
 		sys.getLogger().warn(Message.ERROR_SESSION_INTEGRITY, e.getMessage());
-		sys.getLogger().info(Message.STATUS_PROCESS_RETRY, cmd);
 		sys.disconnect();
 		return false;
 	    }

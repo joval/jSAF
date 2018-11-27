@@ -1,4 +1,4 @@
-// Copyright (C) 2011 jOVAL.org.  All rights reserved.
+// Copyright (C) 2011-2018 JovalCM.com.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.intf.windows.identity;
@@ -21,8 +21,17 @@ public interface IUser extends IPrincipal {
      * groups containing this user, not groups containing groups containing this user, etc.).
      *
      * @since 1.0
+     * @deprecated since 1.4. Use {@link memberOf()} instead.
      */
+    @Deprecated
     Collection<String> getGroupNetbiosNames() throws IdentityException;
+
+    /**
+     * Groups this user is a member of.
+     *
+     * @since 1.4
+     */
+    Collection<IGroup> memberOf() throws IdentityException;
 
     /**
      * Get the full name of the user.

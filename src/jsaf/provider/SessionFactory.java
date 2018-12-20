@@ -54,11 +54,11 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
     public static final String AGENT_FACTORY = "jsaf.provider.AgentSessionFactory";
 
     /**
-     * The class name of the default unauthenticated factory implementation.
+     * The class name of the default network discovery (unauthenticated) factory implementation.
      *
      * @since 1.4.0
      */
-    public static final String UNAUTHENTICATED_FACTORY = "jsaf.provider.UnauthenticatedSessionFactory";
+    public static final String DISCOVERY_FACTORY = "jsaf.provider.DiscoverySessionFactory";
 
     /**
      * Obtain a new instance of a SessionFactory, with no workspace directory. 

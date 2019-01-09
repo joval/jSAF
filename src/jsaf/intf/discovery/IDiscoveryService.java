@@ -3,6 +3,7 @@
 
 package jsaf.intf.discovery;
 
+import jsaf.discovery.DiscoveryException;
 import jsaf.intf.remote.IConnectionSpecification;
 import jsaf.intf.util.ILoggable;
 
@@ -18,19 +19,7 @@ public interface IDiscoveryService extends ILoggable {
     /**
      * Discover the type of an IConnectionSpecification whose type is Type.UNKNOWN.
      */
-    Result discover(IConnectionSpecification target) throws Exception;
-
-    /**
-     * Decrypt an SSH private key.
-     *
-     * @since 1.3.5
-     */
-    byte[] decryptPrivateKey(byte[] encrypted, char[] passphrase) throws Exception;
-
-    /**
-     * Get the public key fingerprint of an SSH target.
-     */
-    String getFingerprint(IConnectionSpecification target) throws Exception;
+    Result discover(IConnectionSpecification target) throws DiscoveryException;
 
     /**
      * An interface for discovery result information.
@@ -40,10 +29,5 @@ public interface IDiscoveryService extends ILoggable {
 	 * Return the session type discovered for the device.
 	 */
         IConnectionSpecification.Type getType();
-
-	/**
-	 * Return the fingerprint of the SSH public key (if Type is SSH).
-	 */
-        String getFingerprint();
     }
 }

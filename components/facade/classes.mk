@@ -1,6 +1,7 @@
 CLASSES=\
 	jsaf.JSAFSystem	\
 	jsaf.Message	\
+	jsaf.discovery.DiscoveryException	\
 	jsaf.identity.IdentityException	\
 	jsaf.intf.apple.system.IiOSSession	\
 	jsaf.intf.cisco.system.IAsaSession	\
@@ -27,6 +28,7 @@ CLASSES=\
 	jsaf.intf.service.IDatabase	\
 	jsaf.intf.service.ILightweightDirectory	\
 	jsaf.intf.service.IServiceHost	\
+	jsaf.intf.ssh.discovery.ISshDiscoveryService	\
 	jsaf.intf.ssh.identity.ISshCredential	\
 	jsaf.intf.ssh.system.IShell	\
 	jsaf.intf.ssh.system.ISshProcess	\

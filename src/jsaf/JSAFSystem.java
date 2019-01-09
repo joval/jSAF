@@ -71,6 +71,9 @@ public final class JSAFSystem {
      * it will be a directory named jSAF in the appropriate AppData storage location.
      */
     public static File getDataDirectory() {
+	if (!dataDir.exists()) {
+	    dataDir.mkdirs();
+	}
 	return dataDir;
     }
 }

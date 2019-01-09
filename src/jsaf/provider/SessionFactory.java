@@ -9,11 +9,12 @@ import java.lang.reflect.Constructor;
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
+import jsaf.discovery.DiscoveryException;
+import jsaf.intf.discovery.IDiscoveryService;
 import jsaf.intf.remote.ConnectionEvent;
 import jsaf.intf.remote.IConnectionSpecification;
 import jsaf.intf.remote.IConnectionSpecificationFactory;
 import jsaf.intf.system.ISession;
-import jsaf.intf.util.ILoggable;
 import jsaf.util.Publisher;
 
 /**
@@ -24,7 +25,7 @@ import jsaf.util.Publisher;
  * @version %I% %G%
  * @since 1.0
  */
-public abstract class SessionFactory extends Publisher<ConnectionEvent> implements ILoggable {
+public abstract class SessionFactory extends Publisher<ConnectionEvent> implements IDiscoveryService {
     /**
      * The class name of the default (local) factory implementation.
      *
@@ -88,10 +89,10 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
      * @param factoryClassName The class name of the desired factory implementation class.
      *
      * @param classLoader      The ClassLoader from which to load the factory. If null is specified, this will be the
-     *                         ClassLoader for the SessionFactory class.
+     *			 ClassLoader for the SessionFactory class.
      *
-     * @param workspace        A directory in which jSAF sessions can create cache files. If null is specified, no caches
-     *                         will be created.
+     * @param workspace	A directory in which jSAF sessions can create cache files. If null is specified, no caches
+     *			 will be created.
      *
      * @since 1.0
      */
@@ -147,6 +148,17 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
 
     public LocLogger getLogger() {
 	return logger;
+    }
+
+
+    // Implement IDiscoveryService
+
+    public Result discover(IConnectionSpecification target) throws DiscoveryException {
+	return new Result() {
+	    public IConnectionSpecification.Type getType() {
+		return IConnectionSpecification.Type.UNKNOWN;
+	    }
+	};
     }
 
     // Abstract

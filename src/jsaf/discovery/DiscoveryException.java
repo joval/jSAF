@@ -7,7 +7,7 @@ package jsaf.discovery;
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.4
+ * @since 1.3.10
  */
 public class DiscoveryException extends Exception {
     public DiscoveryException(String msg) {

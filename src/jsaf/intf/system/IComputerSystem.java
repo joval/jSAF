@@ -29,7 +29,7 @@ public interface IComputerSystem extends ISession {
     /**
      * Property indicating the maximum size of any in-memory buffer containing process output.
      *
-     * @since 1.4
+     * @since 1.3.10
      */
     String PROP_PROCESS_MAXBUFFLEN = "process.output.maxBufferSize";
 

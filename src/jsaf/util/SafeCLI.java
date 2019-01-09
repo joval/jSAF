@@ -51,14 +51,14 @@ public class SafeCLI {
     /**
      * ANSI C locale environment.
      *
-     * @since 1.4
+     * @since 1.3.10
      */
     public static final String[] ANSI_C = new String[] {"LANG=C", "LC_ALL=C"};
 
     /**
      * en_US UTF8 locale environment.
      *
-     * @since 1.4
+     * @since 1.3.10
      */
     public static final String[] en_US = new String[] {"LANG=en_US.UTF-8", "LC_ALL=en_US.UTF-8"};
 

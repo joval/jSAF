@@ -36,13 +36,6 @@ public interface IConnectionSpecification {
 	SSH("ssh", 22),
 
 	/**
-	 * Indicates a VI-SDK-enabled device (i.e., VMWare).
-	 *
-	 * @since 1.4
-	 */
-	VIM("visdk", 443),
-
-	/**
 	 * Indicates a WS-Management-enabled device.
 	 */
 	WS_MAN("WS-Management", 5985),

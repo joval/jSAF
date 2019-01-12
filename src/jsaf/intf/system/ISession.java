@@ -272,6 +272,9 @@ public interface ISession extends IDisposable {
      * @throws UnsupportedServiceException if the session does not support the requested service type
      * @throws IllegalArgumentException if there is a problem with the arguments supplied to obtain the service
      *
+     * @see jsaf.intf.service.ILightweightDirectory
+     * @see jsaf.intf.service.IDatabase
+     *
      * @since 1.2
      */
     <T> T getService(Class<T> serviceType, Object... args) throws UnsupportedServiceException, IllegalArgumentException;

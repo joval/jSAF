@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import jsaf.intf.io.IFile;
 import jsaf.intf.io.IFilesystem;
+import jsaf.intf.net.IServiceHost;
 
 /**
  * A representation of a session on a computer system, which is an ISession on which you can potentially run processes
@@ -18,7 +19,7 @@ import jsaf.intf.io.IFilesystem;
  * @version %I% %G%
  * @since 1.1
  */
-public interface IComputerSystem extends ISession {
+public interface IComputerSystem extends IServiceHost {
     /**
      * Property indicating the number of times to re-try running a command in the event of an unexpected disconnect.
      *

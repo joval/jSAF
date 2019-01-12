@@ -21,13 +21,13 @@ CLASSES=\
 	jsaf.intf.juniper.system.IJunosSession	\
 	jsaf.intf.juniper.system.ISupportInformation	\
 	jsaf.intf.net.IService	\
+	jsaf.intf.net.IServiceHost	\
 	jsaf.intf.netconf.INetconf	\
 	jsaf.intf.remote.ConnectionEvent	\
 	jsaf.intf.remote.IConnectionSpecification	\
 	jsaf.intf.remote.IConnectionSpecificationFactory	\
 	jsaf.intf.service.IDatabase	\
 	jsaf.intf.service.ILightweightDirectory	\
-	jsaf.intf.service.IServiceHost	\
 	jsaf.intf.ssh.discovery.ISshDiscoveryService	\
 	jsaf.intf.ssh.identity.ISshCredential	\
 	jsaf.intf.ssh.system.IShell	\

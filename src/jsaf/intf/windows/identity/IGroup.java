@@ -1,9 +1,11 @@
-// Copyright (C) 2011 jOVAL.org.  All rights reserved.
+// Copyright (C) 2011-2018 JovalCM.com.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.intf.windows.identity;
 
 import java.util.Collection;
+
+import jsaf.identity.IdentityException;
 
 /**
  * The IGroup interface provides information about a Windows group.
@@ -18,7 +20,9 @@ public interface IGroup extends IPrincipal {
      * names of users who are members of groups that are members of this group).
      *
      * @since 1.0
+     * @deprecated since 1.4. Use {@link members()} instead.
      */
+    @Deprecated
     Collection<String> getMemberUserNetbiosNames();
 
     /**
@@ -26,6 +30,15 @@ public interface IGroup extends IPrincipal {
      * names of groups which are members of groups which are members of this group).
      *
      * @since 1.0
+     * @deprecated since 1.4. Use {@link members()} instead.
      */
+    @Deprecated
     Collection<String> getMemberGroupNetbiosNames();
+
+    /**
+     * Get all the IPrincipals (users and groups) that are members of this group (non-recursive).
+     *
+     * @since 1.4
+     */
+    Collection<IPrincipal> members() throws IdentityException;
 }

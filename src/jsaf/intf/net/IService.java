@@ -4,6 +4,8 @@
 package jsaf.intf.net;
 
 import java.net.InetSocketAddress;
+import java.util.Collection;
+import java.util.TreeSet;
 
 import jsaf.service.PortRegistry;
 import jsaf.util.Bytes;
@@ -18,19 +20,25 @@ import jsaf.util.Bytes;
  */
 public interface IService {
     /**
-     * Enumeration of possible transport protocols.
+     * Enumeration of supported transport protocols.
      */
     enum Protocol {
-	UDP, TCP;
+	HTTP,
+	FTP,
+	SMTP,
+	SSH,
+	TCP,
+	TLS,
+	UDP;
     }
 
     /**
-     * Get the transport protocol associated with the service.
+     * Get the transport protocol(s) associated with the service port instance.
      */
-    Protocol getProtocol();
+    Collection<Protocol> protocols();
 
     /**
-     * Get the name associated with the service, e.g., http.
+     * Get the name commonly associated with the service, e.g., http.
      *
      * @see <a href="https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml">IANA</a>
      */
@@ -46,82 +54,4 @@ public interface IService {
      * Shortcut for getSocketAddress().getPort()
      */
     int getPort();
-
-    /**
-     * Implementation of IService interface.
-     */
-    class Entry implements IService, Comparable<IService> {
-	private InetSocketAddress addr;
-	private Protocol transport;
-	private String name;
-
-	public Entry(Protocol transport, InetSocketAddress addr) {
-	    this.transport = transport;
-	    this.addr = addr;
-	    int port = addr.getPort();
-	    switch(transport) {
-	      case UDP:
-		name = PortRegistry.getUdpServiceName(port);
-		break;
-	      case TCP:
-		name = PortRegistry.getTcpServiceName(port);
-		break;
-	    }
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-	    if (obj instanceof Entry) {
-		Entry other = (Entry)obj;
-		return other.transport == transport &&
-		       other.addr.getAddress().getHostAddress().equals(addr.getAddress().getHostAddress()) &&
-		       other.addr.getPort() == addr.getPort();
-	    }
-	    return false;
-	}
-
-	@Override
-	public int hashCode() {
-	    return new StringBuffer()
-		.append(Entry.class.getName())
-		.append(":")
-		.append(toString())
-		.toString().hashCode();
-	}
-
-	@Override
-	public String toString() {
-	    return new StringBuffer()
-		.append(transport.toString())
-		.append(":")
-		.append(Bytes.toHexString(addr.getAddress().getAddress()))
-		.append(":")
-		.append(String.format("0x%04x", addr.getPort()))
-		.toString();
-	}
-
-	// Implement IService
-
-	public Protocol getProtocol() {
-	    return transport;
-	}
-
-	public String getName() {
-	    return name;
-	}
-
-	public InetSocketAddress getSocketAddress() {
-	    return addr;
-	}
-
-	public int getPort() {
-	    return addr.getPort();
-	}
-
-	// Implement Comparable<IService>
-
-	public int compareTo(IService other) {
-	    return toString().compareTo(other.toString());
-	}
-    }
 }

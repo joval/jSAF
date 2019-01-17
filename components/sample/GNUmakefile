@@ -10,9 +10,9 @@ PROVIDER_LIBS=$(subst $(SPACE),$(CLN),$(filter %.jar %.zip, $(wildcard provider/
 CLASSPATH=$(CLASSLIB)$(CLN)$(FACADE_LIB)$(CLN)$(FACADE_DEPS)$(CLN)$(SRC)
 RUNTIMECP="$(CLASSPATH)$(CLN).$(CLN)$(PROVIDER_LIBS)"
 
-CLASS_FILE=WinExample.class
+CLASS_FILES=WinExample.class LinuxExample.class
 
-all: $(CLASS_FILE)
+all: $(CLASS_FILES)
 
 clean:
 	rm -r *.class
@@ -21,4 +21,4 @@ clean:
 	$(JAVAC) $(JAVACFLAGS) -classpath "$(CLASSPATH)" $<
 
 test:
-	$(JRE) -classpath $(RUNTIMECP) WinExample
+	$(JAVA) -classpath $(RUNTIMECP) WinExample

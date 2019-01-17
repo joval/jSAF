@@ -130,7 +130,7 @@ public class WinExample {
 	// Implement IConnectionSpecification
 
         public Type getType() {
-	    return Type.WINDOWS;
+	    return Type.WS_MAN;
         }
 
         public String getIdentifier() {

@@ -43,7 +43,7 @@ public class Streams {
 		if (ptr < buff.length) {
 		    if (j > 0) System.out.print(" ");
 		    String iHex = Integer.toHexString((int)buff[ptr++]);
-		    if (iHex.length() == 0) {
+		    if (iHex.length() == 1) {
 			out.print("0");
 		    }
 		    out.print(iHex);

@@ -12601,7 +12601,8 @@ cddbp-alt	8880/tcp     # CDDBP
 #			    Steve Scherf <steve@moonsoft.com>
 #               8881-8887   Unassigned
 ddi-udp-1       8888/udp     # NewsEDGE server UDP (UDP 1)
-ddi-tcp-1       8888/tcp     # NewsEDGE server TCP (TCP 1)
+# replaced ddi-tcp-1 with sub-answerbook because HTTP is vastly more common on 8888/tcp
+sun-answerbook  8888/tcp     # Sun Answerbook HTTP server
 ddi-udp-2       8889/udp     # NewsEDGE server broadcast
 ddi-tcp-2       8889/tcp     # Desktop Data TCP 1
 ddi-udp-3       8890/udp     # NewsEDGE client broadcast

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.TimerTask;
 import java.util.zip.GZIPInputStream;
 
 import jsaf.JSAFSystem;
@@ -357,7 +356,7 @@ public class SafeCLI {
 	}
 
 	FileMonitor mon = new FileMonitor(sys.getFilesystem());
-	JSAFSystem.getTimer().schedule(mon, 15000, 15000);
+	JSAFSystem.schedule(mon, 15000, 15000);
 	try {
 	    for (int attempt=1; true; attempt++) {
 		if (!sys.isConnected()) {
@@ -413,8 +412,7 @@ public class SafeCLI {
 		}
 	    }
 	} finally {
-	    mon.cancel();
-	    JSAFSystem.getTimer().purge();
+	    JSAFSystem.cancelTask(mon);
 	}
     }
 
@@ -782,7 +780,7 @@ public class SafeCLI {
 	}
     }
 
-    static class FileMonitor extends TimerTask {
+    static class FileMonitor implements Runnable {
 	private IFilesystem fs;
 	private String path;
 

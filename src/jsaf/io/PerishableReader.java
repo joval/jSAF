@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.TimerTask;
 
 import org.slf4j.cal10n.LocLogger;
 
@@ -65,7 +64,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 
     private boolean closed, expired;
     private long timeout;
-    private TimerTask task;
+    private Runnable task;
     private StackTraceElement[] trace;
 
     // Implement ILoggable
@@ -306,10 +305,9 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
      */
     public synchronized void defuse() {
 	if (task != null) {
-	    task.cancel();
+	    JSAFSystem.cancelTask(task);
 	    task = null;
 	}
-	JSAFSystem.getTimer().purge();
     }
 
     // Protected
@@ -317,7 +315,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
     protected synchronized void resetTimer() {
 	defuse();
 	task = new InterruptTask(Thread.currentThread());
-	JSAFSystem.getTimer().schedule(task, timeout);
+	JSAFSystem.schedule(task, timeout);
     }
 
     // Private
@@ -345,7 +343,7 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 	resetTimer();
     }
 
-    class InterruptTask extends TimerTask {
+    class InterruptTask implements Runnable {
 	Thread t;
 
 	InterruptTask(Thread t) {
@@ -378,7 +376,6 @@ public class PerishableReader extends InputStream implements IReader, IPerishabl
 		}
 		logger.debug(Message.WARNING_PERISHABLEIO_INTERRUPT, sb.toString());
 	    }
-	    JSAFSystem.getTimer().purge();
 	}
     }
 

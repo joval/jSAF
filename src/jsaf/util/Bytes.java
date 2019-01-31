@@ -11,6 +11,39 @@ package jsaf.util;
  * @since 1.3.5
  */
 public class Bytes {
+   /**
+    * Return rows of 16 hex-formatted bytes on the left, with ASCII format in a column on the right.
+    */
+   public static final String hexDump(byte[] data, int start, int len) {
+	StringBuffer sb = new StringBuffer();
+	int end = start+len;
+	for (int i=start; i < end; i+=16) {
+	    int term = Math.min(end, i+16);
+	    int plus16 = i + 16;
+	    for (int j=i; j < plus16; j++) {
+		if (j < term) {
+		    sb.append(Bytes.toHexString(data[j]));
+		} else {
+		    sb.append("  ");
+		}
+		sb.append(" ");
+	    }
+	    sb.append("  ");
+	    byte[] buff = new byte[term - i];
+	    for (int j=0; j < buff.length; j++) {
+		byte b = data[j+i];
+		if (32 <= b && b <= 128) {
+		    buff[j] = b;
+		} else {
+		    buff[j] = (byte)254;
+		}
+	    }
+	    sb.append(new String(buff, Strings.ASCII));
+	    sb.append(Strings.LF);
+	}
+	return sb.toString();
+    }
+
     /**
      * Get a string representation of a byte array, where each byte is converted into a [0-F] hex character pair.
      */

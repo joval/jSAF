@@ -22,20 +22,31 @@ public interface IService {
     /**
      * Enumeration of supported transport protocols.
      */
+    enum Transport {
+	TCP,
+	UDP;
+    }
+
+    /**
+     * Enumeration of supported service protocols.
+     */
     enum Protocol {
 	HTTP,
 	FTP,
 	SMTP,
 	SSH,
-	TCP,
-	TLS,
-	UDP;
+	TLS;
     }
 
     /**
-     * Get the transport protocol(s) associated with the service port instance.
+     * Get the transport protocol associated with this port instance.
      */
-    Collection<Protocol> protocols();
+    Transport getTransport();
+
+    /**
+     * Get the service protocol(s) associated with this port instance.
+     */
+    Collection<Protocol> getProtocols();
 
     /**
      * Get the name commonly associated with the service, e.g., http.
@@ -45,8 +56,11 @@ public interface IService {
     String getName();
 
     /**
-     * Get the socket address for the service entry. Note, the InetAddress associated with the socket address describes the
-     * network interface from the perspective of the machine on which the service is running.
+     * Get the socket address for the service entry.
+     *
+     * Note, the InetAddress associated with the socket address describes the network interface from the perspective of the
+     * machine on which the service is running (to the extent that can be determined). For example, a listener bound to all
+     * the machine's network interfaces will have a socket address with an IPv4 component of 0.0.0.0.
      */
     InetSocketAddress getSocketAddress();
 

@@ -44,7 +44,7 @@ public final class JSAFSystem {
 	    File homeDir = new File(System.getProperty("user.home"));
 	    dataDir = new File(homeDir, ".jSAF");
 	}
-	timer = new Timer("jSAF System Timer", true);
+	timer = new JSAFSystemTimer();
     }
 
     /**
@@ -172,6 +172,17 @@ public final class JSAFSystem {
 	    boolean result = super.cancel();
 	    JSAFSystem.timer.purge();
 	    return result;
+	}
+    }
+
+    static class JSAFSystemTimer extends Timer {
+	JSAFSystemTimer() {
+	    super("jSAF System Timer", true);
+	}
+
+	@Override
+	public void cancel() {
+	    // cannot be cancelled
 	}
     }
 }

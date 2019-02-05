@@ -78,6 +78,23 @@ public class Strings {
     public static final Charset UTF16LE = Charset.forName("UTF-16LE");
 
     /**
+     * Just like String.join, except for pre-JDK 1.8
+     *
+     * @since 1.4
+     */
+    public static String join(CharSequence delimiter, Iterable<? extends CharSequence> elements) {
+	StringBuffer sb = new StringBuffer();
+	int i = 0;
+	for (CharSequence element : elements) {
+	    if (i > 0) {
+		sb.append(delimiter);
+	    }
+	    sb.append(element);
+	}
+	return sb.toString();
+    }
+
+    /**
      * Sort the array from A-&gt;Z (ascending ordering).
      *
      * @since 1.2

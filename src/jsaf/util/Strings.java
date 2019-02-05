@@ -82,6 +82,15 @@ public class Strings {
      *
      * @since 1.4
      */
+    public static String join(CharSequence delimiter, CharSequence... elements) {
+	return join(delimiter, Arrays.<CharSequence>asList(elements));
+    }
+
+    /**
+     * Just like String.join, except for pre-JDK 1.8
+     *
+     * @since 1.4
+     */
     public static String join(CharSequence delimiter, Iterable<? extends CharSequence> elements) {
 	StringBuffer sb = new StringBuffer();
 	int i = 0;

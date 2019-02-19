@@ -52,12 +52,14 @@ public class Base64 {
      public final static int URL_SAFE = 16;
 
 
-     /**
-      * Encode using the special "ordered" dialect of Base64 described here:
-      * <a href="http://www.faqs.org/qa/rfcc-1940.html">http://www.faqs.org/qa/rfcc-1940.html</a>.
-      */
-     public final static int ORDERED = 32;
+    /**
+     * Encode using the special "ordered" dialect of Base64 described here:
+     * <a href="http://www.faqs.org/qa/rfcc-1940.html">http://www.faqs.org/qa/rfcc-1940.html</a>.
+     */
+    public final static int ORDERED = 32;
     
+    /** Catch any unexpected end-of-stream exception while unzipping. Value is 64 **/
+    public final static int IGNORE_EOF = 64;
     
 /* ********  P R I V A T E   F I E L D S  ******** */  
     
@@ -1122,6 +1124,13 @@ public class Base64 {
 		    out.close();
                     bytes = out.toByteArray();
 		    out = null;
+		} catch (java.io.EOFException e) {
+		    boolean ignoreEOF = (options & IGNORE_EOF) == IGNORE_EOF;
+		    if (ignoreEOF) {
+			bytes = out.toByteArray();
+		    } else {
+			throw e;
+		    }
                 } finally {
                     try{ if (out != null) out.close(); } catch( Exception e ){}
                     try{ in.close(); } catch( Exception e ){}

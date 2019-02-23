@@ -42,6 +42,14 @@ public interface IWindowsSession extends IComputerSystem {
     String PROP_POWERSHELL_INIT_ARGS = "powershell.initArgs";
 
     /**
+     * Property indicating whether to enable Powershell process memory profiling. When enabled, implementations should log
+     * the Powershell process memory size after every call to IRunspace.invoke.
+     *
+     * @since 1.4.1
+     */
+    String PROP_POWERSHELL_MEMORY_PROFILING = "powershell.memoryProfiling";
+
+    /**
      * Name of the environment variable containing the processor architecture (when running in 32-bit mode on a 64-bit
      * machine, the value will actually be the emulated architecture).
      *

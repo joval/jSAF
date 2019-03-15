@@ -96,7 +96,79 @@ public class LogCensor implements ILoggable.Censor {
 	return sanitized;
     }
 
-    static class FilterLogger extends LocLogger {
+    /**
+     * LogCensor's internal implementation of LocLogger, which has been exposed so that classes can use its filterString method
+     * when creating exceptions whose messages may contain sensitive keywords.
+     */
+    public final static class FilterLogger extends LocLogger {
+	/**
+	 * Remove any sensitive information from a string.
+	 *
+	 * @since 1.4.1
+	 */
+	public String filterString(String data) {
+	    return (String)censor.expurgate(data)[0];
+	}
+
+	// LocLogger overrides
+
+        @Override
+        public void debug(String msg, Throwable t) {
+	    StringBuffer sb = new StringBuffer(msg).append(Strings.LF).append(Strings.toString(t));
+	    logger.debug(filterString(sb.toString()));
+        }
+
+        @Override
+        public void debug(Enum<?> key, Object... args) {
+	    logger.debug(key, censor.expurgate(args));
+        }
+
+        @Override
+        public void error(String msg, Throwable t) {
+	    StringBuffer sb = new StringBuffer(msg).append(Strings.LF).append(censor.expurgate(Strings.toString(t)));
+	    logger.error(filterString(sb.toString()));
+        }
+
+        @Override
+        public void error(Enum<?> key, Object... args) {
+	    logger.error(key, censor.expurgate(args));
+        }
+
+        @Override
+        public void info(String msg, Throwable t) {
+	    StringBuffer sb = new StringBuffer(msg).append(Strings.LF).append(censor.expurgate(Strings.toString(t)));
+	    logger.info(filterString(sb.toString()));
+        }
+
+        @Override
+        public void info(Enum<?> key, Object... args) {
+	    logger.info(key, censor.expurgate(args));
+        }
+
+        @Override
+        public void trace(String msg, Throwable t) {
+	    StringBuffer sb = new StringBuffer(msg).append(Strings.LF).append(censor.expurgate(Strings.toString(t)));
+	    logger.trace(filterString(sb.toString()));
+        }
+
+        @Override
+        public void trace(Enum<?> key, Object... args) {
+	    logger.trace(key, censor.expurgate(args));
+        }
+
+        @Override
+        public void warn(String msg, Throwable t) {
+	    StringBuffer sb = new StringBuffer(msg).append(Strings.LF).append(censor.expurgate(Strings.toString(t)));
+	    logger.warn(filterString(sb.toString()));
+        }
+
+        @Override
+        public void warn(Enum<?> key, Object... args) {
+	    logger.warn(key, censor.expurgate(args));
+        }
+
+	// Internal
+
 	private LogCensor censor;
 	private ILoggable loggable;
 	private LocLogger logger;
@@ -116,32 +188,5 @@ public class LogCensor implements ILoggable.Censor {
 	void dispose() {
 	    loggable.setLogger(logger);
 	}
-
-	// LocLogger overrides
-
-        @Override
-        public void debug(Enum<?> key, Object... args) {
-	    logger.debug(key, censor.expurgate(args));
-        }
-
-        @Override
-        public void error(Enum<?> key, Object... args) {
-	    logger.error(key, censor.expurgate(args));
-        }
-
-        @Override
-        public void info(Enum<?> key, Object... args) {
-	    logger.info(key, censor.expurgate(args));
-        }
-
-        @Override
-        public void trace(Enum<?> key, Object... args) {
-	    logger.trace(key, censor.expurgate(args));
-        }
-
-        @Override
-        public void warn(Enum<?> key, Object... args) {
-	    logger.warn(key, censor.expurgate(args));
-        }
     }
 }

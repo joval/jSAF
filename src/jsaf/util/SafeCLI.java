@@ -52,14 +52,14 @@ public class SafeCLI {
      *
      * @since 1.3.10
      */
-    public static final String[] ANSI_C = new String[] {"LANG=C", "LC_ALL=C"};
+    public static final String[] ANSI_C = new String[] {"LC_ALL=C"};
 
     /**
      * en_US UTF8 locale environment.
      *
      * @since 1.3.10
      */
-    public static final String[] en_US = new String[] {"LANG=en_US.UTF-8", "LC_ALL=en_US.UTF-8"};
+    public static final String[] en_US = new String[] {"LC_ALL=en_US.UTF-8"};
 
     /**
      * An interface for processing data from a process stream (stdout or stderr), used by the exec method.

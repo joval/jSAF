@@ -325,11 +325,11 @@ public class LittleEndian {
 	byte[] buff = new byte[512];
 	int len = 0;
 	while (true) {
-	    byte b1 = (byte)ra.read();
+	    int b1 = ra.read();
 	    if (b1 == -1) {
 		throw new EOFException(Message.getMessage(Message.ERROR_EOF));
 	    }
-	    byte b2 = (byte)ra.read();
+	    int b2 = ra.read();
 	    if (b2 == -1) {
 		throw new EOFException(Message.getMessage(Message.ERROR_EOF));
 	    }
@@ -337,16 +337,16 @@ public class LittleEndian {
 	    if (b1 == 0 && b2 == 0) {
 		break; // Reached the null!
 	    } else if (len < buff.length) {
-		buff[len++] = b1;
-		buff[len++] = b2;
+		buff[len++] = (byte)(0xFF & b1);
+		buff[len++] = (byte)(0xFF & b2);
 	    } else {
 		byte[] buff2 = new byte[buff.length + 512];
 		for (int i=0; i < buff.length; i++) {
 		    buff2[i] = buff[i];
 		}
 		buff = buff2;
-		buff[len++] = b1;
-		buff[len++] = b2;
+		buff[len++] = (byte)(0xFF & b1);
+		buff[len++] = (byte)(0xFF & b2);
 	    }
 	}
 	return getSzUTF16LEString(buff, 0, len);

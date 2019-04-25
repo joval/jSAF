@@ -31,11 +31,11 @@ public class Bytes {
 	    sb.append("  ");
 	    byte[] buff = new byte[term - i];
 	    for (int j=0; j < buff.length; j++) {
-		byte b = data[j+i];
+		int b = 0xFF & data[j+i];
 		if (32 <= b && b <= 128) {
-		    buff[j] = b;
+		    buff[j] = (byte)(0xFF & b);
 		} else {
-		    buff[j] = (byte)254;
+		    buff[j] = (byte)(0xFF & 254);
 		}
 	    }
 	    sb.append(new String(buff, Strings.ASCII));

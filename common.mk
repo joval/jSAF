@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2018 JovalCM.com.  All rights reserved.
+# Copyright (C) 2011-2019 JovalCM.com.  All rights reserved.
 # This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 ifeq (x, x$(JAVA_HOME))
@@ -12,6 +12,8 @@ else
   OS=$(shell uname)
   ifeq (Linux, $(findstring Linux,$(OS)))
     PLATFORM=linux
+  else ifeq (Darwin, $(findstring Darwin,$(OS)))
+    PLATFORM=mac
   endif
   CLN=:
 endif
@@ -40,6 +42,12 @@ else ifeq (1.6, $(findstring 1.6, $(RAW_JAVA_VERSION)))
     JAVADOCFLAGS=-J-Xmx512m
 else
     $(error "Unsupported Java version: $(RAW_JAVA_VERSION)")
+endif
+
+ifeq (mac, $(PLATFORM))
+    NUMPROCS=$(shell sysctl -n hw.ncpu)
+else
+    NUMPROCS=$(shell nproc)
 endif
 
 NULL:=

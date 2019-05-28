@@ -32,9 +32,12 @@ resources:
 	cp $(RSRC)/jsafmsg_en.properties $(BUILD)
 	cp $(SRC)/jsaf/service/etc.services $(BUILD)/jsaf/service
 
-classes: classdirs $(CLASS_FILES)
+classes: classdirs
+	$(MAKE) -j$(NUMPROCS) classfiles
 
 classdirs: $(foreach pkg, $(PACKAGEDIRS), $(BUILD)/$(pkg)/)
+
+classfiles: $(CLASS_FILES)
 
 $(BUILD)/%.class: $(SRC)/%.java
 	$(JAVAC) $(JAVACFLAGS) -d $(BUILD) -classpath $(CLASSPATH) $<

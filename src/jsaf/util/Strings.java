@@ -334,14 +334,24 @@ public class Strings {
      */
     public static String toString(Throwable t) {
 	StringBuffer sb = new StringBuffer(t.getClass().getName());
-	sb.append(": ").append(t.getMessage() == null ? "null" : t.getMessage()).append(LF);
-	StackTraceElement[] ste = t.getStackTrace();
-	for (int i=0; i < ste.length; i++) {
-	    sb.append("        at ").append(ste[i].toString()).append(LF);
-	}
+	sb.append(": ").append(t.getMessage() == null ? "null" : t.getMessage());
+	sb = new StringBuffer(toString(sb.toString(), t.getStackTrace()));
 	Throwable cause = t.getCause();
 	if (cause != null) {
-	    sb.append("Caused by: ").append(toString(cause));
+	    sb.append(LF).append("Caused by: ").append(toString(cause));
+	}
+	return sb.toString();
+    }
+
+    /**
+     * Convert a message and array of stack trace elements to a string.
+     *
+     * @since 1.4.3
+     */
+    public static String toString(String message, StackTraceElement[] ste) {
+	StringBuffer sb = new StringBuffer(message);
+	for (int i=0; i < ste.length; i++) {
+	    sb.append(LF).append("        at ").append(ste[i].toString());
 	}
 	return sb.toString();
     }

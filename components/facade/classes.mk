@@ -45,7 +45,6 @@ CLASSES=\
 	jsaf.intf.util.IConfigurable	\
 	jsaf.intf.util.IDisposable	\
 	jsaf.intf.util.ILoggable	\
-	jsaf.intf.util.IPerishable	\
 	jsaf.intf.util.IProperty	\
 	jsaf.intf.util.IPublisher	\
 	jsaf.intf.util.ISearchable	\

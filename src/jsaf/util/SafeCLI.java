@@ -64,7 +64,7 @@ public class SafeCLI {
     /**
      * An interface for processing data from a process stream (stdout or stderr), used by the exec method.
      *
-     * If the command hangs diring processing (signaled to SafeCLI by an InterruptedIOException or SessionException),
+     * If the command hangs during processing (signaled to SafeCLI by an InterruptedIOException or SessionException),
      * the SafeCLI will kill the old command, start a new command instance (up the the session's configured number of
      * retries), and call handler.handle again.
      *

@@ -5,13 +5,16 @@ package jsaf.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
+import java.io.FilterInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -33,36 +36,54 @@ import jsaf.util.Strings;
  * @version %I% %G%
  */
 public class PerishableReader extends InputStream implements IReader {
+    private static final ExecutorService service = Executors.newCachedThreadPool(new PRThreadFactory());
+    private static final HashSet<String> interruptableTypeNames = new HashSet<String>();
+    static {
+	interruptableTypeNames.add("java.net.SocketInputStream");
+    }
+
     /**
-     * Create a new instance using the given InputStream and initial timeout.  The clock begins ticking immediately, so
-     * it is important to start reading before the timeout has expired.
+     * Create a new instance using the given InputStream and read timeout.
      *
      * If the specified InputStream is already a PerishableReader, then its timeout is altered and it is returned.
      *
-     * @param maxTime the maximum amount of time that should be allowed to elapse between successful reads, in milliseconds.
-     *                If maxTime &lt;= 0, the default of 1hr will apply.
+     * @param timeout the maximum amount of time that should be allowed for a read operation to return, in milliseconds.
+     *                If timeout &lt;= 0, a default of 1hr will apply.
      */
-    public static PerishableReader newInstance(InputStream in, long maxTime) {
+    public static final PerishableReader newInstance(InputStream in, long timeout) {
 	if (in == null) {
 	    throw new NullPointerException();
 	}
 	if (in instanceof PerishableReader) {
 	    PerishableReader reader = (PerishableReader)in;
-	    reader.setTimeout(maxTime);
+	    reader.setTimeout(timeout);
 	    return reader;
 	} else {
-	    return new PerishableReader(in, maxTime);
+	    return new PerishableReader(in, timeout);
 	}
     }
 
-    protected boolean isEOF;
-    protected Buffer buffer;
-    protected LocLogger logger;
+    /**
+     * Add an InputStream type name whose read operations can be interrupted.
+     *
+     * If an InputStream type is known to have interruptable reads, then a PerishableReader will use TimerTasks and interrupts
+     * to implement the timeout functionality. This is fairly low-cost. If an InputStream is not known to have interruptable
+     * reads, then a PerishableReader will use Futures to implement the timeout functionality. This means every read operation
+     * will have to run in a new Thread, which is fairly high-cost.
+     *
+     * By default, PerishableReader knows only about java.net.SocketInputStream.
+     */
+    public static final void addInterruptableTypeName(String typeName) {
+	interruptableTypeNames.add(typeName);
+    }
 
+    private LocLogger logger;
     private InputStream in;
-    private boolean closed, expired;
+    private boolean interruptable, closed, expired;
     private long timeout;
-    private StackTraceElement[] trace;
+
+    protected Buffer buffer;
+    protected boolean isEOF;
 
     /**
      * Check whether a read has expired.
@@ -269,7 +290,7 @@ public class PerishableReader extends InputStream implements IReader {
 	    buff[offset++] = buffer.next();
 	    bytesRead++;
 	}
-	bytesRead += readWithTimeout(buff, offset, len);
+	bytesRead += streamRead(buff, offset, len);
 	int end = offset + bytesRead;
 	for (int i=offset; buffer.hasCapacity() && i < end; i++) {
 	    buffer.add((byte)(i & 0xFF));
@@ -283,7 +304,7 @@ public class PerishableReader extends InputStream implements IReader {
 	if (buffer.hasNext()) {
 	    i = (int)buffer.next();
 	} else if (!isEOF) {
-	    i = readWithTimeout();
+	    i = streamRead();
 	    if (buffer.hasCapacity()) {
 		buffer.add((byte)(i & 0xFF));
 	    } else {
@@ -298,45 +319,90 @@ public class PerishableReader extends InputStream implements IReader {
 
     // Protected
 
-    protected int readWithTimeout() throws IOException {
-	try {
-	    return service.submit(new ReadTask(in)).get(timeout, TimeUnit.MILLISECONDS);
-	} catch (Exception e) {
-	    expired = true;
-	    throw (InterruptedIOException)new InterruptedIOException(e.getMessage()).initCause(e);
+    protected PerishableReader(InputStream in, long timeout) {
+	if (in instanceof PerishableReader) {
+	    throw new IllegalArgumentException(in.getClass().getName());
+	} else {
+	    logger = Message.getLogger();
+	    this.in = in;
+	    interruptable = isInterruptable(in);
+	    isEOF = false;
+	    closed = false;
+	    expired = false;
+	    buffer = new Buffer(0);
+	}
+	setTimeout(timeout);
+    }
+
+    /**
+     * Read a character directly from the wrapped InputStream.
+     *
+     * @throws InterruptedIOException if the no byte is returned before the timeout expires
+     */
+    protected int streamRead() throws IOException {
+	if (interruptable) {
+	    InterruptTask task = new InterruptTask(Thread.currentThread());
+	    JSAFSystem.schedule(task, timeout);
+	    int ch = in.read();
+	    JSAFSystem.cancelTask(task);
+	    return ch;
+	} else {
+	    try {
+		return service.submit(new ReadTask(in)).get(timeout, TimeUnit.MILLISECONDS);
+	    } catch (Exception e) {
+		expired = true;
+		throw (InterruptedIOException)new InterruptedIOException(e.getMessage()).initCause(e);
+	    }
 	}
     }
 
-    protected int readWithTimeout(byte[] buff) throws IOException {
-	return readWithTimeout(buff, 0, buff.length);
+    /**
+     * Identical to streamRead(buff, 0, buff.length)
+     */
+    protected int streamRead(byte[] buff) throws IOException {
+	return streamRead(buff, 0, buff.length);
     }
 
-    protected int readWithTimeout(byte[] buff, int offset, int len) throws IOException {
-	try {
-	    return service.submit(new OffsetReadTask(in, buff, offset, len)).get(timeout, TimeUnit.MILLISECONDS);
-	} catch (Exception e) {
-	    expired = true;
-	    throw (InterruptedIOException)new InterruptedIOException(e.getMessage()).initCause(e);
+    /**
+     * Read from the wrapped InputStream directly into the supplied buffer, with the specified offset and maximum length..
+     *
+     * @throws InterruptedIOException if the no bytes are read before the timeout expires
+     */
+    protected int streamRead(byte[] buff, int offset, int len) throws IOException {
+	if (interruptable) {
+	    InterruptTask task = new InterruptTask(Thread.currentThread());
+	    JSAFSystem.schedule(task, timeout);
+	    int bytesRead = in.read(buff, offset, len);
+	    JSAFSystem.cancelTask(task);
+	    return bytesRead;
+	} else {
+	    try {
+		return service.submit(new ReadTask(in, buff, offset, len)).get(timeout, TimeUnit.MILLISECONDS);
+	    } catch (Exception e) {
+		expired = true;
+		throw (InterruptedIOException)new InterruptedIOException(e.getMessage()).initCause(e);
+	    }
 	}
     }
 
     // Private
 
-    private static final ExecutorService service = Executors.newCachedThreadPool(new PRThreadFactory());
-
-    protected PerishableReader(InputStream in, long timeout) {
-	trace = Thread.currentThread().getStackTrace();
-	if (in instanceof PerishableReader) {
-	    throw new IllegalArgumentException(in.getClass().getName());
-	} else {
-	    this.in = in;
-	    isEOF = false;
-	    closed = false;
-	    expired = false;
-	    buffer = new Buffer(0);
-	    logger = Message.getLogger();
+    /**
+     * Determine whether the specified InputStream is (or wraps) an interruptable type.
+     */
+    private boolean isInterruptable(InputStream in) {
+	try {
+	    Field f = FilterInputStream.class.getDeclaredField("in");
+	    f.setAccessible(true);
+	    while (in instanceof FilterInputStream) {
+		in = (InputStream)f.get((FilterInputStream)in);
+	    }
+	    String className = in.getClass().getName();
+	    return interruptableTypeNames.contains(className);
+	} catch (Exception e) {
+	    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    return false;
 	}
-	setTimeout(timeout);
     }
 
     static class PRThreadFactory implements ThreadFactory {
@@ -354,26 +420,31 @@ public class PerishableReader extends InputStream implements IReader {
 	}
     }
 
-    static class ReadTask implements Callable<Integer> {
-	private InputStream in;
+    static class InterruptTask implements Runnable {
+	private Thread t;
 
-	ReadTask(InputStream in) {
-	    this.in = in;
+	InterruptTask(Thread t) {
+	    this.t = t;
 	}
 
-	// Implement Callable<Integer>
+	// Implement Runnable
 
-	public Integer call() throws Exception {
-	    return in.read();
+	public void run() {
+	    t.interrupt();
 	}
     }
 
-    static class OffsetReadTask implements Callable<Integer> {
+    static class ReadTask implements Callable<Integer> {
 	private InputStream in;
 	private byte[] buff;
-	private int offset, len;
+	int offset, len;
 
-	OffsetReadTask(InputStream in, byte[] buff, int offset, int len) {
+	ReadTask(InputStream in) {
+	    this.in = in;
+	    buff = null;
+	}
+
+	ReadTask(InputStream in, byte[] buff, int offset, int len) {
 	    this.in = in;
 	    this.buff = buff;
 	    this.offset = offset;
@@ -383,7 +454,11 @@ public class PerishableReader extends InputStream implements IReader {
 	// Implement Callable<Integer>
 
 	public Integer call() throws Exception {
-	    return in.read(buff, offset, len);
+	    if (buff == null) {
+		return in.read();
+	    } else {
+		return in.read(buff, offset, len);
+	    }
 	}
     }
 

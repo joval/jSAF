@@ -416,7 +416,10 @@ public class PerishableReader extends InputStream implements IReader {
 	// Implement ThreadFactory
 
 	public synchronized Thread newThread(Runnable r) {
-	    return new Thread(group, r, new StringBuffer("perishable-reader-").append(Integer.toString(counter++)).toString());
+	    String name = new StringBuffer("perishable-reader-").append(Integer.toString(counter++)).toString();
+	    Thread t = new Thread(group, r, name);
+	    t.setDaemon(true);
+	    return t;
 	}
     }
 

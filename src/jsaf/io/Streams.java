@@ -233,6 +233,7 @@ public class Streams {
 		int len = 0;
 		while ((len = in.read(buff)) > 0) {
 		    out.write(buff, 0, len);
+		    out.flush();
 		}
 	    } catch (IOException e) {
 		if (thread == null) {

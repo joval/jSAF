@@ -111,7 +111,7 @@ public class Regex {
      * the specified flags (from java.util.regex.Pattern).
      */
     public static Pattern pattern(String regex, int flags) throws PatternSyntaxException {
-	return Pattern.compile(posix2Java(regex), flags);
+	return Pattern.compile(posix2Java(regex), flags | Pattern.UNIX_LINES);
     }
 
     /**

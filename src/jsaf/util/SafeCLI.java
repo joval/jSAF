@@ -393,14 +393,14 @@ public class SafeCLI {
 		    // Create and return a LineIterator based on a local cache file containing the output
 		    //
 		    if (LOCALHOST.equals(sys.getHostname())) {
-			return new LineIterator(new File(tempPath), true);
+			return new LineIterator(new File(tempPath));
 		    } else {
 			File tempDir = sys.getWorkspace() == null ? new File(System.getProperty("user.home")) : sys.getWorkspace();
 			File localTemp = File.createTempFile("cmd", null, tempDir);
 			try {
 			    Streams.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
 			    remoteTemp.delete();
-			    return new LineIterator(localTemp, true);
+			    return new LineIterator(localTemp);
 			} catch (IOException e) {
 			    if (attempt > cli.execRetries) {
 				throw e;

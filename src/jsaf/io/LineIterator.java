@@ -61,11 +61,11 @@ public class LineIterator implements Iterator<String> {
      * Create a LineIterator for an InputStream using the specified encoding.
      */
     public LineIterator(InputStream in, Charset encoding) throws IOException {
-	BufferedInputStream in = new BufferedInputStream(new FileInputStream(tempFile));
-	if (isGzipped(in)) {
-	    reader = new BufferedReader(new GZIPInputStream(in), encoding);
+	BufferedInputStream bis = new BufferedInputStream(in);
+	if (isGzipped(bis)) {
+	    reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(bis), encoding));
 	} else {
-	    reader = new BufferedReader(in, encoding);
+	    reader = new BufferedReader(new InputStreamReader(bis, encoding));
 	}
     }
 
@@ -129,7 +129,7 @@ public class LineIterator implements Iterator<String> {
 		in.reset();
 		return false;
 	      default:
-		magic[i] = in.read();
+		magic[i] = (byte)(0xFF & ch);
 		break;
 	    }
 	}

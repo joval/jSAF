@@ -4,12 +4,14 @@
 package jsaf.io;
 
 import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -34,34 +36,37 @@ public class LineIterator implements Iterator<String> {
 
     /**
      * Create a LineIterator for a text file. When the end of the iterator has been reached, the file is deleted.
-     * This constructor will auto-detect whether the file is GZipped.
+     * This constructor will detect whether the file is GZipped. Assumes UTF-8 encoding.
      */
     public LineIterator(File tempFile) throws IOException {
-	this(tempFile, isGzipped(tempFile));
+	this(tempFile, Strings.UTF8);
     }
 
     /**
-     * Create a LineIterator for the file (which is gzipped, if indicated).
+     * Create a LineIterator for the file using the specified encoding. Auto-detects GZip-compressed files.
      */
-    public LineIterator(File tempFile, boolean gzipped) throws IOException {
+    public LineIterator(File tempFile, Charset encoding) throws IOException {
+	this(new FileInputStream(tempFile), encoding);
 	this.tempFile = tempFile;
-	InputStream in = new FileInputStream(tempFile);
-	if (gzipped) {
-	    try {
-		in = new GZIPInputStream(in);
-	    } catch (IOException e) {
-		close();
-		throw e;
-	    }
-	}
-	reader = new BufferedReader(new InputStreamReader(in, Strings.UTF8));
     }
 
     /**
-     * Create a LineIterator for an InputStream.
+     * Create a LineIterator for an InputStream using UTF8 encoding.
      */
-    public LineIterator(InputStream in) {
-	reader = new BufferedReader(new InputStreamReader(in, Strings.UTF8));
+    public LineIterator(InputStream in) throws IOException {
+	this(in, Strings.UTF8);
+    }
+
+    /**
+     * Create a LineIterator for an InputStream using the specified encoding.
+     */
+    public LineIterator(InputStream in, Charset encoding) throws IOException {
+	BufferedInputStream in = new BufferedInputStream(new FileInputStream(tempFile));
+	if (isGzipped(in)) {
+	    reader = new BufferedReader(new GZIPInputStream(in), encoding);
+	} else {
+	    reader = new BufferedReader(in, encoding);
+	}
     }
 
     @Override
@@ -111,24 +116,25 @@ public class LineIterator implements Iterator<String> {
 
     private static final byte[] GZIP_MAGIC = new byte[] {(byte)0x1f, (byte)0x8b};
 
-    private static boolean isGzipped(File f) throws IOException {
-	if (f.length() < 2) {
-	    return false;
-	}
-	RandomAccessFile raf = null;
-	try {
-	    raf = new RandomAccessFile(f, "r");
-	    byte[] magic = new byte[2];
-	    raf.readFully(magic);
-	    return Arrays.equals(GZIP_MAGIC, magic);
-	} finally {
-	    if (raf != null) {
-		try {
-		    raf.close();
-		} catch (IOException e) {
-		}
+    /**
+     * Checks the magic bytes to see if the stream is Gzipped, then reset the stream back to the beginning.
+     */
+    private static boolean isGzipped(BufferedInputStream in) throws IOException {
+	in.mark(2);
+	byte[] magic = new byte[2];
+	for (int i=0; i < magic.length; i++) {
+	    int ch = in.read();
+	    switch(ch) {
+	      case -1: // EOF
+		in.reset();
+		return false;
+	      default:
+		magic[i] = in.read();
+		break;
 	    }
 	}
+	in.reset();
+	return Arrays.equals(GZIP_MAGIC, magic);
     }
 
     /**

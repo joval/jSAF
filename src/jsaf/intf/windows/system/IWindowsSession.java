@@ -35,6 +35,14 @@ public interface IWindowsSession extends IComputerSystem {
     String PROP_POWERSHELL_TIMEOUT = "powershell.timeout";
 
     /**
+     * Property indicating the number of milliseconds to wait for a Powershell process to present a prompt to stdout when
+     * initially started, before quitting, killing the process, and throwing an exception.
+     *
+     * @since 1.4.5
+     */
+    String PROP_POWERSHELL_INIT_TIMEOUT = "powershell.initTimeout";
+
+    /**
      * Property indicating the initialization arguments to pass to the powershell process upon startup.
      *
      * @since 1.3.6

@@ -147,9 +147,16 @@ public class Streams {
     /**
      * Read the BOM (Byte-Order marker) from a stream.
      *
+     * Starting in 1.4.6, the implementation will return null and reset the stream to the beginning if the
+     * stream supports mark/reset, instead of throwing a CharacterCodingException.
+     *
      * @since 1.2
      */
     public static Charset detectEncoding(InputStream in) throws IOException {
+	boolean buffered = in.markSupported();
+	if (buffered) {
+	    in.mark(3);
+	}
 	switch(in.read()) {
 	  case 0xEF:
 	    if (in.read() == 0xBB && in.read() == 0xBF) {
@@ -167,7 +174,12 @@ public class Streams {
 	    }
 	    break;
 	}
-	throw new java.nio.charset.CharacterCodingException();
+	if (buffered) {
+	    in.reset();
+	    return null;
+	} else {
+	    throw new java.nio.charset.CharacterCodingException();
+	}
     }
 
     /**

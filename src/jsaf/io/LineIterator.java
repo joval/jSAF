@@ -36,10 +36,10 @@ public class LineIterator implements Iterator<String> {
 
     /**
      * Create a LineIterator for a text file. When the end of the iterator has been reached, the file is deleted.
-     * This constructor will detect whether the file is GZipped. Assumes UTF-8 encoding.
+     * This constructor will detect whether the file is GZipped. Detects encoding by reading the file BOM.
      */
     public LineIterator(File tempFile) throws IOException {
-	this(tempFile, Strings.UTF8);
+	this(tempFile, null);
     }
 
     /**
@@ -51,22 +51,27 @@ public class LineIterator implements Iterator<String> {
     }
 
     /**
-     * Create a LineIterator for an InputStream using UTF8 encoding.
+     * Create a LineIterator for an InputStream; detect encoding.
      */
     public LineIterator(InputStream in) throws IOException {
-	this(in, Strings.UTF8);
+	this(in, null);
     }
 
     /**
      * Create a LineIterator for an InputStream using the specified encoding.
+     *
+     * @param encoding The stream's character encoding. If null, encoding is detected by trying to read a BOM from the stream.
+     *                 If there is no BOM, the class defaults to UTF-8.
      */
     public LineIterator(InputStream in, Charset encoding) throws IOException {
 	BufferedInputStream bis = new BufferedInputStream(in);
 	if (isGzipped(bis)) {
-	    reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(bis), encoding));
-	} else {
-	    reader = new BufferedReader(new InputStreamReader(bis, encoding));
+	    bis = new BufferedInputStream(new GZIPInputStream(bis));
 	}
+	if (encoding == null) {
+	    encoding = Streams.detectEncoding(bis);
+	}
+	reader = new BufferedReader(new InputStreamReader(bis, encoding == null ? Strings.UTF8 : encoding));
     }
 
     @Override

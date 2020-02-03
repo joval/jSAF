@@ -12,15 +12,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
-import java.nio.charset.Charset;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.zip.GZIPInputStream;
 
 import jsaf.JSAFSystem;
 import jsaf.Message;
@@ -520,21 +517,7 @@ public class SafeCLI {
 	// Private
 
 	private List<String> toLines(byte[] buff) throws IOException {
-	    ByteArrayInputStream in = new ByteArrayInputStream(buff);
-	    in.mark(data.length);
-	    Charset encoding = Strings.UTF8;
-	    try {
-		encoding = Streams.detectEncoding(in);
-	    } catch (IOException e) {
-		in.reset();
-	    }
-	    BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding));
-	    List<String> lines = new ArrayList<String>();
-	    String line = null;
-	    while((line = reader.readLine()) != null) {
-		lines.add(line);
-	    }
-	    return lines;
+	    return Strings.toList(new LineIterator(new ByteArrayInputStream(buff)));
 	}
     }
 

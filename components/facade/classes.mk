@@ -49,7 +49,6 @@ CLASSES=\
 	jsaf.intf.util.IPublisher	\
 	jsaf.intf.util.ISearchable	\
 	jsaf.intf.util.ISubscriber	\
-	jsaf.intf.windows.identity.IACE	\
 	jsaf.intf.windows.identity.IDirectory	\
 	jsaf.intf.windows.identity.IGroup	\
 	jsaf.intf.windows.identity.IPrincipal	\
@@ -96,6 +95,7 @@ CLASSES=\
 	jsaf.provider.SessionException	\
 	jsaf.provider.SessionFactory	\
 	jsaf.provider.windows.Timestamp	\
+	jsaf.provider.windows.identity.SID	\
 	jsaf.provider.windows.powershell.PowershellException	\
 	jsaf.provider.windows.registry.RegistryException	\
 	jsaf.provider.windows.wmi.WmiException	\

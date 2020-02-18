@@ -1,7 +1,9 @@
-// Copyright (C) 2011 jOVAL.org.  All rights reserved.
+// Copyright (C) 2011-2020 jOVAL.org.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.intf.windows.identity;
+
+import jsaf.provider.windows.identity.SID;
 
 /**
  * Super-interface for users and groups.
@@ -52,9 +54,9 @@ public interface IPrincipal {
     /**
      * Get the SID.
      *
-     * @since 1.0
+     * @since 1.5.0
      */
-    String getSid();
+    SID getSid();
 
     /**
      * Return the principal type.

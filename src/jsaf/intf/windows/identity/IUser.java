@@ -17,16 +17,6 @@ import jsaf.identity.IdentityException;
  */
 public interface IUser extends IPrincipal {
     /**
-     * Returns the Netbios names (DOMAIN\NAME) of all groups of which the user is a member.  Non-recursive (i.e., only
-     * groups containing this user, not groups containing groups containing this user, etc.).
-     *
-     * @since 1.0
-     * @deprecated since 1.4. Use {@link memberOf()} instead.
-     */
-    @Deprecated
-    Collection<String> getGroupNetbiosNames() throws IdentityException;
-
-    /**
      * Groups this user is a member of.
      *
      * @since 1.4

@@ -9,6 +9,7 @@ import jsaf.intf.windows.io.IWindowsFilesystem;
 import jsaf.intf.windows.powershell.IRunspacePool;
 import jsaf.intf.windows.registry.IRegistry;
 import jsaf.intf.windows.wmi.IWmiProvider;
+import jsaf.provider.windows.wmi.WmiException;
 
 /**
  * A representation of a Windows session.
@@ -158,4 +159,35 @@ public interface IWindowsSession extends IComputerSystem {
      * @since 1.0
      */
     IRunspacePool getRunspacePool();
+
+    /**
+     * See <a href="https://docs.microsoft.com/en-us/windows/win32/api/dsrole/ne-dsrole-dsrole_machine_role">DSROLE_MACHINE_ROLE</a>
+     *
+     * @since 1.5.0
+     */
+    enum DomainRole {
+	STANDALONE_WORKSTATION(0),
+	MEMBER_WORKSTATION(1),
+	STANDALONE_SERVER(2),
+	MEMBER_SERVER(3),
+	BACKUP_DC(4),
+	PRIMARY_DC(5);
+
+	private int id;
+
+	private DomainRole(int id) {
+	    this.id = id;
+	}
+
+	public static DomainRole fromID(int id) throws IllegalArgumentException {
+	    for (DomainRole role : values()) {
+		if (role.id == id) {
+		    return role;
+		}
+	    }
+	    throw new IllegalArgumentException(Integer.toString(id));
+	}
+    }
+
+    DomainRole getDomainRole() throws WmiException;
 }

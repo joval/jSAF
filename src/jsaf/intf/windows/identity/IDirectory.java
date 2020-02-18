@@ -5,9 +5,13 @@ package jsaf.intf.windows.identity;
 
 import java.util.Collection;
 import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
 
 import jsaf.identity.IdentityException;
+import jsaf.intf.util.ISearchable;
+import jsaf.intf.util.ISearchable.Condition;
 import jsaf.intf.util.ILoggable;
+import jsaf.provider.windows.identity.SID;
 
 /**
  * Representation of a Windows user/group store.
@@ -18,116 +22,125 @@ import jsaf.intf.util.ILoggable;
  */
 public interface IDirectory extends ILoggable {
     /**
-     * Returns whether or not the argument matches a valid SID pattern.
-     *
-     * @since 1.4
-     */
-    public boolean isSid(String arg);
-
-    /**
-     * Returns the user corresponding to the specified SID.
-     *
-     * @since 1.0
-     */
-    public IUser queryUserBySid(String sid) throws NoSuchElementException, IdentityException;
-
-    /**
-     * Query for an individual user.  The input parameter should be of the form DOMAIN\NAME.  For built-in users, the
-     * DOMAIN\ part can be dropped, in which case the name parameter is just the user name.
+     * Get the SID (Security Identifier) for the specified netbios name. The input parameter should be of the form DOMAIN\NAME. For built-in SIDs, the
+     * DOMAIN\ part can be dropped, in which case the name parameter is just the principal name.
      *
      * @throws IllegalArgumentException if the domain is not recognized
-     * @throws NoSuchElementException if the group does not exist
+     * @throws NoSuchElementException if the principal name does not map to a SID
      *
-     * @since 1.0
+     * @since 1.5.0
      */
-    public IUser queryUser(String netbiosName) throws IllegalArgumentException, NoSuchElementException, IdentityException;
+    SID lookupSID(String netbiosName) throws IllegalArgumentException, NoSuchElementException, IdentityException;
 
     /**
-     * Returns a Collection of all the local users.
+     * Returns a Principal (User or Group) given a SID.
      *
-     * @since 1.0
+     * @throws NoSuchElementException if no principal exists for the specified SID value
+     *
+     * @since 1.5.0
      */
-    public Collection<IUser> queryAllUsers() throws IdentityException;
+    IPrincipal getPrincipal(SID sid) throws NoSuchElementException, IdentityException;
 
     /**
-     * Returns the group corresponding to the specified SID.
+     * Filter interface for the enumerateLocalPrincipals method.
      *
-     * @since 1.0
+     * @since 1.5.0
      */
-    public IGroup queryGroupBySid(String sid) throws NoSuchElementException, IdentityException;
+    interface PrincipalFilter {
+	public boolean accept(IPrincipal principal);
+    }
+
+    PrincipalFilter USER_FILTER = new PrincipalFilter() {
+	public boolean accept(IPrincipal principal) {
+	    return principal.getType() == IPrincipal.Type.USER;
+	}
+    };
+
+    PrincipalFilter GROUP_FILTER = new PrincipalFilter() {
+	public boolean accept(IPrincipal principal) {
+	    return principal.getType() == IPrincipal.Type.GROUP;
+	}
+    };
+
+    PrincipalFilter WILDCARD_FILTER = new PrincipalFilter() {
+	public boolean accept(IPrincipal principal) {
+	    return true;
+	}
+    };
 
     /**
-     * Query for an individual group.  The input parameter should be of the form DOMAIN\NAME.  For built-in groups, the
-     * DOMAIN\ part can be dropped, in which case the name parameter is just the group name.
+     * Returns all the principals in the LSA, with the specified filter. This can be an expensive operation, particularly on a domain controller, if the
+     * filter attempts to retrieve anything other than the type, SID, or Netbios name.
      *
-     * @throws IllegalArgumentException if the domain is not recognized
-     * @throws NoSuchElementException if the group does not exist
-     *
-     * @since 1.0
+     * @since 1.5.0
      */
-    public IGroup queryGroup(String netbiosName) throws IllegalArgumentException, NoSuchElementException, IdentityException;
-
-    /**
-     * Returns a Collection of all the local groups.
-     *
-     * @since 1.0
-     */
-    public Collection<IGroup> queryAllGroups() throws IdentityException;
-
-    /**
-     * Returns a Principal (User or Group) given a Netbios name.
-     *
-     * @throws IllegalArgumentException if the domain is not recognized
-     * @throws NoSuchElementException if no matching user or group exists
-     *
-     * @since 1.0
-     */
-    public IPrincipal queryPrincipal(String netbiosName)
-	throws IllegalArgumentException, NoSuchElementException, IdentityException;
-
-    /**
-     * Returns a Principal (User or Group) given a sid.
-     *
-     * @since 1.0
-     */
-    public IPrincipal queryPrincipalBySid(String sid) throws NoSuchElementException, IdentityException;
-
-    /**
-     * Returns a Collection of all local users and groups.
-     *
-     * @since 1.0
-     */
-    public Collection<IPrincipal> queryAllPrincipals() throws IdentityException;
-
-    /**
-     * Does the local machine recognize this principal?
-     *
-     * @since 1.0
-     */
-    public boolean isLocal(String netbiosName);
-
-    /**
-     * Does the local machine recognize this SID?
-     *
-     * @since 1.0
-     */
-    public boolean isLocalSid(String sid) throws IdentityException;
+    Collection<IPrincipal> enumerateLocalPrincipals(PrincipalFilter filter) throws IdentityException;
 
     /**
      * Returns the SID for the local machine.
      *
-     * @since 1.3
+     * @since 1.5.0
      */
-    public String getComputerSid() throws IdentityException;
+    SID getComputerSid() throws IdentityException;
 
     /**
-     * Get the members of the principal, if it's a group.
+     * Resolve all members of the specified group, including sub-groups and their members, recursively.
      *
-     * @param includeGroups set to true to include group principals in the result, false if you only want users
-     * @param resolveGroups gets members recursively if true
-     *
-     * @since 1.0
+     * @since 1.5.0
      */
-    public Collection<IPrincipal> getAllPrincipals(IPrincipal principal, boolean includeGroups, boolean resolveGroups)
-	throws IdentityException;
+    Collection<IPrincipal> getAllMembers(IGroup group) throws IdentityException;
+
+    /**
+     * Does the LSA (Local Security Authority) recognize this SID?
+     *
+     * @since 1.5.0
+     */
+    boolean isLocal(SID sid) throws IdentityException;
+
+    /**
+     * Access an ISearchable for the Local Security Authority.
+     *
+     * @since 1.5.0
+     */
+    ISearchable<IPrincipal> getSearcher() throws IdentityException;
+
+    /**
+     * A search condition for retrieving all the service SIDs.
+     *
+     * @since 1.5.0
+     */
+    DirCondition SERVICES = new DirCondition(DirCondition.FIELD_SID, Condition.TYPE_PATTERN, Pattern.compile("^S-1-5-80-"));
+
+    /**
+     * Base ISearchable.Condition subclass for IDirectory search conditions.
+     *
+     * @since 1.5.0
+     */
+    public static final class DirCondition extends Condition {
+	/**
+	 * Create a Condition for searching a windows IDirectory.
+	 */
+	public DirCondition(int field, int type, Object arg) {
+	    super(field, type, arg);
+	}
+
+	/**
+	 * Condition field for a SID pattern. Supports the following condition types:
+	 *  TYPE_PATTERN - search for a SID matching the java.util.regex.Pattern value
+	 *  TYPE_ANY - retrieve multiple IPrincipals given a java.util.Collection&lt;SID&gt;
+	 *
+	 * @since 1.5.0
+	 */
+	public static final int FIELD_SID = 1000;
+
+	/**
+	 * Condition field for a principal name (as in, the String returned by IPrincipal.getName()). 
+	 * Supports the following condition types:
+	 *  TYPE_PATTERN - search for a principal name matching the java.util.regex.Pattern value
+	 *  TYPE_ANY - retrieve multiple IPrincipals given a java.util.Collection&lt;String&gt;
+	 *
+	 * @since 1.5.0
+	 */
+	public static final int FIELD_NAME = 1001;
+    }
 }

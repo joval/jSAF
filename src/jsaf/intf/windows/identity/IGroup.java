@@ -16,27 +16,7 @@ import jsaf.identity.IdentityException;
  */
 public interface IGroup extends IPrincipal {
     /**
-     * Get the Netbios names (DOMAIN\NAME) of users who are members of this group. Non-recursive (i.e., does not return
-     * names of users who are members of groups that are members of this group).
-     *
-     * @since 1.0
-     * @deprecated since 1.4. Use {@link members()} instead.
-     */
-    @Deprecated
-    Collection<String> getMemberUserNetbiosNames();
-
-    /**
-     * Get the Netbios names (DOMAIN\NAME) of groups which are members of this group. Non-recursive (i.e., does not return
-     * names of groups which are members of groups which are members of this group).
-     *
-     * @since 1.0
-     * @deprecated since 1.4. Use {@link members()} instead.
-     */
-    @Deprecated
-    Collection<String> getMemberGroupNetbiosNames();
-
-    /**
-     * Get all the IPrincipals (users and groups) that are members of this group (non-recursive).
+     * Get all the IPrincipals (users and groups) that are direct members of this group (non-recursive).
      *
      * @since 1.4
      */

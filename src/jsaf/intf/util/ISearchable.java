@@ -104,6 +104,13 @@ public interface ISearchable<T> {
      */
     public class Condition {
 	/**
+	 * Condition type constant for indicating indicating invaid type value (which should generate an exception if used).
+	 *
+	 * @since 1.5.0
+	 */
+	public static final int TYPE_INVALID = -1;
+
+	/**
 	 * Condition type indicating a search for something that "equals" the value.
 	 *
 	 * @since 1.2

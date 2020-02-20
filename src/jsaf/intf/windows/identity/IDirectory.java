@@ -129,7 +129,7 @@ public interface IDirectory extends ILoggable {
 	 * On certain machines, such as domain controllers, there may be a great many users and groups
 	 * defined in the Local Security Authority. In such cases, it can be very time-consuming to resolve
 	 * group membership information for every principal in the store. Therefore, it is assumed that
-	 * implementations of ISearchable<IPrincipal> may include a delayed-expansion feature, where group
+	 * implementations of ISearchable&lt;IPrincipal&gt; may include a delayed-expansion feature, where group
 	 * membership data for a principal is queried only when absolutely required.
 	 *
 	 * This search condition field makes it possible for an API client to specify the preferred behavior

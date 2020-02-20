@@ -42,41 +42,6 @@ public interface IDirectory extends ILoggable {
     IPrincipal getPrincipal(SID sid) throws NoSuchElementException, IdentityException;
 
     /**
-     * Filter interface for the enumerateLocalPrincipals method.
-     *
-     * @since 1.5.0
-     */
-    interface PrincipalFilter {
-	public boolean accept(IPrincipal principal);
-    }
-
-    PrincipalFilter USER_FILTER = new PrincipalFilter() {
-	public boolean accept(IPrincipal principal) {
-	    return principal.getType() == IPrincipal.Type.USER;
-	}
-    };
-
-    PrincipalFilter GROUP_FILTER = new PrincipalFilter() {
-	public boolean accept(IPrincipal principal) {
-	    return principal.getType() == IPrincipal.Type.GROUP;
-	}
-    };
-
-    PrincipalFilter WILDCARD_FILTER = new PrincipalFilter() {
-	public boolean accept(IPrincipal principal) {
-	    return true;
-	}
-    };
-
-    /**
-     * Returns all the principals in the LSA, with the specified filter. This can be an expensive operation, particularly on a domain controller, if the
-     * filter attempts to retrieve anything other than the type, SID, or Netbios name.
-     *
-     * @since 1.5.0
-     */
-    Collection<IPrincipal> enumerateLocalPrincipals(PrincipalFilter filter) throws IdentityException;
-
-    /**
      * Returns the SID for the local machine.
      *
      * @since 1.5.0
@@ -112,6 +77,20 @@ public interface IDirectory extends ILoggable {
     DirCondition SERVICES = new DirCondition(DirCondition.FIELD_SID, Condition.TYPE_PATTERN, Pattern.compile("^S-1-5-80-"));
 
     /**
+     * A search condition indicating that fully-expanded results (i.e., including pre-fetched group membership data) are preferred.
+     *
+     * @since 1.5.0
+     */
+    DirCondition EXPAND = new DirCondition(DirCondition.EXPANSION_CONTROL, Condition.TYPE_EQUALITY, Boolean.TRUE);
+
+    /**
+     * A search condition indicating that full data retrieval may be deferred in the interests of query performance.
+     *
+     * @since 1.5.0
+     */
+    DirCondition FAST = new DirCondition(DirCondition.EXPANSION_CONTROL, Condition.TYPE_EQUALITY, Boolean.FALSE);
+
+    /**
      * Base ISearchable.Condition subclass for IDirectory search conditions.
      *
      * @since 1.5.0
@@ -125,7 +104,9 @@ public interface IDirectory extends ILoggable {
 	}
 
 	/**
-	 * Condition field for a SID pattern. Supports the following condition types:
+	 * Condition field for a SID pattern.
+	 *
+	 * Supports the following condition types:
 	 *  TYPE_PATTERN - search for a SID matching the java.util.regex.Pattern value
 	 *  TYPE_ANY - retrieve multiple IPrincipals given a java.util.Collection&lt;SID&gt;
 	 *
@@ -134,7 +115,8 @@ public interface IDirectory extends ILoggable {
 	public static final int FIELD_SID = 1000;
 
 	/**
-	 * Condition field for a principal name (as in, the String returned by IPrincipal.getName()). 
+	 * Condition field for a principal name (as in, the String returned by IPrincipal.getName()).
+	 *
 	 * Supports the following condition types:
 	 *  TYPE_PATTERN - search for a principal name matching the java.util.regex.Pattern value
 	 *  TYPE_ANY - retrieve multiple IPrincipals given a java.util.Collection&lt;String&gt;
@@ -142,5 +124,25 @@ public interface IDirectory extends ILoggable {
 	 * @since 1.5.0
 	 */
 	public static final int FIELD_NAME = 1001;
+
+	/**
+	 * On certain machines, such as domain controllers, there may be a great many users and groups
+	 * defined in the Local Security Authority. In such cases, it can be very time-consuming to resolve
+	 * group membership information for every principal in the store. Therefore, it is assumed that
+	 * implementations of ISearchable<IPrincipal> may include a delayed-expansion feature, where group
+	 * membership data for a principal is queried only when absolutely required.
+	 *
+	 * This search condition field makes it possible for an API client to specify the preferred behavior
+	 * of such a feature with respect to the results of any particular search. When this field is not
+	 * included in search conditions, the behavior of an implementation with respect to delayed expansion
+	 * is not defined. In fact, there is no requirement that delayed expansion be implemented at all.
+	 *
+	 * Supports the following condition type:
+	 *  TYPE_EQUALITY - Use with argument Boolean.TRUE to return only expanded IPrincipals;
+	 *                  use with argument Boolean.FALSE to return un-expanded IPrincipals
+	 *
+	 * @since 1.5.0
+	 */
+	public static final int EXPANSION_CONTROL = 2000;
     }
 }

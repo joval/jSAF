@@ -26,6 +26,15 @@ public interface IReader extends ILoggable {
     int read() throws IOException;
 
     /**
+     * Read into a byte buffer.
+     *
+     * @returns the number of bytes read
+     *
+     * @since 1.5.0
+     */
+    int read(byte[] buff) throws IOException;
+
+    /**
      * Get the underlying InputStream.
      *
      * @since 1.0
@@ -56,13 +65,27 @@ public interface IReader extends ILoggable {
     void readFully(byte[] buff) throws IOException;
 
     /**
-     * Read from the stream until the specified byte is encountered, and return the bytes read.
+     * Read from the stream until the specified byte is encountered, and return the bytes read. Note that
+     * the delimiter character itself will be skipped.
      *
      * @throws EOFException if the end of the stream is reached
      *
      * @since 1.0
      */
     byte[] readUntil(int ch) throws IOException;
+
+    /**
+     * Read from the stream until the specified byte sequence is encountered, and return the bytes read.
+     * Note that the sequence itself will be skipped (i.e., it will not appear in the result, and the
+     * reader will advance in the stream to the end of the delimiter). If the sequence is not encountered,
+     * the remainder of the stream's contents will be returned.
+     *
+     * @returns null when the end of the stream has been reached, and there is no remaining content in the
+     *               stream.
+     *
+     * @since 1.5
+     */
+    byte[] readUntil(byte[] sequence) throws IOException;
 
     /**
      * Close the reader.  After this method is called, all read subsequent calls will fail.

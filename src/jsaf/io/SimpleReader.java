@@ -1,13 +1,15 @@
-// Copyright (C) 2014-2017 jOVAL.org.  All rights reserved.
+// Copyright (C) 2014-2020 jOVAL.org.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.io;
 
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.slf4j.cal10n.LocLogger;
 
@@ -26,6 +28,13 @@ public class SimpleReader implements IReader {
     private boolean closed, eof;
     private LocLogger logger;
 
+    public SimpleReader(InputStream in) {
+	this.in = in;
+	this.logger = jsaf.Message.getLogger();
+	closed = false;
+	eof = false;
+    }
+
     public SimpleReader(InputStream in, LocLogger logger) {
 	this.in = in;
 	this.logger = logger;
@@ -43,7 +52,6 @@ public class SimpleReader implements IReader {
 	return logger;
     }
 
-
     // Implement IReader
 
     public int read() throws IOException {
@@ -54,6 +62,10 @@ public class SimpleReader implements IReader {
 	    eof = ch == -1;
 	    return ch;
 	}
+    }
+
+    public int read(byte[] buff) throws IOException {
+	return in.read(buff);
     }
 
     public InputStream getStream() {
@@ -76,20 +88,44 @@ public class SimpleReader implements IReader {
     }
 
     public void readFully(byte[] buff) throws IOException {
-	int total = 0;
-	int len = 0;
-	while((len = in.read(buff, total, buff.length - total)) > 0) {
-	    total += len;
-	    if (total == buff.length) {
-		return;
-	    }
-	}
-	eof = true;
-	throw new EOFException();
+	readFully(buff, 0, buff.length);
     }
 
     public byte[] readUntil(int ch) throws IOException {
 	return readUntilInternal(ch, true);
+    }
+
+    public synchronized byte[] readUntil(byte[] delim) throws IOException {
+	ByteArrayOutputStream out = new ByteArrayOutputStream();
+	boolean found = false;
+	do {
+	    byte[] buff = readUntilInternal(delim[0], false);
+	    if (buff == null) {
+		return null;
+	    }
+	    out.write(buff);
+	    mark(delim.length);
+	    byte[] b2 = new byte[delim.length];
+	    b2[0] = delim[0];
+	    try {
+		readFully(b2, 1, b2.length - 1);
+		if (Arrays.equals(b2, delim)) {
+		    found = true;
+		} else {
+		    out.write(b2[0]);
+		    reset();
+		}
+	    } catch (EOFException e) {
+		reset();
+		int len = 0;
+		buff = new byte[512];
+		while((len = read(buff)) > 0) {
+		    out.write(buff, 0, len);
+		}
+		break;
+	    }
+	} while(!found);
+	return out.toByteArray();
     }
 
     public void close() throws IOException {
@@ -115,13 +151,31 @@ public class SimpleReader implements IReader {
 
     // Private
 
+    private void readFully(byte[] buff, int offset, int length) throws IOException {
+	int len = 0;
+	while((len = in.read(buff, offset, length)) > 0) {
+	    if (len == 0) {
+		eof = true;
+		throw new EOFException();
+	    }
+	    if ((offset += len) == buff.length) {
+		return;
+	    }
+	}
+    }
+
     public byte[] readUntilInternal(int ch, boolean throwEOF) throws IOException {
 	ArrayList<Byte> list = new ArrayList<Byte>();
 	while(true) {
 	    int c = read();
-	    if (eof && throwEOF) {
-		throw new EOFException();
-	    } else if (c == ch || eof) {
+	    if (c == ch || eof) {
+		if (eof) {
+		    if (throwEOF) {
+			throw new EOFException();
+		    } else if (list.size() == 0) {
+			return null;
+		    }
+		}
 		byte[] buff = new byte[list.size()];
 		for (int i=0; i < buff.length; i++) {
 		    buff[i] = list.get(i).byteValue();

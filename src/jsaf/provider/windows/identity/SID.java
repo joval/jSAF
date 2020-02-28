@@ -35,7 +35,7 @@ public class SID {
      * @throws IllegalArgumentException if the sid value does not match the SID pattern.
      */
     public static final SID create(String sid) throws IllegalArgumentException {
-	return new SID(sid.toUpperCase());
+	return new SID(sid);
     }
 
     /**
@@ -66,9 +66,10 @@ public class SID {
 
     // Private
 
-    private String value;
+    private final String value;
 
     private SID(String sid) {
+	sid = sid.toUpperCase().trim();
 	if (isSidString(sid)) {
 	    value = sid;
 	} else {

@@ -400,10 +400,6 @@ public class Strings {
 		return s2.compareTo(s1);
 	    }
 	}
-
-	public boolean equals(Object obj) {
-	    return super.equals(obj);
-	}
     }
 
     static final class StringTokenIterator implements Iterator<String> {

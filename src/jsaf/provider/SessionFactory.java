@@ -177,4 +177,11 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
      * @since 1.1
      */
     public abstract ISession createSession(IConnectionSpecification spec) throws SessionException;
+
+    /**
+     * Create a session, while delegating log messages specific to the creation to the specified logger.
+     *
+     * @since 1.5
+     */
+    public abstract ISession createSession(IConnectionSpecification spec, LocLogger logger) throws SessionException;
 }

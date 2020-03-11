@@ -28,7 +28,7 @@ public interface IReader extends ILoggable {
     /**
      * Read into a byte buffer.
      *
-     * @returns the number of bytes read
+     * @return the number of bytes read
      *
      * @since 1.5.0
      */
@@ -80,7 +80,7 @@ public interface IReader extends ILoggable {
      * reader will advance in the stream to the end of the delimiter). If the sequence is not encountered,
      * the remainder of the stream's contents will be returned.
      *
-     * @returns null when the end of the stream has been reached, and there is no remaining content in the
+     * @return null when the end of the stream has been reached, and there is no remaining content in the
      *               stream.
      *
      * @since 1.5

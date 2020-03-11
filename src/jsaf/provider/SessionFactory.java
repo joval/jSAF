@@ -181,7 +181,12 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
     /**
      * Create a session, while delegating log messages specific to the creation to the specified logger.
      *
+     * Note that, for backwards-compatibility, the logger argument will be ignored. Subclasses SHOULD override
+     * this default implementation!
+     *
      * @since 1.5
      */
-    public abstract ISession createSession(IConnectionSpecification spec, LocLogger logger) throws SessionException;
+    public ISession createSession(IConnectionSpecification spec, LocLogger logger) throws SessionException {
+	return createSession(spec);
+    }
 }

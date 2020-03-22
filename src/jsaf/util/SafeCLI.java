@@ -38,6 +38,8 @@ import jsaf.io.Streams;
 import jsaf.io.TruncatedInputStream;
 import jsaf.provider.SessionException;
 
+import static jsaf.intf.system.ISession.LOCALHOST;
+
 /**
  * A utility that simplifyies the execution of simple command-lines.
  *
@@ -390,7 +392,7 @@ public class SafeCLI {
 		    //
 		    // Create and return a LineIterator based on a local cache file containing the output
 		    //
-		    if (sys.getProperties().getBooleanProperty("local")) {
+		    if (LOCALHOST.equals(sys.getHostname())) {
 			//
 			// output was redirected to a local file that we can use directly as the cache
 			//

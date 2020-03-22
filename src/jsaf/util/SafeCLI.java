@@ -15,9 +15,12 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import org.slf4j.cal10n.LocLogger;
 
 import jsaf.JSAFSystem;
 import jsaf.Message;
@@ -27,7 +30,6 @@ import jsaf.intf.io.IReader;
 import jsaf.intf.system.IProcess;
 import jsaf.intf.system.IComputerSystem;
 import jsaf.intf.system.ISession.Timeout;
-import static jsaf.intf.system.ISession.LOCALHOST;
 import jsaf.intf.unix.system.IUnixSession;
 import jsaf.io.LineIterator;
 import jsaf.io.PerishableReader;
@@ -287,8 +289,9 @@ public class SafeCLI {
 
     /**
      * Run a command and get the resulting lines of output, using the specified environment. This command assumes that
-     * there will be a large volume of output from the command, so it will pipe the output to a file, transfer the file
-     * locally (if sys is a remote session), and then return an iterator that reads lines from the local file.
+     * there will be a large volume of output from the command, so it will redirect the output to a file, transfer the file
+     * locally (if sys is not a local session), and then return an iterator that reads lines from the local file.
+     *
      * When the end of the iterator is reached, the local file is deleted.
      *
      * @since 1.0.1
@@ -326,9 +329,7 @@ public class SafeCLI {
      *
      * @since 1.3
      */
-    public static final Iterator<String> manyLines(String cmd, String[] env, IReaderHandler errHandler, IUnixSession sys, Timeout timeout)
-		throws Exception {
-
+    public static final Iterator<String> manyLines(String cmd, String[] env, IReaderHandler errHandler, IUnixSession sys, Timeout timeout) throws Exception {
 	return manyLines(cmd, env, errHandler, sys, sys.getTimeout(timeout));
     }
 
@@ -389,9 +390,15 @@ public class SafeCLI {
 		    //
 		    // Create and return a LineIterator based on a local cache file containing the output
 		    //
-		    if (LOCALHOST.equals(sys.getHostname())) {
+		    if (sys.getProperties().getBooleanProperty("local")) {
+			//
+			// output was redirected to a local file that we can use directly as the cache
+			//
 			return new LineIterator(new File(tempPath));
 		    } else {
+			//
+			// output is potentially in a remote file, so we must copy its contents to a local cache
+			//
 			File tempDir = sys.getWorkspace() == null ? new File(System.getProperty("user.home")) : sys.getWorkspace();
 			File localTemp = File.createTempFile("cmd", null, tempDir);
 			try {
@@ -411,6 +418,45 @@ public class SafeCLI {
 	} finally {
 	    JSAFSystem.cancelTask(mon);
 	}
+    }
+
+    /**
+     * Return a String iterator that reads lines from a live, local Process, with stderr redireced to stdout.
+     *
+     * @since 1.5.0
+     */
+    public static final Iterator<String> manyLines(String cmd, String[] env, long timeout) throws Exception {
+	return manyLines(cmd, env, (IReaderHandler)null, timeout);
+    }
+
+    /**
+     * Return a String iterator that reads lines from a live, local Process.
+     *
+     * @since 1.5.0
+     */
+    public static final Iterator<String> manyLines(String cmd, String[] env, IReaderHandler errHandler, long timeout) throws Exception {
+	List<String> argv = null;
+	if (System.getProperty("os.name").toLowerCase().indexOf("windows") == -1) {
+	    argv = Arrays.<String>asList(new String[] {"/bin/sh", "-c", cmd});
+	} else {
+	    argv = Arrays.<String>asList(new String[] {"cmd", "/c", cmd});
+	}
+	ProcessBuilder pb = new ProcessBuilder(argv);
+	if (env != null) {
+	    for (String pair : env) {
+		int ptr = pair.indexOf("=");
+		if (ptr > 0) {
+		    pb.environment().put(pair.substring(0,ptr), pair.substring(ptr+1));
+		}
+	    }
+	}
+	Process p = pb.start();
+	if (errHandler == null) {
+	    pb.redirectErrorStream(true);
+	} else {
+	    new HandlerThread(errHandler, "stderr reader", Message.getLogger()).start(new SimpleReader(p.getErrorStream()));
+	}
+	return new OutputLineIterator(p, timeout);
     }
 
     /**
@@ -445,9 +491,7 @@ public class SafeCLI {
      * @see IReaderHandler
      * @since 1.3
      */
-    public static final void exec(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout, IReaderHandler out, IReaderHandler err)
-		throws Exception {
-
+    public static final void exec(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout, IReaderHandler out, IReaderHandler err) throws Exception {
 	new SafeCLI(cmd, env, dir, sys, readTimeout).exec(out, err);
     }
 
@@ -579,10 +623,10 @@ public class SafeCLI {
 	    if (err == null) {
 		// no errThread
 	    } else if (errorHandler == null) {
-		errThread = new HandlerThread(DevNull, "pipe to /dev/null");
+		errThread = new HandlerThread(DevNull, "pipe to /dev/null", sys.getLogger());
 		errThread.start(PerishableReader.newInstance(err, sys.getTimeout(Timeout.XL)));
 	    } else {
-		errThread = new HandlerThread(errorHandler, "stderr reader");
+		errThread = new HandlerThread(errorHandler, "stderr reader", sys.getLogger());
 		errThread.start(PerishableReader.newInstance(err, sys.getTimeout(Timeout.XL)));
 	    }
 	    reader = PerishableReader.newInstance(p.getInputStream(), readTimeout);
@@ -685,15 +729,17 @@ public class SafeCLI {
 	}
     }
 
-    class HandlerThread implements Runnable {
+    static class HandlerThread implements Runnable {
 	Thread thread;
 	String name;
 	IReader reader;
 	IReaderHandler handler;
+	LocLogger logger;
 
-	HandlerThread(IReaderHandler handler, String name) {
+	HandlerThread(IReaderHandler handler, String name, LocLogger logger) {
 	    this.handler = handler;
 	    this.name = "ReaderHandler " + counter++ + ": " + name;
+	    this.logger = logger;
 	}
 
 	void start(IReader reader) throws IllegalStateException {
@@ -739,7 +785,7 @@ public class SafeCLI {
 	    try {
 		handler.handle(reader);
 	    } catch (IOException e) {
-		sys.getLogger().warn(Message.ERROR_EXCEPTION, e);
+		logger.warn(Message.ERROR_EXCEPTION, e);
 	    }
 	}
     }
@@ -785,6 +831,52 @@ public class SafeCLI {
 		} catch (IOException e) {
 		}
 	    }
+	}
+    }
+
+    static class OutputLineIterator implements Iterator<String> {
+	private Process p;
+	private PerishableReader in;
+	private String line;
+
+	OutputLineIterator(Process p, long timeout) {
+	    this.p = p;
+	    in = PerishableReader.newInstance(p.getInputStream(), timeout);
+	}
+
+	// Implement Iterator<String>
+
+	public synchronized boolean hasNext() {
+	    if (line == null) {
+		if (in.checkEOF()) {
+		    return false;
+		} else {
+		    try {
+			return (line = in.readLine(Strings.UTF8)) != null;
+		    } catch (IOException e) {
+			if (p.isAlive()) {
+			    p.destroy();
+			}
+			return false;
+		    }
+		}
+	    } else {
+		return true;
+	    }
+	}
+
+	public synchronized String next() {
+	    if (line == null) {
+		throw new NoSuchElementException();
+	    } else {
+		String temp = line;
+		line = null;
+		return temp;
+	    }
+	}
+
+	public void remove() {
+	    throw new UnsupportedOperationException();
 	}
     }
 }

@@ -78,7 +78,7 @@ public class SimpleReader implements IReader {
 
     public String readLine(Charset charset) throws IOException {
 	byte[] buff = readUntilInternal('\n', false);
-	if (buff.length == 0) {
+	if (buff == null || buff.length == 0) {
 	    return eof ? null : "";
 	} else if (buff[buff.length - 1] == '\r') {
 	    return new String(buff, 0, buff.length - 1, charset);

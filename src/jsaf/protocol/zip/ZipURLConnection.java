@@ -19,7 +19,7 @@ import java.util.zip.ZipInputStream;
  * @version %I% %G%
  * @since 1.0.1
  */
-public class ZipURLConnection extends URLConnection {
+class ZipURLConnection extends URLConnection {
     private URL innerURL;
     private URLConnection innerConnection;
     private String path;

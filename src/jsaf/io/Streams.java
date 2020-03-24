@@ -4,18 +4,25 @@
 package jsaf.io;
 
 import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilterInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.HashSet;
-import java.util.Vector;
+import java.util.Arrays;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+import org.apache.tools.bzip2.CBZip2InputStream;
 
 import jsaf.Message;
 import jsaf.util.Strings;
@@ -28,6 +35,40 @@ import jsaf.util.Strings;
  * @since 1.2
  */
 public class Streams {
+    /**
+     * Magic numbers for various compression formats.
+     *
+     * @since 1.5.0
+     */
+    public enum Magic {
+	/**
+	 * Magic bytes for a ZIP file.
+	 */
+	ZIP(new byte[] {(byte)0x50, (byte)0x4b, (byte)0x03, (byte)0x04}),
+
+	/**
+	 * Magic bytes for a BZ2 file.
+	 */
+	BZ2(new byte[] {'B', 'Z', 'h'}),
+
+	/**
+	 * Magic bytes for a GZIP file.
+	 */
+	GZIP(new byte[] {(byte)0x1f, (byte)0x8b});
+
+	public byte[] bytes() {
+	    return bytes;
+	}
+
+	// Private
+
+	private byte[] bytes;
+
+	Magic(byte[] bytes) {
+	    this.bytes = bytes;
+	}
+    }
+
     /**
      * Useful in debugging...
      *
@@ -207,6 +248,90 @@ public class Streams {
 	    }
 	}
 	throw new EOFException();
+    }
+
+    /**
+     * Detects and handles compression of the URL content.
+     *
+     * @return an instance of Zipped if the URL points to a ZIP file, otherwise returns the appropriate decompression implementation.
+     *
+     * @since 1.5.0
+     */
+    public static final InputStream open(URL url) throws IOException {
+	BufferedInputStream in = new BufferedInputStream(url.openStream());
+	byte[] buff = new byte[4];
+	in.mark(4);
+	Streams.readFully(in, buff);
+	in.reset();
+	if (Arrays.equals(Magic.ZIP.bytes(), buff)) {
+	    Zipped zip = new Zipped(new ZipInputStream(in));
+	    zip.getNextEntry();
+	    return zip;
+	} else if (Arrays.equals(Magic.GZIP.bytes(), Arrays.copyOfRange(buff, 0, Magic.GZIP.bytes().length))) {
+	    return new GZIPInputStream(in);
+	} else if (Arrays.equals(Magic.BZ2.bytes(), Arrays.copyOfRange(buff, 0, Magic.BZ2.bytes().length))) {
+	    return new CBZip2InputStream(in);
+	} else {
+	    return in;
+	}
+    }
+
+    /**
+     * Method for safely closing whatever is returned by the open(URL) method.
+     *
+     * @since 1.5.0
+     */
+    public static final void close(InputStream in) {
+	if (in == null) return;
+	try {
+	    if (in instanceof Zipped) {
+		((Zipped)in).reallyClose();
+	    } else {
+		in.close();
+	    }
+	} catch (IOException e) {
+	}
+    }
+
+    /**
+     * Wraps a ZipInputStream, primarily for the purpose of making it more difficult to close (it can only be
+     * closed using the ScapStream.close method).
+     *
+     * @since 1.5.0
+     */
+    public static class Zipped extends FilterInputStream {
+        private ZipEntry currentEntry;
+
+        public Zipped(ZipInputStream in) {
+            super(in);
+        }
+
+        public Zipped(ZipInputStream in, ZipEntry entry) {
+            this(in);
+            currentEntry = entry;
+        }
+
+        @Override
+        public void close() {
+            // no-op
+        }
+
+        public ZipEntry getNextEntry() throws IOException {
+            return currentEntry = ((ZipInputStream)in).getNextEntry();
+        }
+
+        public ZipEntry getCurrentEntry() {
+            return currentEntry;
+        }
+
+	// Internal
+
+        void reallyClose() {
+            try {
+                super.close();
+            } catch (IOException e) {
+            }
+        }
     }
 
     // Private

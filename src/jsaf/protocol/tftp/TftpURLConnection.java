@@ -30,7 +30,7 @@ import jsaf.intf.util.ILoggable;
  * @author David A. Solin
  * @version %I% %G%
  */
-public class TftpURLConnection extends URLConnection implements Runnable, ILoggable {
+class TftpURLConnection extends URLConnection implements Runnable, ILoggable {
     // Relevant protected fields are:
     //
     // boolean connected

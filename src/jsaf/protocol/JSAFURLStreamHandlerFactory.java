@@ -6,6 +6,7 @@ package jsaf.protocol;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
+import jsaf.protocol.memory.MemoryURLStreamHandler;
 import jsaf.protocol.tftp.TftpURLStreamHandler;
 import jsaf.protocol.zip.ZipURLStreamHandler;
 
@@ -32,6 +33,8 @@ public final class JSAFURLStreamHandlerFactory implements URLStreamHandlerFactor
 	    return new TftpURLStreamHandler();
 	} else if ("zip".equals(protocol)) {
 	    return new ZipURLStreamHandler();
+	} else if ("memory".equals(protocol)) {
+	    return new MemoryURLStreamHandler();
 	} else {
 	    return null;
 	}

@@ -168,6 +168,47 @@ public class SafeCLI {
     }
 
     /**
+     * Run a command in the local environment without using a session.
+     *
+     * @since 1.5.0
+     */
+    public static final String exec(String cmd, long timeout, LocLogger logger) {
+	logger.debug("Exec: " + cmd);
+	List<String> argv = null; 
+	if (System.getProperty("os.name").toLowerCase().indexOf("windows") == -1) { 
+	    argv = Arrays.<String>asList(new String[] {"/bin/sh", "-c", cmd});
+	} else {
+	    argv = Arrays.<String>asList(new String[] {"cmd", "/c", cmd});
+	}
+	ProcessBuilder pb = new ProcessBuilder(argv);
+	pb.redirectErrorStream(true);
+	InputStream in = null;
+	try {
+	    Process p = pb.start();
+	    in = PerishableReader.newInstance(p.getInputStream(), timeout);
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    byte[] buff = new byte[1024];
+	    int len = 0;
+	    while ((len = in.read(buff)) > 0) {
+		out.write(buff, 0, len);
+	    }
+	    String output = new String(out.toByteArray(), Strings.UTF8);
+	    logger.trace("Output: " + output);
+	    return output;
+	} catch (IOException e) {
+	    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    return null;
+	} finally {
+	    if (in != null) {
+		try {
+		    in.close();
+		} catch (IOException e) {
+		}
+	    }
+	}
+    }
+
+    /**
      * Run a command and get the first (non-empty) line of output.
      *
      * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.

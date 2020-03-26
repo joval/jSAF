@@ -189,5 +189,10 @@ public interface IWindowsSession extends IComputerSystem {
 	}
     }
 
+    /**
+     * Get the machine's DomainRole.
+     *
+     * @since 1.5.0
+     */
     DomainRole getDomainRole() throws WmiException;
 }

@@ -10,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -105,7 +104,7 @@ public class LineIterator implements Iterator<String> {
 		    throw new NoSuchElementException();
 		}
 	    } catch (IOException e) {
-		throw new NoSuchElementException(e.getMessage());
+		throw new RuntimeException(e);
 	    }
 	}
 	String temp = next;

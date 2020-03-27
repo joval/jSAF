@@ -806,7 +806,7 @@ public class SafeCLI {
 	    try {
 		handler.handle(reader);
 	    } catch (IOException e) {
-		logger.warn(Message.ERROR_EXCEPTION, e);
+		logger.warn(Message.WARNING_READER_THREAD, name, e.getMessage() == null ? e.getClass().getName() : e.getMessage());
 	    }
 	}
     }

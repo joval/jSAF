@@ -17,9 +17,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.cal10n.LocLogger;
@@ -349,7 +351,17 @@ public class PerishableReader extends InputStream implements IReader {
 	} else {
 	    try {
 		return service.submit(new ReadTask(in)).get(timeout, TimeUnit.MILLISECONDS);
-	    } catch (Exception e) {
+	    } catch (ExecutionException e) {
+		Throwable cause = e.getCause();
+		if (cause instanceof IOException) {
+		    throw (IOException)cause;
+		} else {
+		    throw new IOException(cause);
+		}
+	    } catch (TimeoutException e) {
+		expired = true;
+		throw (InterruptedIOException)new InterruptedIOException(e.getMessage()).initCause(e);
+	    } catch (InterruptedException e) {
 		expired = true;
 		throw (InterruptedIOException)new InterruptedIOException(e.getMessage()).initCause(e);
 	    }
@@ -378,7 +390,17 @@ public class PerishableReader extends InputStream implements IReader {
 	} else {
 	    try {
 		return service.submit(new ReadTask(in, buff, offset, len)).get(timeout, TimeUnit.MILLISECONDS);
-	    } catch (Exception e) {
+	    } catch (ExecutionException e) {
+		Throwable cause = e.getCause();
+		if (cause instanceof IOException) {
+		    throw (IOException)cause;
+		} else {
+		    throw new IOException(cause);
+		}
+	    } catch (TimeoutException e) {
+		expired = true;
+		throw (InterruptedIOException)new InterruptedIOException(e.getMessage()).initCause(e);
+	    } catch (InterruptedException e) {
 		expired = true;
 		throw (InterruptedIOException)new InterruptedIOException(e.getMessage()).initCause(e);
 	    }

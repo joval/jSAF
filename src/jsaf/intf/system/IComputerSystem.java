@@ -65,6 +65,22 @@ public interface IComputerSystem extends IServiceHost {
     String PROP_FS_SEARCH_MAX_WARNINGS = "fs.search.maxWarnings";
 
     /**
+     * Property whose value indicates whether IFilesystem I/O will be high-performance (true), or subject to network
+     * lag (false).
+     *
+     * @since 1.5.0
+     */
+    String PROP_LOCAL = "local";
+
+    /**
+     * Property whose value indicates whether the session represents an offline machine, e.g., a Docker image,
+     * KVM image, file-based network device session, etc., where system is not actually running.
+     *
+     * @since 1.5.0
+     */
+    String PROP_OFFLINE = "offline";
+
+    /**
      * Get the machine's own impression of its name. This name might not be meaningful to DNS.
      *
      * @since 1.1

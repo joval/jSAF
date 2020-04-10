@@ -774,9 +774,6 @@ public class SafeCLI {
 	}
 
 	void close() throws IOException {
-	    if (thread != null && thread.isAlive()) {
-		thread.interrupt();
-	    }
 	    if (reader != null) {
 		reader.close();
 	    }

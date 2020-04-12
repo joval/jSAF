@@ -39,10 +39,10 @@ public class SID {
     }
 
     /**
-     * @return true if the SID instance corresponds to a Windows service.
+     * @return true if the SID instance corresponds to a Windows service or IIS AppPool.
      */
-    public final boolean isService() {
-	return value.startsWith("S-1-5-80-");
+    public final boolean isServiceOrAppPool() {
+	return value.startsWith("S-1-5-80-") || value.startsWith("S-1-5-82-");
     }
 
     @Override

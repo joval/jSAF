@@ -8,6 +8,7 @@ CLASSES=\
 	jsaf.intf.cisco.system.ICiscoSession	\
 	jsaf.intf.cisco.system.IIosSession	\
 	jsaf.intf.cisco.system.IIosXeSession	\
+	jsaf.intf.cisco.system.INexusSession	\
 	jsaf.intf.cisco.system.ITechSupport	\
 	jsaf.intf.discovery.IDiscoveryService	\
 	jsaf.intf.identity.ICredential	\

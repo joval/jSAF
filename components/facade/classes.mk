@@ -57,6 +57,7 @@ CLASSES=\
 	jsaf.intf.windows.identity.IWindowsCredential	\
 	jsaf.intf.windows.io.IWindowsFileInfo	\
 	jsaf.intf.windows.io.IWindowsFilesystem	\
+	jsaf.intf.windows.powershell.IPipeline	\
 	jsaf.intf.windows.powershell.IRunspace	\
 	jsaf.intf.windows.powershell.IRunspacePool	\
 	jsaf.intf.windows.registry.IBinaryValue	\

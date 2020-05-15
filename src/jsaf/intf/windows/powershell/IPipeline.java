@@ -20,6 +20,8 @@ package jsaf.intf.windows.powershell;
  * @version %I% %G%
  */
 public interface IPipeline<T> extends Iterable<T> {
+    int size();
+
     void add(T arg);
 
     void setExpression(String expression);

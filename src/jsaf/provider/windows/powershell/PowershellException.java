@@ -10,6 +10,10 @@ package jsaf.provider.windows.powershell;
  * @version %I% %G%
  */
 public class PowershellException extends Exception {
+    public PowershellException() {
+	super();
+    }
+
     public PowershellException(String message) {
 	super(message);
     }

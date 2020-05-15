@@ -24,6 +24,10 @@ public class StringPipeline implements IPipeline<String> {
 
     // Implement IPipeline<String>
 
+    public int size() {
+	return members.size();
+    }
+
     public void add(String arg) {
 	members.add(arg);
     }

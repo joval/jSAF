@@ -8,7 +8,7 @@ package jsaf.intf.windows.powershell;
  *
  * For example, to use an IPipeline to express <code>"a", "b", "c" | %{"arg: {0}" -f $_}</code>, you would:
  * <pre>
- * IPipeline<String> p;
+ * IPipeline&lt;String&gt; p;
  * ...
  * p.add("a");
  * p.add("b");

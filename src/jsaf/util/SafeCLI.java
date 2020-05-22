@@ -172,7 +172,7 @@ public class SafeCLI {
      *
      * @since 1.5.0
      */
-    public static final String exec(String cmd, long timeout, LocLogger logger) {
+    public static final String exec(String cmd, long timeout, LocLogger logger) throws IOException {
 	logger.debug("Exec: " + cmd);
 	List<String> argv = null; 
 	if (System.getProperty("os.name").toLowerCase().indexOf("windows") == -1) { 
@@ -195,9 +195,6 @@ public class SafeCLI {
 	    String output = new String(out.toByteArray(), Strings.UTF8);
 	    logger.trace("Output: " + output);
 	    return output;
-	} catch (IOException e) {
-	    logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-	    return null;
 	} finally {
 	    if (in != null) {
 		try {
@@ -206,6 +203,15 @@ public class SafeCLI {
 		}
 	    }
 	}
+    }
+
+    /**
+     * Run a command in the local environment without using a session.
+     *
+     * @since 1.5.1
+     */
+    public static final List<String> multiLine(String cmd, long timeout, LocLogger logger) throws IOException {
+	return Strings.toList(new LineIterator(new ByteArrayInputStream(exec(cmd, timeout, logger).getBytes(Strings.UTF8))));
     }
 
     /**

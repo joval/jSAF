@@ -14,14 +14,7 @@ import jsaf.provider.windows.wmi.WmiException;
  * @version %I% %G%
  * @since 1.0
  */
-public interface ISWbemPropertySet extends Iterable <ISWbemProperty> {
-    /**
-     * Iterate over the properties in the set.
-     *
-     * @since 1.0
-     */
-    Iterator<ISWbemProperty> iterator();
-
+public interface ISWbemPropertySet extends Iterable<ISWbemProperty> {
     /**
      * Get the number of properties in the set.
      *

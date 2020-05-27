@@ -16,13 +16,6 @@ import jsaf.provider.windows.wmi.WmiException;
  */
 public interface ISWbemObjectSet extends Iterable<ISWbemObject> {
     /**
-     * Iterate over the objects in the set.
-     *
-     * @since 1.0
-     */
-    Iterator<ISWbemObject> iterator();
-
-    /**
      * Get the number of objects in the set.
      *
      * @since 1.0

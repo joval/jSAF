@@ -109,9 +109,13 @@ public class Regex {
     /**
      * Compiles a Perl-style regular expression with POSIX-style character classes into a Java regular expression, with
      * the specified flags (from java.util.regex.Pattern).
+     *
+     * Note, for compatibility with Perl regex behavior, the UNIX_LINES flag is always enabled. Therefore, to mimic Perl
+     * behavior when doing pattern matching against (text) file content, you must normalize line-breaks to Unix-style before
+     * matching with the pattern.
      */
     public static Pattern pattern(String regex, int flags) throws PatternSyntaxException {
-	return Pattern.compile(posix2Java(regex), flags);
+	return Pattern.compile(posix2Java(regex), flags | Pattern.UNIX_LINES);
     }
 
     /**

@@ -3,6 +3,7 @@
 
 package jsaf.intf.cisco.system;
 
+import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.regex.Matcher;
@@ -87,7 +88,7 @@ public interface ICiscoSession extends IComputerSystem {
     /**
      * Retrieve "show tech-support" data from the device.
      */
-    ITechSupport getTechSupport() throws Exception;
+    ITechSupport getTechSupport();
 
     /**
      * Get the tech-support constants for the implementation.
@@ -97,5 +98,5 @@ public interface ICiscoSession extends IComputerSystem {
     /**
      * Obtain a shell connection to the device.
      */
-    IShell getShell() throws Exception;
+    IShell getShell() throws IllegalStateException;
 }

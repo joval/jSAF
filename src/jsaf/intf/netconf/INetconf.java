@@ -3,7 +3,9 @@
 
 package jsaf.intf.netconf;
 
+import java.io.IOException;
 import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 import jsaf.intf.system.ISession;
 
@@ -27,5 +29,5 @@ public interface INetconf extends ISession {
      *
      * @since 1.0
      */
-    Document getConfig() throws Exception;
+    Document getConfig() throws IOException, SAXException;
 }

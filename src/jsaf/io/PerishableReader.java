@@ -478,7 +478,7 @@ public class PerishableReader extends InputStream implements IReader {
 
 	// Implement Callable<Integer>
 
-	public Integer call() throws Exception {
+	public Integer call() throws IOException {
 	    if (buff == null) {
 		return in.read();
 	    } else {

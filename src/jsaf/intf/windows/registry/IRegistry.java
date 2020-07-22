@@ -221,7 +221,7 @@ public interface IRegistry extends ILoggable {
      *
      * @since 1.0.1
      */
-    String getStringValue(Hive hive, String subkey, String value) throws Exception;
+    String getStringValue(Hive hive, String subkey, String value) throws RegistryException;
 
     /**
      * Load a registry file and mount it to the specified hive and key path. The file will be unloaded from the registry when the

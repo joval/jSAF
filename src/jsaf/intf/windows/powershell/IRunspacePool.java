@@ -4,6 +4,7 @@
 package jsaf.intf.windows.powershell;
 
 import jsaf.intf.windows.system.IWindowsSession;
+import jsaf.provider.windows.powershell.PowershellException;
 
 /**
  * An interface to a Powershell runspace pool.
@@ -21,7 +22,7 @@ public interface IRunspacePool {
      *
      * @since 1.1.2
      */
-    IRunspace getRunspace() throws Exception;
+    IRunspace getRunspace() throws PowershellException;
 
     /**
      * Get an IRunspace from the pool, with the specified architecture. If a lock cannot be obtained on an existing
@@ -31,7 +32,7 @@ public interface IRunspacePool {
      *
      * @since 1.1.2
      */
-    IRunspace getRunspace(IWindowsSession.View view) throws Exception;
+    IRunspace getRunspace(IWindowsSession.View view) throws PowershellException;
 
     /**
      * Add an IRunspacePool.Initializer, which will be invoked for every new Runspace spawned in the pool.
@@ -46,6 +47,6 @@ public interface IRunspacePool {
      * @since 1.3
      */
     interface Initializer {
-	void configure(IRunspace runspace) throws Exception;
+	void configure(IRunspace runspace) throws PowershellException;
     }
 }

@@ -1,8 +1,9 @@
-// Copyright (C) 2018 jOVAL.org.  All rights reserved.
+// Copyright (C) 2018-2020 jOVAL.org.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.intf.net;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import jsaf.intf.system.ISession;
@@ -18,5 +19,5 @@ public interface IServiceHost extends ISession {
     /**
      * Returns a collection of IService instances listening on the host.
      */
-    Collection<IService> getServices() throws Exception;
+    Collection<IService> getServices() throws IOException;
 }

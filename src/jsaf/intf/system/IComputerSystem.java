@@ -92,7 +92,7 @@ public interface IComputerSystem extends IServiceHost {
      *
      * @since 1.1
      */
-    long getTime() throws Exception;
+    long getTime();
 
     /**
      * Create a process on the machine, with the specified environment variables.
@@ -103,7 +103,7 @@ public interface IComputerSystem extends IServiceHost {
      *
      * @since 1.1
      */
-    IProcess createProcess(String command, String[] env, String dir) throws Exception;
+    IProcess createProcess(String command, String[] env, String dir) throws IOException;
 
     /**
      * Returns the maximum length of a command that should be used with createProcess.

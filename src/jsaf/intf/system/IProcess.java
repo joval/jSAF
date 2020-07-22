@@ -27,7 +27,7 @@ public interface IProcess {
      *
      * @since 1.0
      */
-    public void start() throws Exception;
+    public void start() throws IOException;
 
     /**
      * Get the process's stdout

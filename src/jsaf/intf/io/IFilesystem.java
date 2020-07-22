@@ -181,7 +181,7 @@ public interface IFilesystem extends ILoggable {
      *
      * @since 1.0
      */
-    ISearchable<IFile> getSearcher() throws IOException;
+    ISearchable<IFile> getSearcher();
 
     /**
      * A search condition for only matching directories.

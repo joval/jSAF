@@ -1,10 +1,9 @@
-// Copyright (C) 2012 jOVAL.org.  All rights reserved.
+// Copyright (C) 2012-2020 jOVAL.org.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.intf.windows.powershell;
 
 import java.io.InputStream;
-import java.io.IOException;
 import java.net.URL;
 
 import jsaf.intf.util.ILoggable;
@@ -40,139 +39,130 @@ public interface IRunspace extends ILoggable {
      *
      * @since 1.0
      */
-    void loadModule(InputStream in) throws IOException, PowershellException;
+    void loadModule(InputStream in) throws PowershellException;
 
     /**
      * Load a Powershell module into the runspace from an InputStream, using the specified timeout (in millis).
      *
      * @since 1.0
      */
-    void loadModule(InputStream in, long timeout) throws IOException, PowershellException;
+    void loadModule(InputStream in, long timeout) throws PowershellException;
 
     /**
      * Load a Powershell module into the runspace from a URL.
      *
-     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
      * @throws PowershellException if there is a Powershell syntactical error with the module contents
      *
      * @since 1.3.5
      */
-    void loadModule(URL url) throws IOException, PowershellException;
+    void loadModule(URL url) throws PowershellException;
 
     /**
      * Load a Powershell module into the runspace from a URL, using the specified timeout (in millis).
      *
-     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
      * @throws PowershellException if there is a Powershell syntactical error with the module contents
      *
      * @since 1.3.5
      */
-    void loadModule(URL url, long timeout) throws IOException, PowershellException;
+    void loadModule(URL url, long timeout) throws PowershellException;
 
     /**
      * Load an assembly (DLL) into the runspace from an InputStream.
      *
      * @since 1.1
      */
-    void loadAssembly(InputStream in) throws IOException, PowershellException;
+    void loadAssembly(InputStream in) throws PowershellException;
 
     /**
      * Load an assembly (DLL) into the runspace from an InputStream, using the specified timeout (in millis).
      *
      * @since 1.1
      */
-    void loadAssembly(InputStream in, long timeout) throws IOException, PowershellException;
+    void loadAssembly(InputStream in, long timeout) throws PowershellException;
 
     /**
      * Load an assembly (DLL) into the runspace from a URL.
      *
-     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
      * @throws PowershellException if there is a Powershell syntactical error with the module contents
      *
      * @since 1.3.5
      */
-    void loadAssembly(URL url) throws IOException, PowershellException;
+    void loadAssembly(URL url) throws PowershellException;
 
     /**
      * Load an assembly (DLL) into the runspace from a URL, using the specified timeout (in millis).
      *
-     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
      * @throws PowershellException if there is a Powershell syntactical error with the module contents
      *
      * @since 1.3.5
      */
-    void loadAssembly(URL url, long timeout) throws IOException, PowershellException;
+    void loadAssembly(URL url, long timeout) throws PowershellException;
 
     /**
      * Load a module based on an assembly from an InputStream.
      *
-     * @throws IOException if there is a problem reading from the stream, or writing to the Runspace
      * @throws PowershellException if there is a Powershell syntactical error with the module contents
      *
      * @since 1.3.3
      */
-    void loadModuleAssembly(InputStream in) throws IOException, PowershellException;
+    void loadModuleAssembly(InputStream in) throws PowershellException;
 
     /**
      * Load a module based on an assembly from an InputStream, using the specified timeout (in millis).
      *
-     * @throws IOException if there is a problem reading from the stream, or writing to the Runspace
      * @throws PowershellException if there is a Powershell syntactical error with the module contents
      *
      * @since 1.3.3
      */
-    void loadModuleAssembly(InputStream in, long timeout) throws IOException, PowershellException;
+    void loadModuleAssembly(InputStream in, long timeout) throws PowershellException;
 
     /**
      * Load a module based on an assembly from a URL.
      *
-     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
      * @throws PowershellException if there is a Powershell syntactical error with the module contents
      *
      * @since 1.3.5
      */
-    void loadModuleAssembly(URL url) throws IOException, PowershellException;
+    void loadModuleAssembly(URL url) throws PowershellException;
 
     /**
      * Load a module based on an assembly from a URL, using the specified timeout (in millis).
      *
-     * @throws IOException if there is a problem reading from the url, or writing to the Runspace
      * @throws PowershellException if there is a Powershell syntactical error with the module contents
      *
      * @since 1.3.5
      */
-    void loadModuleAssembly(URL url, long timeout) throws IOException, PowershellException;
+    void loadModuleAssembly(URL url, long timeout) throws PowershellException;
 
     /**
      * Invoke a command or module.
      *
      * @return Text output from the command
      *
-     * @throws IOException if there is a problem reading or writing data to/from the Runspace
      * @throws PowershellException if the command causes Powershell to raise an exception
      *
      * @since 1.0
      */
-    String invoke(String command) throws IOException, PowershellException;
+    String invoke(String command) throws PowershellException;
 
     /**
      * Invoke a command or module with the specified read timeout (in millis).
      *
      * @since 1.0
      */
-    String invoke(String command, long timeout) throws IOException, PowershellException;
+    String invoke(String command, long timeout) throws PowershellException;
 
     /**
      * Invoke a String pipeline with the default read timeout.
      *
      * @since 1.5.1
      */
-    String invoke(IPipeline<String> pipeline) throws IOException, PowershellException;
+    String invoke(IPipeline<String> pipeline) throws PowershellException;
 
     /**
      * Invoke a String pipeline with the specified read timeout (in millis).
      *
      * @since 1.5.1
      */
-    String invoke(IPipeline<String> pipeline, long timeout) throws IOException, PowershellException;
+    String invoke(IPipeline<String> pipeline, long timeout) throws PowershellException;
 }

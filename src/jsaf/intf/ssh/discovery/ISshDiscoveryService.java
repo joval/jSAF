@@ -3,6 +3,8 @@
 
 package jsaf.intf.ssh.discovery;
 
+import java.io.IOException;
+
 import jsaf.discovery.DiscoveryException;
 import jsaf.intf.remote.IConnectionSpecification;
 import jsaf.intf.discovery.IDiscoveryService;
@@ -24,7 +26,7 @@ public interface ISshDiscoveryService extends IDiscoveryService {
     /**
      * Decrypt an SSH private key.
      */
-    byte[] decryptPrivateKey(byte[] encrypted, char[] passphrase) throws Exception;
+    byte[] decryptPrivateKey(byte[] encrypted, char[] passphrase) throws IOException;
 
     /**
      * An interface for discovery result information.

@@ -61,14 +61,14 @@ public interface IWindowsSession extends IComputerSystem {
     /**
      * Property governing the maximum single-threaded CPU utilization for a filesystem search.
      *
-     * @since 1.5.2
+     * @since 1.6.0
      */
     String PROP_FS_SEARCH_MAX_CPU = "fs.search.maxCpu";
 
     /**
      * Property indicating the maximum single-threaded CPU utilization for a registry search.
      *
-     * @since 1.5.2
+     * @since 1.6.0
      */
     String PROP_REGISTRY_SEARCH_MAX_CPU = "registry.search.maxCpu";
 

@@ -31,6 +31,16 @@ public interface IUnixSession extends IComputerSystem {
     String PROP_SUDO_READ_MAXLEN = "elevate.read.maxlen";
 
     /**
+     * Property governing the desired niceness adjustment for filesystem searches.
+     *
+     * When not set, searches run using the default process priority. Typically, this value can be set to any integer from
+     * -20 (most favorable scheduling) to 19 (least favorable).
+     *
+     * @since 1.6.0
+     */
+    String PROP_FS_SEARCH_NICE_ADJUSTMENT = "fs.search.niceAdjustment";
+
+    /**
      * Root username.
      *
      * @since 1.0.1

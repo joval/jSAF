@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.PatternSyntaxException;
 
+import jsaf.Message;
 import jsaf.intf.system.IEnvironment;
 
 /**
@@ -46,8 +48,12 @@ public abstract class AbstractEnvironment implements IEnvironment {
 	}
 	String originalData = data;
 	for(Map.Entry<String, String> entry : map.entrySet()) {
-	    String pattern = new StringBuffer(caseInsensitive ? "(?i)%" : "%").append(entry.getKey()).append("%").toString();
-	    data = data.replaceAll(pattern, Matcher.quoteReplacement(entry.getValue()));
+	    try {
+		String pattern = new StringBuffer(caseInsensitive ? "(?i)%" : "%").append(Regex.escapeRegex(entry.getKey())).append("%").toString();
+		data = data.replaceAll(pattern, Matcher.quoteReplacement(entry.getValue()));
+	    } catch (PatternSyntaxException e) {
+		Message.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
 	}
 	if (data.equals(originalData)) {
 	    return data; // Some unexpandable pattern exists in there

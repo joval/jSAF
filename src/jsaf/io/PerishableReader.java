@@ -461,16 +461,17 @@ public class PerishableReader extends InputStream implements IReader {
 
     static class ReadTask implements Callable<Integer> {
 	private InputStream in;
-	private byte[] buff;
-	int offset, len;
+	private byte[] buff = null;
+	private int offset=0, len=0;
+	private Thread caller;
 
 	ReadTask(InputStream in) {
 	    this.in = in;
-	    buff = null;
+	    caller = Thread.currentThread();
 	}
 
 	ReadTask(InputStream in, byte[] buff, int offset, int len) {
-	    this.in = in;
+	    this(in);
 	    this.buff = buff;
 	    this.offset = offset;
 	    this.len = len;
@@ -479,10 +480,16 @@ public class PerishableReader extends InputStream implements IReader {
 	// Implement Callable<Integer>
 
 	public Integer call() throws IOException {
-	    if (buff == null) {
-		return in.read();
-	    } else {
-		return in.read(buff, offset, len);
+	    try {
+		if (buff == null) {
+		    return in.read();
+		} else {
+		    return in.read(buff, offset, len);
+		}
+	    } catch (IOException e) {
+		IOException e2 = new IOException(e);
+		e2.setStackTrace(caller.getStackTrace());
+		throw e2;
 	    }
 	}
     }

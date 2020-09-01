@@ -686,6 +686,8 @@ public class SafeCLI {
 		sys.disconnect();
 		return false;
 	    }
+	} catch (IllegalThreadStateException e) {
+	    throw new IOException(e);
 	} catch (InterruptedException e) {
 	    throw new IOException(e);
 	} finally {

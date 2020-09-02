@@ -637,6 +637,7 @@ public class SafeCLI {
 	try {
 	    p = sys.createProcess(cmd, env, dir);
 	    p.start();
+	    long started = System.currentTimeMillis();
 	    InputStream err = p.getErrorStream();
 	    if (outputHandler == null) {
 		if (err == null) {
@@ -661,7 +662,8 @@ public class SafeCLI {
 	    reader = PerishableReader.newInstance(p.getInputStream(), readTimeout);
 	    reader.setLogger(sys.getLogger());
 	    outputHandler.handle(reader);
-	    p.waitFor(sys.getTimeout(Timeout.S));
+	    long elapsed = System.currentTimeMillis() - started;
+	    p.waitFor(Math.max(sys.getTimeout(Timeout.S), readTimeout - elapsed));
 	    result.exitCode = p.exitValue();
 	    return true;
 	} catch (IOException e) {

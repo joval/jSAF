@@ -10,9 +10,9 @@ import jsaf.intf.netconf.INetconf;
  *
  * @author David A. Solin
  * @version %I% %G%
- * @since 1.5.1
+ * @since 1.6.2
  */
-public interface INexusSession extends ICiscoSession {
+public interface INxosSession extends ICiscoSession {
     /**
      * Get an INetconf for the device.
      */

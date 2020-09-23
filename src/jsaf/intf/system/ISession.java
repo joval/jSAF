@@ -76,11 +76,11 @@ public interface ISession extends IDisposable {
 	CISCO_IOSXE("ios-xe"),
 
 	/**
-	 * Indicates a session with a device running Cisco Nexus (NX-OS).
+	 * Indicates a session with a device running Cisco NX-OS.
 	 *
-	 * @since 1.5.1
+	 * @since 1.6.2
 	 */
-	CISCO_NEXUS("nexus"),
+	CISCO_NXOS("nxos"),
 
 	/**
 	 * Indicates a session with a device running Cisco PixOS (PIX firewall).

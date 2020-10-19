@@ -87,7 +87,6 @@ CLASSES=\
 	jsaf.io.LittleEndian	\
 	jsaf.io.PerishableReader	\
 	jsaf.io.ProgressInputStream	\
-	jsaf.io.ProgressURLStreamHandler	\
 	jsaf.io.SimpleReader	\
 	jsaf.io.StreamLogger	\
 	jsaf.io.Streams	\

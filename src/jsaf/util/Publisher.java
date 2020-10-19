@@ -55,8 +55,22 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
     }
 
     public void unsubscribe(ISubscriber<T> subscriber) {
-	synchronized(subscribers) {
-	    subscribers.remove(subscriber);
+	unsubscribe(subscriber, 0L);
+    }
+
+    public void unsubscribe(ISubscriber<T> subscriber, long maxWait) {
+	try {
+	    if (maxWait > 0) {
+		long finishBy = System.currentTimeMillis() + maxWait;
+		for (int i=0; System.currentTimeMillis() < finishBy && queue.size() > 0; i++) {
+		    Thread.sleep(10);
+		}
+	    }
+	} catch (InterruptedException e) {
+	} finally {
+	    synchronized(subscribers) {
+		subscribers.remove(subscriber);
+	    }
 	}
     }
 

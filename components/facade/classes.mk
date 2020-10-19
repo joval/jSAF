@@ -50,6 +50,7 @@ CLASSES=\
 	jsaf.intf.util.IPublisher	\
 	jsaf.intf.util.ISearchable	\
 	jsaf.intf.util.ISubscriber	\
+	jsaf.intf.util.Progress	\
 	jsaf.intf.windows.identity.IDirectory	\
 	jsaf.intf.windows.identity.IGroup	\
 	jsaf.intf.windows.identity.IPrincipal	\
@@ -85,6 +86,8 @@ CLASSES=\
 	jsaf.io.LineIterator	\
 	jsaf.io.LittleEndian	\
 	jsaf.io.PerishableReader	\
+	jsaf.io.ProgressInputStream	\
+	jsaf.io.ProgressURLStreamHandler	\
 	jsaf.io.SimpleReader	\
 	jsaf.io.StreamLogger	\
 	jsaf.io.Streams	\

@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FilterInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
@@ -277,6 +279,17 @@ public class Streams {
     }
 
     /**
+     * Detects and handles compression of the URL content.
+     *
+     * @return a CachedURLConnection, backed by a file cache.
+     *
+     * @since 1.6.3
+     */
+    public static final CachedURLConnection openConnection(URL url) throws IOException {
+	return new CachedURLConnection(url);
+    }
+
+    /**
      * Method for safely closing whatever is returned by the open(URL) method.
      *
      * @since 1.5.0
@@ -334,7 +347,88 @@ public class Streams {
         }
     }
 
-    // Private
+    public static class CachedURLConnection extends URLConnection {
+	private File temp = null;
+	private CachingStream stream = null;
+
+	CachedURLConnection(URL url) throws IOException {
+	    super(url);
+	}
+
+	public void dispose() {
+	    if (temp != null) {
+		temp.delete();
+	    }
+	    url = null;
+	}
+
+	public void connect() throws IOException {
+	    if (!connected) {
+		temp = File.createTempFile("url_cache", ".tmp");
+		connected = true;
+	    }
+	}
+
+	@Override
+	public InputStream getInputStream() throws IOException {
+	    connect();
+	    if (stream != null && stream.isEOF()) {
+		return new FileInputStream(temp);
+	    } else {
+		return stream = new CachingStream(open(url));
+	    }
+	}
+
+	@Override
+	public int getContentLength() {
+	    return (int)getContentLengthLong();
+	}
+
+	@Override
+	public long getContentLengthLong() {
+	    try {
+		connect();
+		if (temp.length() == 0) {
+		    copy(open(url), new FileOutputStream(temp), true);
+		}
+		return temp.length();
+	    } catch (IOException e) {
+		throw new RuntimeException(e);
+	    }
+	}
+
+	// Internal
+
+	class CachingStream extends InputStream {
+	    private InputStream in;
+	    private boolean eof = false;
+
+	    CachingStream(InputStream in) throws IOException {
+		this.in = new StreamLogger(in, CachedURLConnection.this.temp);
+	    }
+
+	    public boolean isEOF() {
+		return eof;
+	    }
+
+	    public int read() throws IOException {
+		if (eof) {
+		    return -1;
+		} else {
+		    int ch = in.read();
+		    if (ch == -1) {
+			eof = true;
+			close();
+		    }
+		    return ch;
+		}
+	    }
+
+	    public void close() throws IOException {
+		in.close();
+	    }
+	}
+    }
 
     private static class Copier implements Runnable {
 	InputStream in;

@@ -48,7 +48,7 @@ public final class JSAFSystem {
     }
 
     /**
-     * Register the JSAF URL handlers for the tftp and zip protocols.
+     * Register the JSAF URL handlers for the tftp, zip and memory protocols.
      */
     public static void registerURLHandlers() {
 	if (!registeredHandlers) {

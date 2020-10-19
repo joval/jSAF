@@ -17,10 +17,21 @@ public interface IPublisher <T extends Enum> {
 
     /**
      * Remove a subscriber. No-op if the subscriber is not already subscribed to notifications from this publisher.
+     * Does not drain any queued notifications before unsubscribing.
      *
      * @param subscriber the subscriber to be removed
      */
     public void unsubscribe(ISubscriber<T> subscriber);
+
+    /**
+     * Drain queued messages and unsubscribe the specified subscriber.  No-op if the subscriber is not currently subscribed
+     * to notifications.
+     *
+     * @param subscriber the subscriber to be removed
+     * @param maxWait the maximum amount of time to wait (in milliseconds) for queued notifications before unsubscribing.
+     * @since 1.6.3
+     */
+    public void unsubscribe(ISubscriber<T> subscriber, long maxWait);
 
     /**
      * Publish an event to subscribers. All subscribers will receive a corresponding notify call.

@@ -406,7 +406,7 @@ public class Streams {
 	    return (int)getContentLengthLong();
 	}
 
-	@Override
+	//@Override -- NB: override annotation is invalid when compiling with JDK 1.6
 	public long getContentLengthLong() {
 	    try {
 		connect();

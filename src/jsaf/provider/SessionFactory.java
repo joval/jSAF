@@ -137,7 +137,10 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
 
     @Override
     protected void finalize() {
-	stop();
+	try {
+	    stop();
+	} catch (IllegalStateException e) {
+	}
     }
 
     // Implement ILoggable

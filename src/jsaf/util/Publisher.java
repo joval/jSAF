@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import jsaf.Message;
 import jsaf.intf.util.IPublisher;
 import jsaf.intf.util.ISubscriber;
 
@@ -21,15 +22,23 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
     private Collection<ISubscriber<T>> subscribers;
     private LinkedBlockingQueue<QueueEntry> queue;
     private Thread thread;
+    private String publisherThreadName;
+
+    private static final String DEFAULT_NAME = "Event Publisher Thread";
 
     public Publisher() {
+	this(DEFAULT_NAME);
+    }
+
+    public Publisher(String publisherThreadName) {
+	this.publisherThreadName = publisherThreadName;
 	subscribers = new HashSet<ISubscriber<T>>();
 	queue = new LinkedBlockingQueue<QueueEntry>();
     }
 
     public void start() {
 	if (thread == null) {
-	    thread = new Thread(this, "Event Publisher Thread");
+	    thread = new Thread(this, publisherThreadName);
 	    thread.setDaemon(true);
 	    thread.start();
 	} else {
@@ -89,6 +98,7 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
 		queue.take().publish();
 	    }
 	} catch (InterruptedException e) {
+	    Message.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	}
     }
 

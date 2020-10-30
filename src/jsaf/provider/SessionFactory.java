@@ -130,7 +130,20 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
 
     protected LocLogger logger;
 
+    /**
+     * @since 1.0
+     * @deprecated Use {@link jsaf.provider.SessionFactory(String)}
+     */
+    @Deprecated
     protected SessionFactory() {
+	this("Event Publisher Thread - Legacy");
+    }
+
+    /**
+     * @since 1.6.4
+     */
+    protected SessionFactory(String publisherThreadName) {
+	super(publisherThreadName);
 	logger = Message.getLogger();
 	start();
     }

@@ -41,11 +41,9 @@ public class ProgressInputStream extends InputStream {
 	try {
 	    return in.read();
 	} finally {
-	    if (publisher != null) {
-		short pct = (short)((counter++ * 100L) / length);
-		if (pct > lastPct) {
-		    publisher.publish(Progress.UPDATE, new Progress.Update(lastPct = pct, counter));
-		}
+	    short pct = (short)((counter++ * 100L) / length);
+	    if (pct > lastPct) {
+		publisher.publish(Progress.UPDATE, new Progress.Update(lastPct = pct, counter));
 	    }
 	}
     }
@@ -74,6 +72,9 @@ public class ProgressInputStream extends InputStream {
     // Private
 
     private void init(InputStream in, long length, IPublisher<Progress> publisher) throws IOException {
+	if (publisher == null) {
+	    throw new NullPointerException();
+	}
 	this.publisher = publisher;
 	if (length > 0) {
 	    this.length = length;

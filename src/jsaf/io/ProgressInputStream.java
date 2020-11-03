@@ -15,6 +15,13 @@ import java.net.URLConnection;
 import jsaf.intf.util.IPublisher;
 import jsaf.intf.util.Progress;
 
+/**
+ * InputStream that publishes Progress.UPDATE events as the underlying stream is read.
+ *
+ * @since 1.6.3
+ * @author David A. Solin
+ * @version %I% %G%
+ */
 public class ProgressInputStream extends InputStream {
     private IPublisher<Progress> publisher;
     private long counter=0, length=0;
@@ -34,9 +41,11 @@ public class ProgressInputStream extends InputStream {
 	try {
 	    return in.read();
 	} finally {
-	    short pct = (short)((counter++ * 100L) / length);
-	    if (pct > lastPct) {
-		publisher.publish(Progress.UPDATE, new Progress.Update(lastPct = pct, counter));
+	    if (publisher != null) {
+		short pct = (short)((counter++ * 100L) / length);
+		if (pct > lastPct) {
+		    publisher.publish(Progress.UPDATE, new Progress.Update(lastPct = pct, counter));
+		}
 	    }
 	}
     }

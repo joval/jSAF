@@ -23,6 +23,7 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
     private LinkedBlockingQueue<QueueEntry> queue;
     private Thread thread;
     private String publisherThreadName;
+    private boolean stopping = false;
 
     private static final String DEFAULT_NAME = "Event Publisher Thread";
 
@@ -50,6 +51,8 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
 	if (thread == null) {
 	    throw new IllegalStateException();
 	} else {
+	    Message.getLogger().debug(Message.STATUS_PUBLISHER_STOP, publisherThreadName);
+	    stopping = true;
 	    thread.interrupt();
 	    thread = null;
 	}
@@ -98,7 +101,9 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
 		queue.take().publish();
 	    }
 	} catch (InterruptedException e) {
-	    Message.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    if (!stopping) {
+		Message.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+	    }
 	}
     }
 

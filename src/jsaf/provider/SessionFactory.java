@@ -132,7 +132,7 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
 
     /**
      * @since 1.0
-     * @deprecated Use {@link jsaf.provider.SessionFactory(String)}
+     * @deprecated Use jsaf.provider.SessionFactory(String)
      */
     @Deprecated
     protected SessionFactory() {

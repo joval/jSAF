@@ -313,8 +313,8 @@ public class Streams {
     public static final void close(InputStream in) {
 	if (in == null) return;
 	try {
-	    if (in instanceof Zipped) {
-		((Zipped)in).reallyClose();
+	    if (in instanceof Unclosable) {
+		((Unclosable)in).reallyClose();
 	    } else {
 		in.close();
 	    }
@@ -323,12 +323,21 @@ public class Streams {
     }
 
     /**
+     * Wraps an InputStream to prevent it from being closed.
+     *
+     * @since 1.6.4
+     */
+    public static InputStream unclosable(InputStream in) {
+	return new Unclosable(in);
+    }
+
+    /**
      * Wraps a ZipInputStream, primarily for the purpose of making it more difficult to close (it can only be
      * closed using the ScapStream.close method).
      *
      * @since 1.5.0
      */
-    public static class Zipped extends FilterInputStream {
+    public static class Zipped extends Unclosable {
         private ZipEntry currentEntry;
 
         public Zipped(ZipInputStream in) {
@@ -340,26 +349,12 @@ public class Streams {
             currentEntry = entry;
         }
 
-        @Override
-        public void close() {
-            // no-op
-        }
-
         public ZipEntry getNextEntry() throws IOException {
             return currentEntry = ((ZipInputStream)in).getNextEntry();
         }
 
         public ZipEntry getCurrentEntry() {
             return currentEntry;
-        }
-
-	// Internal
-
-        void reallyClose() {
-            try {
-                super.close();
-            } catch (IOException e) {
-            }
         }
     }
 
@@ -474,6 +469,26 @@ public class Streams {
 		in.close();
 	    }
 	}
+    }
+
+    private static class Unclosable extends FilterInputStream {
+	Unclosable(InputStream in) {
+	    super(in);
+	}
+
+        @Override
+        public void close() throws IOException {
+            // no-op
+        }
+
+	// Internal
+
+        void reallyClose() {
+            try {
+                super.close();
+            } catch (IOException e) {
+            }
+        }
     }
 
     private static class Copier implements Runnable {

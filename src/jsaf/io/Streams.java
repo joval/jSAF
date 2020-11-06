@@ -465,6 +465,22 @@ public class Streams {
 		}
 	    }
 
+	    public int read(byte[] buff) throws IOException {
+		return read(buff, 0, buff.length);
+	    }
+
+	    public int read(byte[] buff, int offset, int len) throws IOException {
+		if (eof) {
+		    return -1;
+		} else {
+		    int result = in.read(buff, offset, len);
+		    if (result == -1) {
+			eof = true;
+		    }
+		    return result;
+		}
+	    }
+
 	    public void close() throws IOException {
 		in.close();
 	    }

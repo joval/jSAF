@@ -24,28 +24,37 @@ import jsaf.intf.util.Progress;
  */
 public class ProgressInputStream extends InputStream {
     private IPublisher<Progress> publisher;
-    private long counter=0, length=0;
+    private int length, bytesRead=0;
     private short lastPct = 0;
     private InputStream in;
 
-    public ProgressInputStream(File f, IPublisher<Progress> publisher) throws IOException {
-	init(new FileInputStream(f), f.length(), publisher);
+    public ProgressInputStream(URLConnection conn, IPublisher<Progress> publisher) throws IOException {
+	this(conn.getInputStream(), conn.getContentLength(), publisher);
     }
 
-    public ProgressInputStream(InputStream in, long length, IPublisher<Progress> publisher) throws IOException {
-	init(in, length, publisher);
+    public ProgressInputStream(File f, IPublisher<Progress> publisher) throws IOException {
+	this(new FileInputStream(f), (int)f.length(), publisher);
     }
 
     @Override
     public int read() throws IOException {
-	try {
-	    return in.read();
-	} finally {
-	    short pct = (short)((counter++ * 100L) / length);
-	    if (pct > lastPct) {
-		publisher.publish(Progress.UPDATE, new Progress.Update(lastPct = pct, counter));
-	    }
+	int ch = in.read();
+	if (ch != -1) {
+	    update(1);
 	}
+	return ch;
+    }
+
+    @Override
+    public int read(byte[] buff) throws IOException {
+	return read(buff, 0, buff.length);
+    }
+
+    @Override
+    public int read(byte[] buff, int offset, int length) throws IOException {
+	int result = in.read(buff, offset, length);
+	update(result);
+	return result;
     }
 
     @Override
@@ -53,37 +62,24 @@ public class ProgressInputStream extends InputStream {
 	in.close();
     }
 
-    // Internal
-
-    static class BufferStream extends ByteArrayOutputStream {
-	BufferStream() {
-	    super();
-	}
-
-	ByteArrayInputStream getInputStream() {
-	    return new ByteArrayInputStream(buf, 0, count);
-	}
-
-	int length() {
-	    return count;
-	}
-    }
-
     // Private
 
-    private void init(InputStream in, long length, IPublisher<Progress> publisher) throws IOException {
+    private ProgressInputStream(InputStream in, int length, IPublisher<Progress> publisher) throws IOException {
 	if (publisher == null) {
 	    throw new NullPointerException();
 	}
 	this.publisher = publisher;
-	if (length > 0) {
-	    this.length = length;
-	    this.in = in;
-	} else {
-	    BufferStream buff = new BufferStream();
-	    Streams.copy(in, buff);
-	    this.length = buff.length();
-	    this.in = buff.getInputStream();
+	this.in = in;
+	this.length = length;
+    }
+
+    private void update(int len) {
+	if (len > 0) {
+	    bytesRead += len;
+	    short pct = (short)((bytesRead * 100) / length);
+	    if (pct > lastPct) {
+		publisher.publish(Progress.UPDATE, new Progress.Update(lastPct = pct, bytesRead));
+	    }
 	}
     }
 }

@@ -128,8 +128,6 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
 	}
     }
 
-    protected LocLogger logger;
-
     /**
      * @since 1.0
      * @deprecated Use jsaf.provider.SessionFactory(String)
@@ -144,16 +142,11 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
      */
     protected SessionFactory(String publisherThreadName) {
 	super(publisherThreadName);
-	logger = Message.getLogger();
-	start();
     }
 
     @Override
     protected void finalize() {
-	try {
-	    stop();
-	} catch (IllegalStateException e) {
-	}
+	dispose();
     }
 
     // Implement ILoggable

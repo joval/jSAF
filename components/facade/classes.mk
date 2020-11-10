@@ -83,6 +83,7 @@ CLASSES=\
 	jsaf.intf.windows.wmi.ISWbemProperty	\
 	jsaf.intf.windows.wmi.ISWbemPropertySet	\
 	jsaf.intf.windows.wmi.IWmiProvider	\
+	jsaf.io.CachedURLConnection	\
 	jsaf.io.LineIterator	\
 	jsaf.io.LittleEndian	\
 	jsaf.io.PerishableReader	\

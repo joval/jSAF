@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.slf4j.cal10n.LocLogger;
+
 import jsaf.Message;
 import jsaf.intf.util.IPublisher;
 import jsaf.intf.util.ISubscriber;
@@ -27,6 +29,8 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
 
     private static final String DEFAULT_NAME = "Event Publisher Thread";
 
+    protected LocLogger logger;
+
     public Publisher() {
 	this(DEFAULT_NAME);
     }
@@ -35,27 +39,10 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
 	this.publisherThreadName = publisherThreadName;
 	subscribers = new HashSet<ISubscriber<T>>();
 	queue = new LinkedBlockingQueue<QueueEntry>();
-    }
-
-    public void start() {
-	if (thread == null) {
-	    thread = new Thread(this, publisherThreadName);
-	    thread.setDaemon(true);
-	    thread.start();
-	} else {
-	    throw new IllegalStateException();
-	}
-    }
-
-    public void stop() {
-	if (thread == null) {
-	    throw new IllegalStateException();
-	} else {
-	    Message.getLogger().debug(Message.STATUS_PUBLISHER_STOP, publisherThreadName);
-	    stopping = true;
-	    thread.interrupt();
-	    thread = null;
-	}
+	logger = Message.getLogger();
+	thread = new Thread(this, publisherThreadName);
+	thread.setDaemon(true);
+	thread.start();
     }
 
     // Implement IPublisher<T>
@@ -102,9 +89,35 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
 	    }
 	} catch (InterruptedException e) {
 	    if (!stopping) {
-		Message.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
+		logger.warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 	    }
 	}
+    }
+
+    // Implement IDisposable
+
+    public void dispose() {
+	if (thread == null) {
+	    throw new IllegalStateException();
+	} else {
+	    for (ISubscriber<T> subscriber : subscribers) {
+		unsubscribe(subscriber);
+	    }
+	    logger.debug(Message.STATUS_PUBLISHER_STOP, publisherThreadName);
+	    stopping = true;
+	    thread.interrupt();
+	    thread = null;
+	}
+    }
+
+    // Implement ILoggable
+
+    public void setLogger(LocLogger logger) {
+	this.logger = logger;
+    }
+
+    public LocLogger getLogger() {
+	return logger;
     }
 
     // Internal

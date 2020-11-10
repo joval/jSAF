@@ -6,11 +6,14 @@ package jsaf.protocol.zip;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import jsaf.io.Streams;
 
 /**
  * URLConnection subclass for generic ZIP files.  Only supports read requests.
@@ -21,7 +24,8 @@ import java.util.zip.ZipInputStream;
  */
 class ZipURLConnection extends URLConnection {
     private URL innerURL;
-    private URLConnection innerConnection;
+    private InputStream in;
+    private int length;
     private String path;
 
     ZipURLConnection(URL url) throws MalformedURLException {
@@ -43,7 +47,24 @@ class ZipURLConnection extends URLConnection {
 
     @Override
     public void connect() throws IOException {
-	innerConnection = innerURL.openConnection();
+	ZipInputStream zin = new ZipInputStream(innerURL.openStream());
+	ZipEntry entry = advanceTo(zin, path);
+	length = (int)entry.getSize();
+	if (length <= 0) {
+	    //
+	    // We need to determine the uncompressed size
+	    //
+	    try {
+		SizeStream out = new SizeStream();
+		Streams.copy(zin, out);
+		length = out.size();
+	    } finally {
+		Streams.close(zin);
+	    }
+	    zin = new ZipInputStream(innerURL.openStream());
+	    advanceTo(zin, path);
+	}
+	in = zin;
 	connected = true;
     }
 
@@ -52,17 +73,46 @@ class ZipURLConnection extends URLConnection {
 	if (!connected) {
 	    connect();
 	}
-	ZipInputStream zin = new ZipInputStream(innerConnection.getInputStream());
+	return in;
+    }
+
+    @Override
+    public int getContentLength() {
+	try {
+	    if (!connected) {
+		connect();
+	    }
+	    return length;
+	} catch (IOException e) {
+	    throw new RuntimeException(e);
+	}
+    }
+
+    // Private
+
+    private static ZipEntry advanceTo(ZipInputStream zin, String name) throws IOException {
 	ZipEntry entry;
 	while ((entry = zin.getNextEntry()) != null) {
-	    if (entry.getName().equals(path)) {
-		break;
+	    if (entry.getName().equals(name)) {
+		return entry;
 	    }
 	}
-	if (entry == null) {
-	    throw new FileNotFoundException(path);
-	} else {
-	    return zin;
+	throw new FileNotFoundException(name);
+    }
+
+    private static class SizeStream extends OutputStream {
+	int counter;
+
+	SizeStream() {
+	    counter = 0;
+	}
+
+	int size() {
+	    return counter;
+	}
+
+	public void write(int b) {
+	    counter++;
 	}
     }
 }

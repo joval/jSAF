@@ -29,7 +29,6 @@ import org.apache.tools.bzip2.CBZip2InputStream;
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
-import jsaf.intf.util.IDisposable;
 import jsaf.util.Strings;
 
 /**
@@ -293,19 +292,6 @@ public class Streams {
     }
 
     /**
-     * Safely dispose of a CachedURLConnection (no null check needed).
-     *
-     * @since 1.6.3
-     */
-    public static final void dispose(CachedURLConnection conn) {
-	if (conn == null) {
-	    return;
-	} else {
-	    conn.dispose();
-	}
-    }
-
-    /**
      * Method for safely closing whatever is returned by the open(URL) method (no null check needed).
      *
      * @since 1.5.0
@@ -358,134 +344,7 @@ public class Streams {
         }
     }
 
-    public static class CachedURLConnection extends URLConnection implements IDisposable {
-	private File temp=null, original=null;
-	private CachingStream stream = null;
-	private LocLogger logger;
-
-	CachedURLConnection(URL url) throws IOException {
-	    super(url);
-	    logger = Message.getLogger();
-	}
-
-	public void connect() throws IOException {
-	    if (!connected) {
-		if (url.getProtocol() == "file") {
-		    try {
-			original = new File(url.toURI());
-		    } catch (URISyntaxException e) {
-			throw new IOException(e);
-		    }
-		} else {
-		    temp = File.createTempFile("url_cache", ".tmp");
-		}
-		connected = true;
-	    }
-	}
-
-	@Override
-	public InputStream getInputStream() throws IOException {
-	    connect();
-	    if (original != null) {
-		return new FileInputStream(original);
-	    } else if (stream != null && stream.isEOF()) {
-		return new FileInputStream(temp);
-	    } else {
-		logger.debug(Message.STATUS_URL_CACHE, url.toString(), temp.toString());
-		return stream = new CachingStream(open(url));
-	    }
-	}
-
-	@Override
-	public int getContentLength() {
-	    return (int)getContentLengthLong();
-	}
-
-	//@Override -- NB: override annotation is invalid when compiling with JDK 1.6
-	public long getContentLengthLong() {
-	    try {
-		connect();
-		if (original != null) {
-		    return original.length();
-		} else {
-		    if (temp.length() == 0) {
-			// buffer the whole file
-			copy(open(url), new FileOutputStream(temp), true);
-		    }
-		    return temp.length();
-		}
-	    } catch (IOException e) {
-		throw new RuntimeException(e);
-	    }
-	}
-
-	// Implement IDisposable
-
-	public void dispose() {
-	    if (temp != null) {
-		temp.delete();
-	    }
-	    url = null;
-	}
-
-	// Implement ILoggable
-
-	public void setLogger(LocLogger logger) {
-	    this.logger = logger;
-	}
-
-	public LocLogger getLogger() {
-	    return logger;
-	}
-
-	// Internal
-
-	class CachingStream extends InputStream {
-	    private InputStream in;
-	    private boolean eof = false;
-
-	    CachingStream(InputStream in) throws IOException {
-		this.in = new StreamLogger(in, CachedURLConnection.this.temp);
-	    }
-
-	    public boolean isEOF() {
-		return eof;
-	    }
-
-	    public int read() throws IOException {
-		if (eof) {
-		    return -1;
-		} else {
-		    int ch = in.read();
-		    if (ch == -1) {
-			eof = true;
-			close();
-		    }
-		    return ch;
-		}
-	    }
-
-	    public int read(byte[] buff) throws IOException {
-		return read(buff, 0, buff.length);
-	    }
-
-	    public int read(byte[] buff, int offset, int len) throws IOException {
-		if (eof) {
-		    return -1;
-		} else {
-		    int result = in.read(buff, offset, len);
-		    if (result == -1) {
-			eof = true;
-		    }
-		    return result;
-		}
-	    }
-
-	    public void close() throws IOException {
-		in.close();
-	    }
-	}
-    }
+    // Private
 
     private static class Unclosable extends FilterInputStream {
 	Unclosable(InputStream in) {

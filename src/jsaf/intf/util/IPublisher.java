@@ -9,7 +9,7 @@ package jsaf.intf.util;
  * @author David A. Solin
  * @version %I% %G%
  */
-public interface IPublisher <T extends Enum> {
+public interface IPublisher<T extends Enum> extends IDisposable {
     /**
      * Add a subscriber for events published by an IPublisher instance.
      */

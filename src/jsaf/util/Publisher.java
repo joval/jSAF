@@ -98,19 +98,15 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
     // Implement IDisposable
 
     public void dispose() {
-	if (thread == null) {
-	    throw new IllegalStateException();
-	} else {
+	if (thread != null) {
 	    Iterator<ISubscriber<T>> iter = subscribers.iterator();
 	    while(iter.hasNext()) {
 		unsubscribe(iter.next());
 	    }
-	    if (thread != null) {
-		logger.debug(Message.STATUS_PUBLISHER_STOP, publisherThreadName);
-		stopping = true;
-		thread.interrupt();
-		thread = null;
-	    }
+	    logger.debug(Message.STATUS_PUBLISHER_STOP, publisherThreadName);
+	    stopping = true;
+	    thread.interrupt();
+	    thread = null;
 	}
     }
 

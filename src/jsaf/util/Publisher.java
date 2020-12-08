@@ -6,6 +6,7 @@ package jsaf.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.slf4j.cal10n.LocLogger;
@@ -100,13 +101,16 @@ public class Publisher<T extends Enum> implements IPublisher<T>, Runnable {
 	if (thread == null) {
 	    throw new IllegalStateException();
 	} else {
-	    for (ISubscriber<T> subscriber : subscribers) {
-		unsubscribe(subscriber);
+	    Iterator<ISubscriber<T>> iter = subscribers.iterator();
+	    while(iter.hasNext()) {
+		unsubscribe(iter.next());
 	    }
-	    logger.debug(Message.STATUS_PUBLISHER_STOP, publisherThreadName);
-	    stopping = true;
-	    thread.interrupt();
-	    thread = null;
+	    if (thread != null) {
+		logger.debug(Message.STATUS_PUBLISHER_STOP, publisherThreadName);
+		stopping = true;
+		thread.interrupt();
+		thread = null;
+	    }
 	}
     }
 

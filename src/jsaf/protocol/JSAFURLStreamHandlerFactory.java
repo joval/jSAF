@@ -5,6 +5,8 @@ package jsaf.protocol;
 
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
+import java.util.HashMap;
+import java.util.Map;
 
 import jsaf.protocol.memory.MemoryURLStreamHandler;
 import jsaf.protocol.tftp.TftpURLStreamHandler;
@@ -19,6 +21,25 @@ import jsaf.protocol.zip.ZipURLStreamHandler;
 public final class JSAFURLStreamHandlerFactory implements URLStreamHandlerFactory {
     private static final JSAFURLStreamHandlerFactory INSTANCE = new JSAFURLStreamHandlerFactory();
 
+    private static final Map<String, Delegate> handlers = new HashMap<String, Delegate>();
+    static {
+	handlers.put("tftp", new Delegate() {
+	    public URLStreamHandler newHandler() {
+		return new TftpURLStreamHandler();
+	    }
+	});
+	handlers.put("zip", new Delegate() {
+	    public URLStreamHandler newHandler() {
+		return new ZipURLStreamHandler();
+	    }
+	});
+	handlers.put("memory", new Delegate() {
+	    public URLStreamHandler newHandler() {
+		return new MemoryURLStreamHandler();
+	    }
+	});
+    }
+
     /**
      * Get the singleton instance.
      */
@@ -26,15 +47,19 @@ public final class JSAFURLStreamHandlerFactory implements URLStreamHandlerFactor
 	return INSTANCE;
     }
 
+    public interface Delegate {
+	public URLStreamHandler newHandler();
+    }
+
+    public static void setDelegate(String name, Delegate delegate) {
+	handlers.put(name, delegate);
+    }
+
     // Implement URLStreamHandlerFactory
 
     public final URLStreamHandler createURLStreamHandler(String protocol) {
-	if ("tftp".equals(protocol)) {
-	    return new TftpURLStreamHandler();
-	} else if ("zip".equals(protocol)) {
-	    return new ZipURLStreamHandler();
-	} else if ("memory".equals(protocol)) {
-	    return new MemoryURLStreamHandler();
+	if (handlers.containsKey(protocol)) {
+	    return handlers.get(protocol).newHandler();
 	} else {
 	    return null;
 	}
@@ -42,5 +67,6 @@ public final class JSAFURLStreamHandlerFactory implements URLStreamHandlerFactor
 
     // Private
 
-    private JSAFURLStreamHandlerFactory() {}
+    private JSAFURLStreamHandlerFactory() {
+    }
 }

@@ -309,6 +309,20 @@ public class Streams {
     }
 
     /**
+    /**
+     * Method for safely closing an OutputStream (no null check needed).
+     *
+     * @since 1.6.6
+     */
+    public static final void close(OutputStream out) {
+	if (out == null) return;
+	try {
+	    out.close();
+	} catch (IOException e) {
+	}
+    }
+
+    /**
      * Wraps an InputStream to prevent it from being closed.
      *
      * @since 1.6.4

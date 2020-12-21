@@ -37,6 +37,11 @@ public class ProgressInputStream extends InputStream {
     }
 
     @Override
+    public int available() throws IOException {
+	return in.available();
+    }
+
+    @Override
     public int read() throws IOException {
 	int ch = in.read();
 	if (ch != -1) {

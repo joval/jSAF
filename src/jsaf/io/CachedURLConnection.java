@@ -40,7 +40,7 @@ public class CachedURLConnection extends URLConnection implements IDisposable {
 
     public void connect() throws IOException {
 	if (!connected) {
-	    if (url.getProtocol() == "file") {
+	    if ("file".equals(url.getProtocol())) {
 		try {
 		    original = new File(url.toURI());
 		} catch (URISyntaxException e) {

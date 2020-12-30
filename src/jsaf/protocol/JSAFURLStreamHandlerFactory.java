@@ -3,11 +3,13 @@
 
 package jsaf.protocol;
 
+import java.io.File;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
+import jsaf.Message;
 import jsaf.protocol.memory.MemoryURLStreamHandler;
 import jsaf.protocol.tftp.TftpURLStreamHandler;
 import jsaf.protocol.zip.ZipURLStreamHandler;

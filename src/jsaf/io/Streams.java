@@ -1,4 +1,4 @@
-// Copyright (c) 2011 jOVAL.org.  All rights reserved.
+// Copyright (c) 2011-2020 jOVAL.org.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.io;
@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -252,6 +253,28 @@ public class Streams {
 	    }
 	}
 	throw new EOFException();
+    }
+
+    /**
+     * Convert a string representing a URL or a valid file path to a URL.
+     *
+     * @since 1.6.6
+     */
+    public static URL toURL(String str) throws MalformedURLException {
+	MalformedURLException ex = null;
+	try {
+	    return new URL(str);
+	} catch (MalformedURLException e) {
+	    ex = e;
+	}
+
+	File f = new File(str);
+	if (f.isFile()) {
+	    return f.toURI().toURL();
+	}
+	MalformedURLException exception = new MalformedURLException(Message.getMessage(Message.ERROR_URL, str));
+	exception.initCause(ex);
+	throw exception;
     }
 
     /**

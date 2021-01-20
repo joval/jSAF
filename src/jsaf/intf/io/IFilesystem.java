@@ -129,28 +129,11 @@ public interface IFilesystem extends ILoggable {
     IFile createTempFile(String prefix, String suffix, IFile directory) throws IOException;
 
     /**
-     * Get all mounts; shortcut for getMounts(null).
+     * Get all filesystem mounts.
      *
      * @since 1.0.1
      */
     Collection<IMount> getMounts() throws IOException;
-
-    /**
-     * Shortcut for getMounts(typeFilter, false).
-     *
-     * @since 1.0
-     */
-    Collection<IMount> getMounts(Pattern typeFilter) throws IOException;
-
-    /**
-     * List the mounts on this filesystem, filtered by the specified pattern.
-     *
-     * @param typeFilter the pattern to use as a filter. Use null for no filtering.
-     * @param include use true to return mounts matching the typeFilter, false to filter out mounts matching the typeFilter.
-     *
-     * @since 1.0.1
-     */
-    Collection<IMount> getMounts(Pattern typeFilter, boolean include) throws IOException;
 
     /**
      * An interface describing a filesystem mount point.
@@ -174,6 +157,13 @@ public interface IFilesystem extends ILoggable {
 	 * @since 1.0
 	 */
 	String getType();
+
+	/**
+	 * Returns true if the mount is machine-local (i.e., not a mounted network device).
+	 *
+	 * @since 1.6.6
+	 */
+	boolean local();
     }
 
     /**
@@ -205,6 +195,14 @@ public interface IFilesystem extends ILoggable {
      * @since 1.3.4
      */
     FSCondition XDEV = new FSCondition(FSCondition.FIELD_XDEV, Condition.TYPE_EQUALITY, Boolean.TRUE);
+
+    /**
+     * A search condition signifying that the search should be confined to local filesystems. If this condition is not
+     * present, the search can include results that reside in networked filesystems.
+     *
+     * @since 1.6.6
+     */
+    FSCondition LOCAL = new FSCondition(FSCondition.FIELD_LOCAL, Condition.TYPE_EQUALITY, Boolean.TRUE);
 
     /**
      * Base ISearchable.Condition subclass for IFilesystem search conditions.
@@ -264,6 +262,13 @@ public interface IFilesystem extends ILoggable {
 	 * @since 1.0.1
 	 */
 	public static final int FIELD_FSTYPE = 54;
+
+        /**
+         * Condition field to search only local filesystems. Condition type and value are ignored.
+	 *
+         * @since 1.6.6
+         */
+        public static final int FIELD_LOCAL = 55;
 
         /**
          * Condition field for the link-following flag. Condition type and value are ignored. Links will not be followed

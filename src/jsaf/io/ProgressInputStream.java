@@ -24,16 +24,16 @@ import jsaf.intf.util.Progress;
  */
 public class ProgressInputStream extends InputStream {
     private IPublisher<Progress> publisher;
-    private int length, bytesRead=0;
+    private long length, bytesRead=0;
     private short lastPct = 0;
     private InputStream in;
 
     public ProgressInputStream(URLConnection conn, IPublisher<Progress> publisher) throws IOException {
-	this(conn.getInputStream(), conn.getContentLength(), publisher);
+	this(conn.getInputStream(), conn.getContentLengthLong(), publisher);
     }
 
     public ProgressInputStream(File f, IPublisher<Progress> publisher) throws IOException {
-	this(new FileInputStream(f), (int)f.length(), publisher);
+	this(new FileInputStream(f), f.length(), publisher);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class ProgressInputStream extends InputStream {
 
     // Private
 
-    private ProgressInputStream(InputStream in, int length, IPublisher<Progress> publisher) throws IOException {
+    private ProgressInputStream(InputStream in, long length, IPublisher<Progress> publisher) throws IOException {
 	if (publisher == null) {
 	    throw new NullPointerException();
 	}
@@ -81,7 +81,7 @@ public class ProgressInputStream extends InputStream {
     private void update(int len) {
 	if (len > 0) {
 	    bytesRead += len;
-	    short pct = (short)((bytesRead * 100) / length);
+	    short pct = (short)((bytesRead * 100L) / length);
 	    if (pct > lastPct) {
 		publisher.publish(Progress.UPDATE, new Progress.Update(lastPct = pct, bytesRead));
 	    }

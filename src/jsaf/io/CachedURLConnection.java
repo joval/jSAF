@@ -13,7 +13,9 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.zip.GZIPInputStream;
 
+import org.apache.tools.bzip2.CBZip2InputStream;
 import org.slf4j.cal10n.LocLogger;
 
 import jsaf.Message;
@@ -31,6 +33,7 @@ import jsaf.util.Strings;
 public class CachedURLConnection extends URLConnection implements IDisposable {
     private File temp=null, original=null;
     private CachingStream stream = null;
+    private long contentLength = -1;
     private LocLogger logger;
 
     public CachedURLConnection(URL url) {
@@ -57,7 +60,7 @@ public class CachedURLConnection extends URLConnection implements IDisposable {
     public InputStream getInputStream() throws IOException {
 	connect();
 	if (original != null) {
-	    return new FileInputStream(original);
+	    return Streams.open(url);
 	} else if (stream != null && stream.isEOF()) {
 	    return new FileInputStream(temp);
 	} else {
@@ -73,19 +76,30 @@ public class CachedURLConnection extends URLConnection implements IDisposable {
 
     //@Override -- NB: override annotation is invalid when compiling with JDK 1.6
     public long getContentLengthLong() {
+	if (contentLength != -1) {
+	    return contentLength;
+	}
+	InputStream in = null;
 	try {
 	    connect();
+	    in = Streams.open(url);
 	    if (original != null) {
-		return original.length();
+		if (in instanceof GZIPInputStream || in instanceof CBZip2InputStream) {
+		    return contentLength = Streams.measure(in);
+		} else {
+		    return contentLength = original.length();
+		}
 	    } else {
 		if (temp.length() == 0) {
 		    // buffer the whole file
-		    Streams.copy(Streams.open(url), new FileOutputStream(temp), true);
+		    Streams.copy(in, new FileOutputStream(temp), true);
 		}
-		return temp.length();
+		return contentLength = temp.length();
 	    }
 	} catch (IOException e) {
 	    throw new RuntimeException(e);
+	} finally {
+	    Streams.close(in);
 	}
     }
 

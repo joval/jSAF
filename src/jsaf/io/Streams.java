@@ -171,6 +171,17 @@ public class Streams {
     }
 
     /**
+     * Measure the length of the InputStream.
+     *
+     * @since 1.6.6
+     */
+    public static long measure(InputStream in) throws IOException {
+	SizeStream out = new SizeStream();
+	copy(in, out);
+	return out.size();
+    }
+
+    /**
      * Read the contents of a file into a String.
      *
      * @since 1.3.5
@@ -361,24 +372,45 @@ public class Streams {
      * @since 1.5.0
      */
     public static class Zipped extends Unclosable {
-        private ZipEntry currentEntry;
+	private ZipEntry currentEntry;
 
-        public Zipped(ZipInputStream in) {
-            super(in);
-        }
+	public Zipped(ZipInputStream in) {
+	    super(in);
+	}
 
-        public Zipped(ZipInputStream in, ZipEntry entry) {
-            this(in);
-            currentEntry = entry;
-        }
+	public Zipped(ZipInputStream in, ZipEntry entry) {
+	    this(in);
+	    currentEntry = entry;
+	}
 
-        public ZipEntry getNextEntry() throws IOException {
-            return currentEntry = ((ZipInputStream)in).getNextEntry();
-        }
+	public ZipEntry getNextEntry() throws IOException {
+	    return currentEntry = ((ZipInputStream)in).getNextEntry();
+	}
 
-        public ZipEntry getCurrentEntry() {
-            return currentEntry;
-        }
+	public ZipEntry getCurrentEntry() {
+	    return currentEntry;
+	}
+    }
+
+    /**
+     * Used to measure the length of another InputStream.
+     *
+     * @since 1.6.6
+     */
+    public static class SizeStream extends OutputStream {
+	private long counter;
+
+	public SizeStream() {
+	    counter = 0L;
+	}
+
+	public long size() {
+	    return counter;
+	}
+
+	public void write(int b) {
+	    counter++;
+	}
     }
 
     // Private
@@ -388,19 +420,19 @@ public class Streams {
 	    super(in);
 	}
 
-        @Override
-        public void close() throws IOException {
-            // no-op
-        }
+	@Override
+	public void close() throws IOException {
+	    // no-op
+	}
 
 	// Internal
 
-        void reallyClose() {
-            try {
-                super.close();
-            } catch (IOException e) {
-            }
-        }
+	void reallyClose() {
+	    try {
+		super.close();
+	    } catch (IOException e) {
+	    }
+	}
     }
 
     private static class Copier implements Runnable {

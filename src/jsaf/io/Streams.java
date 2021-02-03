@@ -176,9 +176,16 @@ public class Streams {
      * @since 1.6.6
      */
     public static long measure(InputStream in) throws IOException {
-	SizeStream out = new SizeStream();
-	copy(in, out);
-	return out.size();
+	try {
+	    SizeStream out = new SizeStream();
+	    copy(in, out);
+	    return out.size();
+	} finally {
+	    try {
+		in.close();
+	    } catch (IOException e) {
+	    }
+	}
     }
 
     /**

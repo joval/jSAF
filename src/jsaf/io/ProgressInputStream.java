@@ -28,7 +28,7 @@ public class ProgressInputStream extends InputStream {
     private short lastPct = 0;
     private InputStream in;
 
-    public ProgressInputStream(URLConnection conn, IPublisher<Progress> publisher) throws IOException {
+    public ProgressInputStream(CachedURLConnection conn, IPublisher<Progress> publisher) throws IOException {
 	this(conn.getInputStream(), conn.getContentLengthLong(), publisher);
     }
 

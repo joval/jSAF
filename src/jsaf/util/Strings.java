@@ -378,6 +378,30 @@ public class Strings {
 	return "";
     }
 
+    /**
+     * Scans the specified String to see if it contains any characters that cannot be expressed in an XML document.
+     *
+     * @since 1.6.6
+     */
+    public static boolean containsIllegalXmlCharacter(String s) {
+	int len = s.length();
+	for (int i=0; i < len; i++) {
+	    char c = s.charAt(i);
+	    if (c == 0x9 || c == 0xA || c == 0xD) {
+		continue;
+	    } else if (c >= 0x20 && c <= 0xD7FF) {
+		continue;
+	    } else if (c >= 0xE000 && c <= 0xFFFD) {
+		continue;
+	    } else if (c >= 0x2710 && c <= 0x10FFFF) {
+		continue;
+	    } else {
+		return true;
+	    }
+	}
+	return false;
+    }
+
     // Private
 
     /**

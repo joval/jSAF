@@ -66,11 +66,25 @@ public interface IWindowsSession extends IComputerSystem {
     String PROP_FS_SEARCH_MAX_CPU = "fs.search.maxCpu";
 
     /**
+     * Property governing the maximum time that can be used for any one filesystem search.
+     *
+     * @since 1.6.6
+     */
+    String PROP_FS_SEARCH_TIMEOUT = "fs.search.timeout";
+
+    /**
      * Property indicating the maximum single-threaded CPU utilization for a registry search.
      *
      * @since 1.6.0
      */
     String PROP_REGISTRY_SEARCH_MAX_CPU = "registry.search.maxCpu";
+
+    /**
+     * Property governing the maximum time that can be used for any one registry search.
+     *
+     * @since 1.6.6
+     */
+    String PROP_REGISTRY_SEARCH_TIMEOUT = "registry.search.timeout";
 
     /**
      * Name of the environment variable containing the processor architecture (when running in 32-bit mode on a 64-bit

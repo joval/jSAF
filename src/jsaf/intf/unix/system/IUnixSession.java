@@ -41,6 +41,13 @@ public interface IUnixSession extends IComputerSystem {
     String PROP_FS_SEARCH_NICE_ADJUSTMENT = "fs.search.niceAdjustment";
 
     /**
+     * Property governing the maximum time that can be used for any one filesystem search.
+     *
+     * @since 1.6.6
+     */
+    String PROP_FS_SEARCH_TIMEOUT = "fs.search.timeout";
+
+    /**
      * Root username.
      *
      * @since 1.0.1

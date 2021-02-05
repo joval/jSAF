@@ -418,6 +418,14 @@ public class Streams {
 	public void write(int b) {
 	    counter++;
 	}
+
+	public void write(byte[] buff) {
+	    write(buff, 0, buff.length);
+	}
+
+	public void write(byte[] buff, int off, int len) {
+	    counter += Math.min(len, buff.length - off);
+	}
     }
 
     // Private

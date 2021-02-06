@@ -28,6 +28,10 @@ public class ProgressInputStream extends InputStream {
     private short lastPct = 0;
     private InputStream in;
 
+    public ProgressInputStream(byte[] buff, IPublisher<Progress> publisher) throws IOException {
+	this(new ByteArrayInputStream(buff), (long)buff.length(), publisher);
+    }
+
     public ProgressInputStream(CachedURLConnection conn, IPublisher<Progress> publisher) throws IOException {
 	this(conn.getInputStream(), conn.getContentLengthLong(), publisher);
     }

@@ -29,7 +29,7 @@ public class ProgressInputStream extends InputStream {
     private InputStream in;
 
     public ProgressInputStream(byte[] buff, IPublisher<Progress> publisher) throws IOException {
-	this(new ByteArrayInputStream(buff), (long)buff.length(), publisher);
+	this(new ByteArrayInputStream(buff), (long)buff.length, publisher);
     }
 
     public ProgressInputStream(CachedURLConnection conn, IPublisher<Progress> publisher) throws IOException {

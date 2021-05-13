@@ -51,6 +51,13 @@ public interface IWindowsSession extends IComputerSystem {
     String PROP_POWERSHELL_INIT_ARGS = "powershell.initArgs";
 
     /**
+     * Property indicating the value that should be set for %TEMP% and %TMP% when launching Powershell.
+     *
+     * @since 1.6.8
+     */
+    String PROP_POWERSHELL_TMPDIR = "powershell.tmpdir";
+
+    /**
      * Property indicating whether to enable Powershell process memory profiling. When enabled, implementations should log
      * the Powershell process memory size after every call to IRunspace.invoke.
      *

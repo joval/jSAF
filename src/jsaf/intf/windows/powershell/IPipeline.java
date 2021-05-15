@@ -1,4 +1,4 @@
-// Copyright (C) 2020, JovalCM.com.  All rights reserved.
+// Copyright (C) 2020-2021, JovalCM.com.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.intf.windows.powershell;
@@ -27,4 +27,11 @@ public interface IPipeline<T> extends Iterable<T> {
     void setExpression(String expression);
 
     String getExpression();
+
+    /**
+     * Get the MD5 checksum representation of the pipeline. Useful for result caching.
+     *
+     * @since 1.6.8
+     */
+    String getMD5();
 }

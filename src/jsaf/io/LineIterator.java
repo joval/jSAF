@@ -78,6 +78,26 @@ public class LineIterator implements Iterator<String> {
 	close();
     }
 
+    /**
+     * Clean up the reader stream and file (if there is one).
+     *
+     * @since 1.6.8
+     */
+    public void close() {
+	if (reader != null) {
+	    try {
+		reader.close();
+	    } catch (IOException e) {
+	    }
+	    reader = null;
+	}
+	if (tempFile != null) {
+	    if (tempFile.delete()) {
+		tempFile = null;
+	    }
+	}
+    }
+
     // Implement Iterator<String>
 
     public boolean hasNext() {
@@ -139,23 +159,5 @@ public class LineIterator implements Iterator<String> {
 	}
 	in.reset();
 	return Arrays.equals(GZIP_MAGIC, magic);
-    }
-
-    /**
-     * Clean up the reader stream and file.
-     */
-    private void close() {
-	if (reader != null) {
-	    try {
-		reader.close();
-	    } catch (IOException e) {
-	    }
-	    reader = null;
-	}
-	if (tempFile != null) {
-	    if (tempFile.delete()) {
-		tempFile = null;
-	    }
-	}
     }
 }

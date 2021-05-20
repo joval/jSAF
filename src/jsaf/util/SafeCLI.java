@@ -452,8 +452,8 @@ public class SafeCLI {
 			    //
 			    // output is potentially in a remote file, so we must copy its contents to a local cache
 			    //
-			    File tempDir = sys.getWorkspace() == null ? new File(System.getProperty("user.home")) : sys.getWorkspace();
-			    File localTemp = File.createTempFile("cmd", null, tempDir);
+			    File localTemp = File.createTempFile("cmd", null, sys.getWorkspace());
+			    localTemp.deleteOnExit();
 			    try {
 				Streams.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
 				remoteTemp.delete();

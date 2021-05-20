@@ -51,6 +51,7 @@ public class CachedURLConnection extends URLConnection implements IDisposable {
 		}
 	    } else {
 		temp = File.createTempFile("url_cache", ".tmp");
+		temp.deleteOnExit();
 	    }
 	    connected = true;
 	}

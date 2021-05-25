@@ -107,6 +107,7 @@ CLASSES=\
 	jsaf.provider.windows.identity.SID	\
 	jsaf.provider.windows.powershell.PowershellException	\
 	jsaf.provider.windows.powershell.StringPipeline	\
+	jsaf.provider.windows.powershell.StringPropertyPipeline	\
 	jsaf.provider.windows.registry.RegistryException	\
 	jsaf.provider.windows.wmi.WmiException	\
 	jsaf.service.PortRegistry	\

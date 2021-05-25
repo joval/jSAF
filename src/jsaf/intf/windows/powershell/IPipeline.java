@@ -29,9 +29,9 @@ public interface IPipeline<T> extends Iterable<T> {
     String getExpression();
 
     /**
-     * Get the MD5 checksum representation of the pipeline. Useful for result caching.
+     * Get a unique checksum representation of the pipeline. Useful for result caching.
      *
      * @since 1.6.8
      */
-    String getMD5();
+    String checksum();
 }

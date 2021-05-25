@@ -153,16 +153,16 @@ public interface IRunspace extends ILoggable {
     String invoke(String command, long timeout) throws PowershellException;
 
     /**
-     * Invoke a String pipeline with the default read timeout.
+     * Invoke a pipeline with the default read timeout.
      *
      * @since 1.5.1
      */
-    String invoke(IPipeline<String> pipeline) throws PowershellException;
+    String invoke(IPipeline pipeline) throws PowershellException;
 
     /**
-     * Invoke a String pipeline with the specified read timeout (in millis).
+     * Invoke a pipeline with the specified read timeout (in millis).
      *
      * @since 1.5.1
      */
-    String invoke(IPipeline<String> pipeline, long timeout) throws PowershellException;
+    String invoke(IPipeline pipeline, long timeout) throws PowershellException;
 }

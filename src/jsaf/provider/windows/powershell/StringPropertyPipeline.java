@@ -1,10 +1,12 @@
-// Copyright (C) 2020, JovalCM.com.  All rights reserved.
+// Copyright (C) 2021, JovalCM.com.  All rights reserved.
 
 package jsaf.provider.windows.powershell;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -13,29 +15,29 @@ import jsaf.util.Checksum;
 import jsaf.util.Strings;
 
 /**
- * Utility class for encoding a Powershell pipeline of Strings directed at an expression.
+ * Utility class for encoding a Powershell pipeline of Dictionary<string, string> mappings directed at an expression.
  */
-public class StringPipeline implements IPipeline<String> {
-    private List<String> members;
+public class StringPropertyPipeline implements IPipeline<Map<String, String>> {
+    private List<Map<String, String>> members;
     private String expression;
 
-    public StringPipeline() {
-	members = new ArrayList<String>();
+    public StringPropertyPipeline() {
+	members = new ArrayList<Map<String, String>>();
     }
 
     // Implement Iterable<String>
 
-    public Iterator<String> iterator() {
+    public Iterator<Map<String, String>> iterator() {
 	return members.iterator();
     }
 
-    // Implement IPipeline<String>
+    // Implement IPipeline<Map<String, String>>
 
     public int size() {
 	return members.size();
     }
 
-    public void add(String arg) {
+    public void add(Map<String, String> arg) {
 	if (arg == null) {
 	    throw new NullPointerException();
 	}
@@ -54,7 +56,16 @@ public class StringPipeline implements IPipeline<String> {
 	try {
 	    MessageDigest digest = digest = MessageDigest.getInstance("MD5");
 	    for (int i=0; i < members.size(); i++) {
-		digest.update(members.get(i).getBytes(Strings.UTF8));
+		Map<String, String> member = members.get(i);
+		if (!(member instanceof TreeMap)) {
+		    member = new TreeMap<String, String>(member);
+		}
+		for (Map.Entry<String, String> entry : member.entrySet()) {
+		    digest.update(entry.getKey().getBytes(Strings.UTF8));
+		    digest.update((byte)0x61); // =
+		    digest.update(entry.getValue().getBytes(Strings.UTF8));
+		    digest.update((byte)0x59); // ;
+		}
 		if (i > 0) {
 		    digest.update((byte)0x00);
 		}

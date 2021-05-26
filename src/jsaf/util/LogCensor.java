@@ -141,6 +141,11 @@ public class LogCensor implements ILoggable.Censor {
         }
 
         @Override
+        public void info(String msg) {
+	    logger.info(msg);
+        }
+
+        @Override
         public void info(Enum<?> key, Object... args) {
 	    logger.info(key, censor.expurgate(args));
         }

@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -71,6 +72,13 @@ public class LineIterator implements Iterator<String> {
 	    encoding = Streams.detectEncoding(bis);
 	}
 	reader = new BufferedReader(new InputStreamReader(bis, encoding == null ? Strings.UTF8 : encoding));
+    }
+
+    /**
+     * Create a LineIterator for String data.
+     */
+    public LineIterator(String data) {
+	reader = new BufferedReader(new StringReader(data));
     }
 
     @Override

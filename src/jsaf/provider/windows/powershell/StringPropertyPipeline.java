@@ -15,7 +15,7 @@ import jsaf.util.Checksum;
 import jsaf.util.Strings;
 
 /**
- * Utility class for encoding a Powershell pipeline of Dictionary<string, string> mappings directed at an expression.
+ * Utility class for encoding a Powershell pipeline of Dictionary&lt;string, string&gt; mappings directed at an expression.
  */
 public class StringPropertyPipeline implements IPipeline<Map<String, String>> {
     private List<Map<String, String>> members;

@@ -24,16 +24,21 @@ import jsaf.protocol.JSAFURLStreamHandlerFactory;
  * @version %I% %G%
  */
 public final class JSAFSystem {
+    private static final boolean WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("windows") != -1;
+
     private static Timer timer;
     private static Map<Runnable, TimerTask> tasks = new HashMap<Runnable, TimerTask>();
     private static File dataDir = null;
     private static boolean registeredHandlers = false;
 
     static {
-	if (System.getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
+	if (WINDOWS) {
 	    String s = System.getenv("LOCALAPPDATA");
 	    if (s == null) {
 		s = System.getenv("APPDATA");
+	    }
+	    if (s != null && s.toLowerCase().indexOf("system32") != -1) {
+		s = System.getenv("ProgramData");
 	    }
 	    if (s != null) {
 		File appDataDir = new File(s);

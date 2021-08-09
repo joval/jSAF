@@ -149,17 +149,6 @@ public abstract class SessionFactory extends Publisher<ConnectionEvent> implemen
 	dispose();
     }
 
-    // Implement ILoggable
-
-    public void setLogger(LocLogger logger) {
-	this.logger = logger;
-    }
-
-    public LocLogger getLogger() {
-	return logger;
-    }
-
-
     // Implement IDiscoveryService
 
     public Result discover(IConnectionSpecification target) throws DiscoveryException {

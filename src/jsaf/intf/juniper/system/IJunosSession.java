@@ -16,6 +16,9 @@ import jsaf.intf.netconf.INetconf;
  * @since 1.0
  */
 public interface IJunosSession extends IComputerSystem {
+    public String SHOW_VERSION = "show version detail";
+    public String SHOW_INTERFACES = "show interfaces extensive";
+
     /**
      * Retrieve "request support information" data from the device.
      *

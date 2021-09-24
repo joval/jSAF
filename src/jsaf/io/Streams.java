@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -345,6 +346,19 @@ public class Streams {
 	    } else {
 		in.close();
 	    }
+	} catch (IOException e) {
+	}
+    }
+
+    /**
+     * Method for safely closing a Writer
+     *
+     * @since 1.6.9
+     */
+    public static final void close(Writer writer) {
+	if (writer == null) return;
+	try {
+	    writer.close();
 	} catch (IOException e) {
 	}
     }

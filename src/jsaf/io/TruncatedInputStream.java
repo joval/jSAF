@@ -26,7 +26,7 @@ public class TruncatedInputStream extends FilterInputStream {
 	}
     }
 
-    private long pointer, limit, mark;
+    private long position, limit, mark;
 
     /**
      * Create a new TruncatedInputStream using raw data that has already been truncated.
@@ -34,7 +34,7 @@ public class TruncatedInputStream extends FilterInputStream {
     public TruncatedInputStream(byte[] data) {
 	super(new ByteArrayInputStream(data));
 	limit = data.length;
-	pointer = 0L;
+	position = 0L;
     }
 
     /**
@@ -49,17 +49,17 @@ public class TruncatedInputStream extends FilterInputStream {
 	    throw new IllegalArgumentException("limit=0");
 	}
 	this.limit = limit;
-	pointer = 0L;
+	position = 0L;
     }
 
     // Overrides
 
     @Override
     public int read() throws IOException {
-	if (pointer < limit) {
+	if (position < limit) {
 	    int ch = in.read();
 	    if (ch != -1) {
-		pointer++;
+		position++;
 	    }
 	    return ch;
 	} else {
@@ -74,10 +74,10 @@ public class TruncatedInputStream extends FilterInputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-	if (pointer < limit) {
-	    int i = in.read(b, off, (int)Math.min((long)len, limit - pointer));
-	    pointer += (long)i;
-	    return i;
+	if (position < limit) {
+	    int bytesRead = in.read(b, off, (int)Math.min((long)len, limit - position));
+	    position += (long)bytesRead;
+	    return bytesRead;
 	} else {
 	    throw new TruncatedIOException(Message.getMessage(Message.ERROR_TRUNCATE, Long.toString(limit)));
 	}
@@ -85,9 +85,9 @@ public class TruncatedInputStream extends FilterInputStream {
 
     @Override
     public long skip(long n) throws IOException {
-	if ((pointer + n) < limit) {
+	if ((position + n) < limit) {
 	    long skipped = in.skip(n);
-	    pointer += skipped;
+	    position += skipped;
 	    return skipped;
 	} else {
 	    throw new TruncatedIOException(Message.getMessage(Message.ERROR_TRUNCATE, Long.toString(limit)));
@@ -97,14 +97,16 @@ public class TruncatedInputStream extends FilterInputStream {
     @Override
     public void mark(int readlimit) {
 	if (in.markSupported()) {
-	    mark = pointer;
+	    mark = position;
 	    in.mark(readlimit);
 	}
     }
 
     @Override
     public void reset() throws IOException {
-	in.reset();
-	pointer = mark;
+	if (in.markSupported()) {
+	    in.reset();
+	    position = mark;
+	}
     }
 }

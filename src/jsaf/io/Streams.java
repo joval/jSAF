@@ -108,16 +108,27 @@ public class Streams {
      * @since 1.2
      */
     public static final void readFully(InputStream in, byte[] buff) throws IOException {
-	if (buff.length > 0) {
-	    int offset = 0;
-	    do {
-		int bytesRead = in.read(buff, offset, buff.length-offset);
-		if (bytesRead == -1) {
-		    throw new EOFException(Message.getMessage(Message.ERROR_EOS));
-		} else {
-		    offset += bytesRead;
-		}
-	    } while (offset < buff.length);
+	readFully(in, buff, 0, buff.length);
+    }
+
+    /**
+     * Read from the stream into the buffer starting at the offset, until length bytes have been read.
+     *
+     * @since 1.6.10
+     */
+    public static final void readFully(InputStream in, byte[] buff, int offset, int len) throws IOException {
+	if (offset + len > buff.length) {
+	    throw new IllegalArgumentException(String.format("Cannot read %d bytes into %d length buffer with %d offset", len, buff.length, offset));
+	}
+	for (int i=0; i < len; i++) {
+	    int ch = in.read();
+	    switch(ch) {
+	      case -1:
+		throw new EOFException(Message.getMessage(Message.ERROR_EOS));
+	      default:
+		buff[offset + i] = (byte)ch;
+		break;
+	    }
 	}
     }
 

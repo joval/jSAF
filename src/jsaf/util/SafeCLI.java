@@ -1,4 +1,4 @@
-// Copyright (C) 2011 jOVAL.org.  All rights reserved.
+// Copyright (C) 2011-2021 Arctic Wolf Networks, Inc.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
 
 package jsaf.util;
@@ -36,6 +36,7 @@ import jsaf.io.PerishableReader;
 import jsaf.io.SimpleReader;
 import jsaf.io.Streams;
 import jsaf.io.TruncatedInputStream;
+import jsaf.io.XMLFilterStream;
 import jsaf.provider.SessionException;
 
 import static jsaf.intf.system.ISession.LOCALHOST;
@@ -501,9 +502,34 @@ public class SafeCLI {
      * @since 1.0
      */
     public static final ExecData execData(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout) throws IOException {
+	int maxLen = sys.getProperties().getIntProperty(IComputerSystem.PROP_PROCESS_MAXBUFFLEN);
+	BufferHandler out = new BufferHandler(maxLen, true);
+	BufferHandler err = new BufferHandler(maxLen, true);
 	SafeCLI cli = new SafeCLI(cmd, env, dir, sys, readTimeout);
-	cli.exec();
-	return cli.getResult();
+	cli.exec(out, err);
+	ExecData result = cli.getResult();
+	result.data = out.getData();
+	result.err = err.getData();
+	return result;
+    }
+
+    /**
+     * Run a command and get the resulting ExecData, using the specified environment and start directory.
+     *
+     * @param readTimeout Specifies the maximum amount of time the command should go without producing any character output.
+     *
+     * @since 1.6.10
+     */
+    public static final ExecData execDataRaw(String cmd, String[] env, String dir, IComputerSystem sys, long readTimeout) throws IOException {
+	int maxLen = sys.getProperties().getIntProperty(IComputerSystem.PROP_PROCESS_MAXBUFFLEN);
+	BufferHandler out = new BufferHandler(maxLen, false);
+	BufferHandler err = new BufferHandler(maxLen, false);
+	SafeCLI cli = new SafeCLI(cmd, env, dir, sys, readTimeout);
+	cli.exec(out, err);
+	ExecData result = cli.getResult();
+	result.data = out.getData();
+	result.err = err.getData();
+	return result;
     }
 
     /**
@@ -718,25 +744,18 @@ public class SafeCLI {
 	}
     }
 
-    private void exec() throws IOException {
-	int maxLen = sys.getProperties().getIntProperty(IComputerSystem.PROP_PROCESS_MAXBUFFLEN);
-	BufferHandler out = new BufferHandler(maxLen);
-	BufferHandler err = new BufferHandler(maxLen);
-	exec(out, err);
-	result.data = out.getData();
-	result.err = err.getData();
-    }
-
     /**
      * An IReaderHandler that simply buffers data.
      */
     static class BufferHandler implements IReaderHandler {
 	private ByteArrayOutputStream buff;
 	private int maxLen;
+	private boolean xmlEscape;
 
-	BufferHandler(int maxLen) {
+	BufferHandler(int maxLen, boolean xmlEscape) {
 	    buff = new ByteArrayOutputStream();
 	    this.maxLen = maxLen;
+	    this.xmlEscape = xmlEscape;
 	}
 
 	byte[] getData() {
@@ -748,7 +767,8 @@ public class SafeCLI {
 	}
 
 	public void handle(IReader reader) throws IOException {
-	    Streams.copy(new TruncatedInputStream(reader.getStream(), maxLen), buff, true);
+	    InputStream trunc = new TruncatedInputStream(reader.getStream(), maxLen);
+	    Streams.copy(xmlEscape ? XMLFilterStream.filterStream(trunc, true) : trunc, buff, true);
 	}
     }
 

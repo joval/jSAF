@@ -93,6 +93,7 @@ CLASSES=\
 	jsaf.io.StreamLogger	\
 	jsaf.io.Streams	\
 	jsaf.io.TruncatedInputStream	\
+	jsaf.io.XMLFilterStream	\
 	jsaf.protocol.JSAFURLStreamHandlerFactory	\
 	jsaf.protocol.memory.MemoryURLConnection	\
 	jsaf.protocol.memory.MemoryURLFactory	\

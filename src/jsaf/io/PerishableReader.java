@@ -474,7 +474,7 @@ public class PerishableReader extends InputStream implements IReader {
 	    this(in);
 	    this.buff = buff;
 	    this.offset = offset;
-	    this.len = len;
+	    this.len = Math.min(len, buff.length - offset);
 	}
 
 	// Implement Callable<Integer>

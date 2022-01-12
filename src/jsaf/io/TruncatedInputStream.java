@@ -74,6 +74,9 @@ public class TruncatedInputStream extends FilterInputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
+	if (off < 0 || len < 0 || len > b.length - off) {
+	    throw new IndexOutOfBoundsException();
+	}
 	if (position < limit) {
 	    int bytesRead = in.read(b, off, (int)Math.min((long)len, limit - position));
 	    position += (long)bytesRead;

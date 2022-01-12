@@ -287,12 +287,15 @@ public class PerishableReader extends InputStream implements IReader {
 
     @Override
     public synchronized int read(byte[] buff, int offset, int len) throws IOException {
+	if (offset < 0 || len < 0 || len > buff.length - offset) {
+	    throw new IndexOutOfBoundsException();
+	}
 	int bytesRead = 0;
-	while (buffer.hasNext() && offset < buff.length) {
+	while (buffer.hasNext() && bytesRead < len) {
 	    buff[offset++] = buffer.next();
 	    bytesRead++;
 	}
-	bytesRead += streamRead(buff, offset, len);
+	bytesRead += streamRead(buff, offset, len - bytesRead);
 	int end = offset + bytesRead;
 	for (int i=offset; buffer.hasCapacity() && i < end; i++) {
 	    buffer.add((byte)(i & 0xFF));
@@ -381,6 +384,9 @@ public class PerishableReader extends InputStream implements IReader {
      * @throws InterruptedIOException if the no bytes are read before the timeout expires
      */
     protected int streamRead(byte[] buff, int offset, int len) throws IOException {
+	if (offset < 0 || len < 0 || len > buff.length - offset) {
+	    throw new IndexOutOfBoundsException();
+	}
 	if (interruptable) {
 	    InterruptTask task = new InterruptTask(Thread.currentThread());
 	    JSAFSystem.schedule(task, timeout);

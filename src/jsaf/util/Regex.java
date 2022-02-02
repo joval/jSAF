@@ -25,6 +25,11 @@ import java.util.regex.PatternSyntaxException;
  * @since 1.3.8
  */
 public class Regex {
+    /**
+     * @since 1.6.10
+     */
+    public static final Pattern WILDCARD = Pattern.compile(".*");
+
     protected static final char cOBRACE = '{';
     protected static final char cCBRACE = '}';
     protected static final char cOPEREN = '(';

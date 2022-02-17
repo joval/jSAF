@@ -3,12 +3,13 @@
 package jsaf.provider.windows.powershell;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import jsaf.intf.windows.powershell.IPipeline;
+import jsaf.util.Bytes;
 import jsaf.util.Checksum;
 import jsaf.util.Strings;
 
@@ -16,11 +17,23 @@ import jsaf.util.Strings;
  * Utility class for encoding a Powershell pipeline of Strings directed at an expression.
  */
 public class StringPipeline implements IPipeline<String> {
-    private List<String> members;
+    private Collection<String> members;
     private String expression;
 
+    /**
+     * Create a StringPipeline with an empty ArrayList argument set.
+     */
     public StringPipeline() {
 	members = new ArrayList<String>();
+    }
+
+    /**
+     * Create a StringPipeline using the specified argument collection. The collection can be chosen
+     * to appropriately solve de-duplication and ordering problems (e.g., Should duplicate arguments
+     * be consolidated?  Should arguments be sorted?).
+     */
+    public StringPipeline(Collection<String> argCollection) {
+	members = argCollection;
     }
 
     // Implement Iterable<String>
@@ -42,6 +55,10 @@ public class StringPipeline implements IPipeline<String> {
 	members.add(arg);
     }
 
+    public void addAll(Collection<String> args) {
+	members.addAll(args);
+    }
+
     public void setExpression(String expression) {
 	this.expression = expression;
     }
@@ -52,21 +69,14 @@ public class StringPipeline implements IPipeline<String> {
 
     public String checksum() {
 	try {
-	    MessageDigest digest = digest = MessageDigest.getInstance("MD5");
-	    for (int i=0; i < members.size(); i++) {
-		digest.update(members.get(i).getBytes(Strings.UTF8));
-		if (i > 0) {
-		    digest.update((byte)0x00);
-		}
+	    MessageDigest digest = MessageDigest.getInstance("MD5");
+	    for (String arg : members) {
+		digest.update(arg.getBytes(Strings.UTF8));
+		digest.update((byte)0x00);
 	    }
 	    digest.update(DIV);
 	    digest.update(expression.getBytes(Strings.UTF8));
-	    byte[] cs = digest.digest();
-	    StringBuffer sb = new StringBuffer();
-	    for (int i=0; i < cs.length; i++) {
-	      sb.append(Integer.toString((cs[i]&0xff) + 0x100, 16).substring(1));
-	    }
-	    return sb.toString();
+	    return Bytes.toHexString(digest.digest());
 	} catch (NoSuchAlgorithmException e) {
 	    throw new RuntimeException(e);
 	}

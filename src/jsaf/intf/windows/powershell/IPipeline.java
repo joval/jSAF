@@ -3,6 +3,8 @@
 
 package jsaf.intf.windows.powershell;
 
+import java.util.Collection;
+
 /**
  * An interface for creating a large set of String objects that will be pipelined into a Powershell expression.
  *
@@ -22,7 +24,17 @@ package jsaf.intf.windows.powershell;
 public interface IPipeline<T> extends Iterable<T> {
     int size();
 
+    /**
+     * Add an argument to the expression.
+     */
     void add(T arg);
+
+    /**
+     * Add multiple arguments to the expression.
+     *
+     * @since 1.6.10
+     */
+    void addAll(Collection<T> arg);
 
     void setExpression(String expression);
 

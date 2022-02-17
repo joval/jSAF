@@ -3,6 +3,7 @@
 package jsaf.provider.windows.powershell;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import jsaf.intf.windows.powershell.IPipeline;
+import jsaf.util.Bytes;
 import jsaf.util.Checksum;
 import jsaf.util.Strings;
 
@@ -44,6 +46,10 @@ public class StringPropertyPipeline implements IPipeline<Map<String, String>> {
 	members.add(arg);
     }
 
+    public void addAll(Collection<Map<String, String>> args) {
+	members.addAll(args);
+    }
+
     public void setExpression(String expression) {
 	this.expression = expression;
     }
@@ -64,20 +70,13 @@ public class StringPropertyPipeline implements IPipeline<Map<String, String>> {
 		    digest.update(entry.getKey().getBytes(Strings.UTF8));
 		    digest.update((byte)0x61); // =
 		    digest.update(entry.getValue().getBytes(Strings.UTF8));
-		    digest.update((byte)0x59); // ;
-		}
-		if (i > 0) {
 		    digest.update((byte)0x00);
 		}
+		digest.update((byte)0x00);
 	    }
 	    digest.update(DIV);
 	    digest.update(expression.getBytes(Strings.UTF8));
-	    byte[] cs = digest.digest();
-	    StringBuffer sb = new StringBuffer();
-	    for (int i=0; i < cs.length; i++) {
-	      sb.append(Integer.toString((cs[i]&0xff) + 0x100, 16).substring(1));
-	    }
-	    return sb.toString();
+	    return Bytes.toHexString(digest.digest());
 	} catch (NoSuchAlgorithmException e) {
 	    throw new RuntimeException(e);
 	}

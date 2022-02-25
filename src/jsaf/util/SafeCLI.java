@@ -420,6 +420,7 @@ public class SafeCLI {
 		//
 		FileMonitor mon = new FileMonitor(sys.getFilesystem());
 		JSAFSystem.schedule(mon, 15000, 15000);
+		int retries = sys.getProperties().getIntProperty(IComputerSystem.PROP_EXEC_RETRIES);
 		try {
 		    IFile remoteTemp = sys.getFilesystem().createTempFile("cmd", ".out", null);
 		    String tempPath = remoteTemp.getPath();
@@ -455,18 +456,16 @@ public class SafeCLI {
 			    //
 			    File localTemp = File.createTempFile("cmd", null, sys.getWorkspace());
 			    localTemp.deleteOnExit();
-			    try {
-				Streams.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
-				remoteTemp.delete();
-				return new LineIterator(localTemp);
-			    } catch (IOException e) {
-				if (attempt > cli.execRetries) {
-				    throw e;
-				} else {
-				    sys.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
-				}
-			    }
+			    Streams.copy(remoteTemp.getInputStream(), new FileOutputStream(localTemp), true);
+			    remoteTemp.delete();
+			    return new LineIterator(localTemp);
 			}
+		    }
+		} catch (IOException e) {
+		    if (attempt > retries) {
+			throw e;
+		    } else {
+			sys.getLogger().warn(Message.getMessage(Message.ERROR_EXCEPTION), e);
 		    }
 		} finally {
 		    JSAFSystem.cancelTask(mon);

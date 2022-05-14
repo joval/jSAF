@@ -290,17 +290,22 @@ public class PerishableReader extends InputStream implements IReader {
 	if (offset < 0 || len < 0 || len > buff.length - offset) {
 	    throw new IndexOutOfBoundsException();
 	}
-	int bytesRead = 0;
-	while (buffer.hasNext() && bytesRead < len) {
+	int bufferBytesRead = 0;
+	while (buffer.hasNext() && bufferBytesRead < len) {
 	    buff[offset++] = buffer.next();
-	    bytesRead++;
+	    bufferBytesRead++;
 	}
-	bytesRead += streamRead(buff, offset, len - bytesRead);
-	int end = offset + bytesRead;
-	for (int i=offset; buffer.hasCapacity() && i < end; i++) {
-	    buffer.add((byte)(i & 0xFF));
+	int streamBytesRead = streamRead(buff, offset, len - bufferBytesRead);
+	if (streamBytesRead == -1) {
+	    return bufferBytesRead == 0 ? -1 : bufferBytesRead;
+	} else {
+	    int bytesRead = bufferBytesRead + streamBytesRead;
+	    int end = offset + bytesRead;
+	    for (int i=offset; buffer.hasCapacity() && i < end; i++) {
+		buffer.add((byte)(i & 0xFF));
+	    }
+	    return bufferBytesRead == 0 ? streamBytesRead : bytesRead;
 	}
-	return bytesRead;
     }
 
     @Override

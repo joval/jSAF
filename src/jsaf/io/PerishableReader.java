@@ -397,10 +397,13 @@ public class PerishableReader extends InputStream implements IReader {
 	    JSAFSystem.schedule(task, timeout);
 	    int bytesRead = in.read(buff, offset, len);
 	    JSAFSystem.cancelTask(task);
+	    isEOF = bytesRead == -1;
 	    return bytesRead;
 	} else {
 	    try {
-		return service.submit(new ReadTask(in, buff, offset, len)).get(timeout, TimeUnit.MILLISECONDS);
+		int bytesRead = service.submit(new ReadTask(in, buff, offset, len)).get(timeout, TimeUnit.MILLISECONDS);
+		isEOF = bytesRead == -1;
+		return bytesRead;
 	    } catch (ExecutionException e) {
 		Throwable cause = e.getCause();
 		if (cause instanceof IOException) {

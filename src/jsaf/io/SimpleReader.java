@@ -182,7 +182,7 @@ public class SimpleReader implements IReader {
 		}
 		return buff;
 	    } else {
-		list.add(new Byte((byte)(0xFF & c)));
+		list.add(Byte.valueOf((byte)(0xFF & c)));
 	    }
 	}
     }

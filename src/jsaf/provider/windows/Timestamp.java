@@ -24,7 +24,7 @@ public class Timestamp {
      * digits will always be 0, as there is only enough information to express the time in milliseconds.
      */
     public static String toWindowsTimestamp(long javaTS) {
-	BigInteger tm = new BigInteger(new Long(javaTS).toString());
+	BigInteger tm = new BigInteger(Long.valueOf(javaTS).toString());
 	tm = tm.multiply(TEN_K); // 10K 100 nanosecs in one millisec
 	return tm.add(CNANOS_1601to1970).toString();
     }

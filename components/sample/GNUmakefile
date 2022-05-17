@@ -7,8 +7,8 @@ include $(TOP)/common.mk
 
 PROVIDER_LIBS=$(subst $(SPACE),$(CLN),$(filter %.jar %.zip, $(wildcard provider/*)))
 
-CLASSPATH=$(CLASSLIB)$(CLN)$(FACADE_LIB)$(CLN)$(FACADE_DEPS)$(CLN)$(SRC)
-RUNTIMECP="$(CLASSPATH)$(CLN).$(CLN)$(PROVIDER_LIBS)"
+CLASSPATH=$(FACADE_LIB)$(CLN)$(FACADE_DEPS)$(CLN)$(SRC)
+RUNTIMECP=".$(CLN)$(PROVIDER_LIBS)"
 
 CLASS_FILES=WinExample.class LinuxExample.class
 

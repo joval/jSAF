@@ -5,8 +5,8 @@ TOP=$(realpath ../..)
 
 include $(TOP)/common.mk
 
-CLASSPATH="$(CLASSLIB)$(CLN)$(LIBS)$(CLN)$(SRC)"
-RUNTIMECP="$(CLASSLIB)$(CLN)$(LIBS)$(CLN)$(FACADE_LIB)"
+CLASSPATH="$(LIBS)$(CLN)$(SRC)"
+RUNTIMECP="$(LIBS)$(CLN)$(FACADE_LIB)"
 
 include classes.mk
 

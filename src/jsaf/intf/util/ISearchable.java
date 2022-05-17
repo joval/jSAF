@@ -184,7 +184,7 @@ public interface ISearchable<T> {
 	 *
 	 * @since 1.2
 	 */
-	public static final Object DEPTH_UNLIMITED_VALUE = new Integer(DEPTH_UNLIMITED);
+	public static final Object DEPTH_UNLIMITED_VALUE = Integer.valueOf(DEPTH_UNLIMITED);
 
 	private int field, type;
 	private Object value;

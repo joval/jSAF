@@ -18,10 +18,10 @@ else
   CLN=:
 endif
 ifeq (win, $(PLATFORM))
-    JAVA=$(TOP)/cygwin.sh $(JAVA_HOME)/bin/java
-    JAR=$(TOP)/cygwin.sh $(JAVA_HOME)/bin/jar
-    JAVADOC=$(TOP)/cygwin.sh $(JAVA_HOME)/bin/javadoc
-    JAVAC=$(TOP)/cygwin.sh $(JAVA_HOME)/bin/javac
+    JAVA=$(TOP)/cygwin.sh "$(JAVA_HOME)/bin/java"
+    JAR=$(TOP)/cygwin.sh "$(JAVA_HOME)/bin/jar"
+    JAVADOC=$(TOP)/cygwin.sh "$(JAVA_HOME)/bin/javadoc"
+    JAVAC=$(TOP)/cygwin.sh "$(JAVA_HOME)/bin/javac"
     NUMPROCS=1
 else
     JAVA=$(JAVA_HOME)/bin/java
@@ -34,7 +34,7 @@ else
         NUMPROCS=$(shell nproc)
     endif
 endif
-RAW_JAVA_VERSION:=$(shell $(JAVA_HOME)/bin/java -version 2>&1)
+RAW_JAVA_VERSION:=$(shell $(JAVA) -version 2>&1)
 ifeq (18, $(findstring 18, $(findstring "18., $(RAW_JAVA_VERSION))))
     JAVA_VERSION=18
     JAVADOCFLAGS=-Xdoclint:none -J-Xmx512m

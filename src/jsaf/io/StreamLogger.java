@@ -56,9 +56,7 @@ public class StreamLogger extends InputStream {
 
     public int read() throws IOException {
 	int ch = in.read();
-	if (ch == -1) {
-	    close();
-	} else {
+	if (ch != -1) {
 	    out.write(ch);
 	}
 	return ch;
@@ -70,9 +68,7 @@ public class StreamLogger extends InputStream {
 
     public int read(byte[] buff, int offset, int len) throws IOException {
 	int bytesRead = in.read(buff, offset, len);
-	if (bytesRead == -1) {
-	    close();
-	} else if (bytesRead > 0) {
+	if (bytesRead > 0) {
 	    out.write(buff, offset, bytesRead);
 	}
 	return bytesRead;

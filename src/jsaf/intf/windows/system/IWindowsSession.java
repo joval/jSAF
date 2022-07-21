@@ -44,6 +44,13 @@ public interface IWindowsSession extends IComputerSystem {
     String PROP_POWERSHELL_INIT_TIMEOUT = "powershell.initTimeout";
 
     /**
+     * Property indicating a pathname pointing to powershell.exe, or a suitable wrapper program.
+     *
+     * @since 1.6.12
+     */
+    String PROP_POWERSHELL_PATH = "powershell.path";
+
+    /**
      * Property indicating the initialization arguments to pass to the powershell process upon startup.
      *
      * @since 1.3.6

@@ -20,6 +20,13 @@ public interface IJunosSession extends IComputerSystem {
     public String SHOW_INTERFACES = "show interfaces extensive";
 
     /**
+     * Property indicating the line detection pattern and capture group for detecting the JUNOS version.
+     *
+     * @since 6.4.5
+     */
+    String PROP_JUNOS_VERSION_PATTERN = "junos.version.pattern";
+
+    /**
      * Retrieve "request support information" data from the device.
      *
      * @since 1.0

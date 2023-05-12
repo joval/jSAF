@@ -16,6 +16,14 @@ import jsaf.util.SafeCLI;
  * @since 1.0
  */
 public interface IUnixSession extends IComputerSystem {
+
+    /**
+     * Property indicating if version searching via /etc/*-release is disabled.
+     *
+     * @since 6.4.5
+     */
+    String PROP_DISABLE_VERSION_READING = "ignore.linux.os-release";
+
     /**
      * Property indicating the number of milliseconds to wait for a read before quiting a privilege escalation attempt.
      *

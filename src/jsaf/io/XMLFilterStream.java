@@ -4,13 +4,12 @@
 package jsaf.io;
 
 import java.io.BufferedInputStream;
-import java.io.EOFException;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.StringTokenizer;
 
 import jsaf.util.Strings;
 
@@ -21,7 +20,7 @@ import jsaf.util.Strings;
  * @author David A. Solin
  * @since 1.6.10
  */
-public class XMLFilterStream extends InputStream {
+public class XMLFilterStream extends FilterInputStream {
     private static final byte[] U8	= new byte[] {0x3C, 0x3F, 0x78, 0x6D}; // <?xm
     private static final byte[] U16	= new byte[] {0x00, 0x3C, 0x00, 0x3F}; // .<.?
     private static final byte[] U16LE	= new byte[] {0x3C, 0x00, 0x3F, 0x00}; // <.?.
@@ -33,14 +32,18 @@ public class XMLFilterStream extends InputStream {
     /**
      * Filter characters illegal in XML, provided the stream contains valid XML; i.e., equivalent to filterStream(in, false).
      */
-    public static InputStream filterStream(InputStream in) throws IOException {
+    public static InputStream filterStream(InputStream in) {
 	return filterStream(in, false);
     }
 
     /**
      * Force filtering of characters illegal in XML from the specified stream.
      */
-    public static InputStream filterStream(InputStream in, boolean force) throws IOException {
+    public static InputStream filterStream(InputStream in, boolean force) {
+	return new XMLFilterStream(in, force);
+    }
+
+    private void init() throws IOException {
 	if (!in.markSupported()) {
 	    in = new BufferedInputStream(in);
 	}
@@ -72,9 +75,6 @@ public class XMLFilterStream extends InputStream {
 		throw new IllegalArgumentException("Invalid BOM");
 	    }
 	    break;
-	  case -1:
-	    in.reset();
-	    return in;
 	  default:
 	    in.reset();
 	    break;
@@ -110,26 +110,24 @@ public class XMLFilterStream extends InputStream {
 	    in.reset();
 	}
 
-	if (charset != null || force) {
-	    return new XMLFilterStream(new InputStreamReader(in, charset == null ? Strings.UTF8 : charset));
-	} else {
-	    //
-	    // Pass-thru (not XML or force-filtered)
-	    //
-	    return in;
-	}
+	bypass = (charset == null) && !force;
+	reader = new InputStreamReader(in, charset == null ? Strings.UTF8 : charset);
+	this.charset = Charset.forName(reader.getEncoding());
     }
 
     // Overrides for InputStream
 
     private InputStreamReader reader;
     private Charset charset;
+    private boolean force;
+    private boolean bypass;
     private byte[] buff = null;
     private int ptr = 0;
     private boolean closed=false, eof=false;
 
     @Override
     public int read() throws IOException {
+	if (bypass) return super.read();
 	if (closed || eof) return -1;
 	byte[] ch = new byte[1];
 	if (read(ch, 0, 1) == -1) {
@@ -141,12 +139,15 @@ public class XMLFilterStream extends InputStream {
 
     @Override
     public int read(byte[] buffer) throws IOException {
+	if (bypass) return super.read(buffer);
 	if (closed || eof) return -1;
 	return read(buffer, 0, buffer.length);
     }
 
     @Override
     public int read(byte[] buffer, int offset, int length) throws IOException {
+	if (bypass) return super.read(buffer, offset, length);
+	if (reader == null) init();
 	if (closed || eof) return -1;
 	if (buff == null) {
 	    char[] cbuff = new char[1024];
@@ -192,14 +193,20 @@ public class XMLFilterStream extends InputStream {
 
     @Override
     public void close() throws IOException {
-	reader.close();
+	if (bypass) {
+	    super.close();
+	    return;
+	}
+	if (reader != null) {
+	    reader.close();
+	}
 	closed = true;
     }
 
     // Private
 
-    private XMLFilterStream(InputStreamReader reader) {
-	this.reader = reader;
-	this.charset = Charset.forName(reader.getEncoding());;
+    private XMLFilterStream(InputStream in, boolean force) {
+	super(in);
+	this.force = force;
     }
 }

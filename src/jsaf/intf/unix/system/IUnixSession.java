@@ -56,6 +56,12 @@ public interface IUnixSession extends IComputerSystem {
     String PROP_FS_SEARCH_TIMEOUT = "fs.search.timeout";
 
     /**
+     * Property indicating whether to use `ifconfig` or the newer `ip` command.
+     * @since 6.4.5
+     */
+    String PROP_NETWORK_USE_IFCONFIG = "network.use.ifconfig";
+
+    /**
      * Root username.
      *
      * @since 1.0.1

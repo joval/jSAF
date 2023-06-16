@@ -76,7 +76,7 @@ public class XMLFilterStream extends FilterInputStream {
 	    }
 	    break;
 	  default:
-	    in.reset();
+	    reset();
 	    break;
 	}
 
@@ -107,7 +107,7 @@ public class XMLFilterStream extends FilterInputStream {
 		    charset = Strings.UTF16LE;
 		}
 	    }
-	    in.reset();
+	    reset();
 	}
 
 	bypass = (charset == null) && !force;
@@ -189,6 +189,14 @@ public class XMLFilterStream extends FilterInputStream {
 	    }
 	    return len;
 	}
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+	super.reset();
+	ptr = 0;
+	buff = null;
+	eof = false;
     }
 
     @Override

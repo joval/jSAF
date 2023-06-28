@@ -197,6 +197,9 @@ public class XMLFilterStream extends FilterInputStream {
 	ptr = 0;
 	buff = null;
 	eof = false;
+	if (reader != null) {
+	    reader = new InputStreamReader(in, charset);
+	}
     }
 
     @Override

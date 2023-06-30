@@ -254,6 +254,7 @@ public class Strings {
      * Convert a byte array in the specified encoding to a char array.
      *
      * @since 1.2
+     * @deprecated since 1.6.13
      */
     public static char[] toChars(byte[] bytes, Charset charset) {
 	return toChars(bytes, 0, bytes.length, charset);
@@ -263,6 +264,7 @@ public class Strings {
      * Convert len bytes of the specified array in the specified encoding, starting from offset, to a char array.
      *
      * @since 1.2
+     * @deprecated since 1.6.13
      */
     public static char[] toChars(byte[] bytes, int offset, int len, Charset charset) {
 	return charset.decode(ByteBuffer.wrap(bytes, offset, len)).array();

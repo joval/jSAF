@@ -97,14 +97,14 @@ public class Regex {
     }
 
     /**
-     * Get the REGEX_CONCEPT's corresponding String value.
+     * Get the RegexConcept's corresponding String value.
      */
     public String value() {
       return s;
     }
 
     /**
-     * Given a String value, obtain a corresponding REGEX_CONCEPT.
+     * Given a String value, obtain a corresponding RegexConcept.
      */
     public static RegexConcept typeOf(String s) {
       for (RegexConcept t : values()) {
@@ -409,7 +409,7 @@ public class Regex {
 
   /**
    * Returns true if the specified regex expression contains the specified regular expression syntax.  This function take into account escaped regex characters.
-   * Also, returns false if there is no regex pattern defined for the REGEX_CONCEPT.
+   * Also, returns false if there is no regex pattern defined for the RegexConcept.
    * */
   public static boolean containsSpecificRegex(RegexConcept regex, String pattern) throws PatternSyntaxException {
     Pattern p = REGEX_REGEX.get(regex);

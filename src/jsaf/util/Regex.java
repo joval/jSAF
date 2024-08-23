@@ -1,6 +1,5 @@
-// Copyright (C) 2011-2018 JovalCM.com.  All rights reserved.
+// Copyright (C) 2011-2024, Arctic Wolf Networks, Inc.  All rights reserved.
 // This software is licensed under the LGPL 3.0 license available at http://www.gnu.org/licenses/lgpl.txt
-
 package jsaf.util;
 
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
 
 /**
  * Regular expression utilities.
@@ -113,6 +111,45 @@ public class Regex {
         }
       }
       return UNKNOWN;
+    }
+  }
+
+  public static enum GroupingType {
+    CAPTURE("(", ")"),
+    NON_CAPTURE("(?:", ")"),
+    POSITIVE_LOOKAHEAD("(?=", ")"),
+    NEGATIVE_LOOKAHEAD("(?!", ")");
+
+    private String prefix;
+    private String suffix;
+
+    GroupingType(String prefix, String suffix) {
+      this.prefix = prefix;
+      this.suffix = suffix;
+    }
+
+    /**
+     * Get the GroupingType's prefix.
+     */
+    public String prefix() {
+      return prefix;
+    }
+
+    /**
+     * Get the GroupingType's suffix.
+     */
+    public String suffix() {
+      return suffix;
+    }
+
+    /**
+     * Generates a Regex string of this group type for a string.
+     *
+     * @param s The inner regex of the group
+     * @return The regex string, of the form [prefix][s][suffix].
+     */
+    public String getRegexString(String s) {
+      return prefix() + s + suffix();
     }
   }
 
@@ -243,6 +280,21 @@ public class Regex {
     if (pattern == null) {
       return null;
     }
+
+    String p = pattern.pattern();
+    int pipeIndex = p.indexOf("|");
+    while (pipeIndex != -1) {
+      if (!Strings.isEscaped(p, pipeIndex)) {
+        break;
+      }
+      p = p.substring(pipeIndex + 1);
+      pipeIndex = p.indexOf("|");
+    }
+
+    if (pipeIndex == -1) {
+      return Arrays.asList(pattern.pattern());
+    }
+
     List<String> regexPatterns = new ArrayList<String>();
     for (StringBuilder sb : getAlternationsHelper(pattern)) {
       regexPatterns.add(sb.toString());
@@ -270,13 +322,14 @@ public class Regex {
         if (c == '[') {
           sb.append(c);
           i++;
-          boolean firstCaptureCharFlag = true;  // Flag used to indicate parsing of the first character in the character class.  Reason for this is because if "]" is the first character, it isn't interpreted as the closing character class character.
+          boolean firstCaptureCharFlag =
+              true;  // Flag used to indicate parsing of the first character in the character class.  Reason for this is because if "]" is the first character, it isn't interpreted as the closing character class character.
           for (; i < chars.length; i++) {
             c = chars[i];
             if (escaped) {
-                escaped = false;
-                sb.append('\\');
-                sb.append(c);
+              escaped = false;
+              sb.append('\\');
+              sb.append(c);
             } else {
               if (c == '\\') {
                 escaped = true;
@@ -302,6 +355,21 @@ public class Regex {
         } else if (c == '\\') {
           escaped = !escaped;
         } else if (c == '(') {
+          GroupingType groupingType = GroupingType.CAPTURE;
+          if (i + 2 < chars.length) {
+            if (chars[i + 1] == '?') {
+              if (chars[i + 2] == ':') {
+                groupingType = GroupingType.NON_CAPTURE;
+                i += 2;
+              } else if (chars[i + 2] == '=') {
+                groupingType = GroupingType.POSITIVE_LOOKAHEAD;
+                i += 2;
+              } else if (chars[i + 2] == '!') {
+                groupingType = GroupingType.NEGATIVE_LOOKAHEAD;
+                i += 2;
+              }
+            }
+          }
           // Find closing ')'
           int count = 0;
           for (int j = i + 1; j < chars.length; j++) {
@@ -319,9 +387,7 @@ public class Regex {
                 for (StringBuilder sBuilder : list) {
                   StringBuilder sb2 = new StringBuilder();
                   sb2.append(sb);
-                  sb2.append('(');
-                  sb2.append(sBuilder);
-                  sb2.append(')');
+                  sb2.append(groupingType.getRegexString(sBuilder.toString()));
                   if (list.size() == 1) {
                     sb = sb2;
                   } else {
@@ -354,23 +420,19 @@ public class Regex {
             }
           }
         } else if (c == '|') {
-          if (sb.length() > 0) {
-            hasAlts = true;
-            alts.add(sb);
-            sb = new StringBuilder();
-          }
+          hasAlts = true;
+          alts.add(sb);
+          sb = new StringBuilder();
         } else {
           sb.append(c);
         }
       }
     }
-    if (sb.length() > 0) {
-      if (alts.size() == 0 || hasAlts) {
-        alts.add(sb);
-      } else {
-        for (StringBuilder sb2 : alts) {
-          sb2.append(sb);
-        }
+    if (alts.size() == 0 || hasAlts) {
+      alts.add(sb);
+    } else {
+      for (StringBuilder sb2 : alts) {
+        sb2.append(sb);
       }
     }
 
@@ -493,7 +555,28 @@ public class Regex {
     jcre = jcre.replace("[:upper:]", "\\p{Upper}");
     jcre = jcre.replace("[:lower:]", "\\p{Lower}");
     jcre = jcre.replace("[:cntrl:]", "\\p{Cntrl}");
-    return jcre;
+
+    sb = new StringBuffer(jcre);
+    int i = 0;
+    while (i < sb.length()) {
+      if (sb.charAt(i) == '[' && !Strings.isEscaped(sb.toString(), i)) {
+        int j = i + 1;
+        while (j < sb.length()) {
+          // Check to see if end of char class has been found.  End of char class is the first occurrence of ']' that is not escaped
+          // except if it's the first char in the char class or the first char after the not char in the character class
+          if (sb.charAt(j) == ']' && (j != i + 1 || !(j == i + 2 && sb.charAt(j - 1) == '^') && !Strings.isEscaped(sb.toString(), j))) {
+            i = j + 1;
+            break;
+          } else if (sb.charAt(j) == '[') {
+            sb.insert(j, '\\');
+            j++;
+          }
+          j++;
+        }
+      }
+      i++;
+    }
+    return sb.toString();
   }
 
   /**

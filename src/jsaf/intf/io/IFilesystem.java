@@ -147,7 +147,7 @@ public interface IFilesystem extends ILoggable {
      * @throws IllegalArgumentException if directory.isDirectory() returns false.
      * @throws IOException if there is a problem creating the file.
      *
-     * @since 6.4.6
+     * @since 1.6.16
      */
     IFile createTempFile(String prefix, String suffix, IFile directory, boolean executable) throws IOException;
 

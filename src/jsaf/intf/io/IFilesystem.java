@@ -136,6 +136,22 @@ public interface IFilesystem extends ILoggable {
     Collection<IMount> getMounts() throws IOException;
 
     /**
+     * Creates a new file in the specified directory, using the given prefix and suffix strings to generate its name. Any file created using this
+     * method will be deleted (if not already deleted) when the ISession is disconnected.
+     *
+     * @param prefix The prefix string to be used in generating the file's name.
+     * @param suffix The suffix string to be used in generating the file's name; may be null, in which case the suffix ".tmp" will be used.
+     * @param directory The directory in which the file is to be created, or null if the default temporary file directory should be used.
+     * @param executable Boolean indicating if the file should have executable permissions.
+     *
+     * @throws IllegalArgumentException if directory.isDirectory() returns false.
+     * @throws IOException if there is a problem creating the file.
+     *
+     * @since 1.6.16
+     */
+    IFile createTempFile(String prefix, String suffix, IFile directory, boolean executable) throws IOException;
+
+    /**
      * An interface describing a filesystem mount point.
      *
      * @since 1.0

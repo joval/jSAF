@@ -442,6 +442,13 @@ public class SafeCLI {
 
 		    SafeCLI cli = new SafeCLI(redirected, env, null, sys, timeout);
 		    if (cli.execOnce(null, errHandler, attempt)) {
+			// Capture command output files in debug packages
+			if (sys.getProperties().getBooleanProperty(IComputerSystem.PROP_DEBUG)) {
+				try (InputStream in = remoteTemp.getInputStream();
+				  FileOutputStream out = new FileOutputStream(sys.getWorkspace() + "/" + remoteTemp.getName())) {
+                			Streams.copy(in, out, true);
+				}
+			}			
 			//
 			// Create and return a LineIterator based on a local cache file containing the output
 			//
